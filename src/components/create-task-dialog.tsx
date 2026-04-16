@@ -320,73 +320,77 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
 
             {/* Row: Due Date + Deadline */}
             <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="dueDate"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
+               <FormField
+                 control={form.control}
+                 name="dueDate"
+                 render={({ field }) => (
+                   <FormItem className="flex flex-col">
 <FormLabel>Due Date</FormLabel>
-                     <Popover>
-                       <PopoverTrigger>
-                         <FormControl>
-                           <Button
-                             variant="outline"
-                             className={cn(
-                               "pl-3 text-left font-normal",
-                               !field.value && "text-muted-foreground"
-                             )}
-                           >
-                             {field.value ? format(field.value, "MMM d, yyyy") : "Pick a date"}
-                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                           </Button>
-                         </FormControl>
-                       </PopoverTrigger>
-                       <PopoverContent className="w-auto p-0" align="start">
-                         <Calendar
-                           mode="single"
-                           selected={field.value}
-                           onSelect={field.onChange}
-                           initialFocus
+                       <Popover>
+                         <PopoverTrigger
+                           render={
+                             <FormControl>
+                               <Button
+                                 variant="outline"
+                                 className={cn(
+                                   "pl-3 text-left font-normal",
+                                   !field.value && "text-muted-foreground"
+                                 )}
+                               >
+                                 {field.value ? format(field.value, "MMM d, yyyy") : "Pick a date"}
+                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                               </Button>
+                             </FormControl>
+                           }
                          />
-                       </PopoverContent>
-                     </Popover>
-                  </FormItem>
-                )}
-              />
+                         <PopoverContent className="w-auto p-0" align="start">
+                           <Calendar
+                             mode="single"
+                             selected={field.value}
+                             onSelect={field.onChange}
+                             initialFocus
+                           />
+                         </PopoverContent>
+                       </Popover>
+                   </FormItem>
+                 )}
+               />
 
-              <FormField
-                control={form.control}
-                name="deadline"
-                render={({ field }) => (
-                  <FormItem className="flex flex-col">
+               <FormField
+                 control={form.control}
+                 name="deadline"
+                 render={({ field }) => (
+                   <FormItem className="flex flex-col">
 <FormLabel>Deadline</FormLabel>
-                     <Popover>
-                       <PopoverTrigger>
-                         <FormControl>
-                           <Button
-                             variant="outline"
-                             className={cn(
-                               "pl-3 text-left font-normal",
-                               !field.value && "text-muted-foreground"
-                             )}
-                           >
-                             {field.value ? format(field.value, "MMM d, yyyy") : "Pick a date"}
-                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                           </Button>
-                         </FormControl>
-                       </PopoverTrigger>
-                       <PopoverContent className="w-auto p-0" align="start">
-                         <Calendar
-                           mode="single"
-                           selected={field.value}
-                           onSelect={field.onChange}
-                           initialFocus
+                       <Popover>
+                         <PopoverTrigger
+                           render={
+                             <FormControl>
+                               <Button
+                                 variant="outline"
+                                 className={cn(
+                                   "pl-3 text-left font-normal",
+                                   !field.value && "text-muted-foreground"
+                                 )}
+                               >
+                                 {field.value ? format(field.value, "MMM d, yyyy") : "Pick a date"}
+                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                               </Button>
+                             </FormControl>
+                           }
                          />
-                       </PopoverContent>
-                     </Popover>
-                  </FormItem>
-                )}
-              />
+                         <PopoverContent className="w-auto p-0" align="start">
+                           <Calendar
+                             mode="single"
+                             selected={field.value}
+                             onSelect={field.onChange}
+                             initialFocus
+                           />
+                         </PopoverContent>
+                       </Popover>
+                   </FormItem>
+                 )}
+               />
             </div>
 
             {/* Recurrence */}
@@ -443,13 +447,15 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                     </Badge>
                   );
                 })}
-                {availableLabels.length > 0 && (
-                  <DropdownMenu>
-<DropdownMenuTrigger>
-                       <Button variant="outline" size="sm" type="button">
-                         + Add Label
-                       </Button>
-                     </DropdownMenuTrigger>
+                  {availableLabels.length > 0 && (
+                    <DropdownMenu>
+<DropdownMenuTrigger
+                        render={
+                          <Button variant="outline" size="sm" type="button">
+                            + Add Label
+                          </Button>
+                        }
+                      />
                     <DropdownMenuContent>
                       {availableLabels.map((label) => (
                         <DropdownMenuItem

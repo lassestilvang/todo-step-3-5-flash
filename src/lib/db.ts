@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
 
-let db: Database;
+let db: ReturnType<typeof Database>;
 
 if (process.env.NODE_ENV === 'test') {
   db = new Database(':memory:');

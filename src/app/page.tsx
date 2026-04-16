@@ -95,14 +95,16 @@ export default function HomePage() {
           <header className="flex-shrink-0 border-b border-border p-2 md:p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 md:gap-3">
-                {/* Mobile menu button */}
-                <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                  <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
-                      <PanelLeft className="h-5 w-5" />
-                    </Button>
-                  </SheetTrigger>
-                </Sheet>
+                 {/* Mobile menu button */}
+                 <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                   <SheetTrigger
+                     render={
+                       <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
+                         <PanelLeft className="h-5 w-5" />
+                       </Button>
+                     }
+                   />
+                 </Sheet>
 
                 <div>
                   <h2 className="text-lg md:text-2xl font-semibold capitalize">

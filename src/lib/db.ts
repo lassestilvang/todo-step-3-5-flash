@@ -217,8 +217,9 @@ export function createList(data: {
   icon: string;
   parent_id?: string;
   order?: number;
+  id?: string;
 }): ListRow {
-  const id = generateId();
+  const id = data.id ?? generateId();
   db.prepare(`
     INSERT INTO lists (id, name, color, icon, parent_id, order_index)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -274,6 +275,7 @@ export function ensureInboxExists() {
   const inbox = getListById("inbox");
   if (!inbox) {
     createList({
+      id: "inbox",
       name: "Inbox",
       color: "#3b82f6",
       icon: "📥",

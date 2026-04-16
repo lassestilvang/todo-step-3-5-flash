@@ -114,12 +114,14 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
           <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Lists
           </div>
-<Dialog open={newListDialogOpen} onOpenChange={setNewListDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6" aria-label="Create new list">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
+          <Dialog open={newListDialogOpen} onOpenChange={setNewListDialogOpen}>
+            <DialogTrigger
+              render={
+                <Button variant="ghost" size="icon" className="h-6 w-6" aria-label="Create new list">
+                  <Plus className="h-4 w-4" />
+                </Button>
+              }
+            />
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create New List</DialogTitle>

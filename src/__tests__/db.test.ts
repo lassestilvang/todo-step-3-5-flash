@@ -794,7 +794,8 @@ describe('Database', () => {
         createSubtask({ task_id: taskId, title: 'Second' });
         const third = createSubtask({ task_id: taskId, title: 'Third' });
 
-        expect(third.order_index).toBe(2);
+        // order is 1-indexed: first=1, second=2, third=3
+        expect(third.order_index).toBe(3);
       });
 
       it('should allow custom order', () => {

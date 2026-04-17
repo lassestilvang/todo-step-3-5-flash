@@ -1,4 +1,5 @@
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { useStore } from '@/store';
 import * as actions from '@/app/actions';
 import type { Task, TaskList, Label } from '@/types';

@@ -3,7 +3,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Mock zustand persist middleware to avoid localStorage issues in tests
 vi.mock('zustand/middleware', () => ({
-  persist: (setup: any, options: any) => setup,
+  persist: (setup: any) => setup,
 }));
 
 // Mock the actions module before store is imported

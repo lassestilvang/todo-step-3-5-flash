@@ -258,7 +258,7 @@ describe('Database', () => {
     describe('ensureInboxExists', () => {
       it('should create inbox if it does not exist', () => {
         // Remove inbox if exists (from seed data)
-        db.prepare('DELETE FROM lists WHERE id = "inbox"').run();
+        db.prepare("DELETE FROM lists WHERE id = 'inbox'").run();
         // Confirm inbox does not exist
         expect(getListById('inbox')).toBeNull();
 
@@ -268,6 +268,14 @@ describe('Database', () => {
         expect(inbox).toBeDefined();
         expect(inbox?.name).toBe('Inbox');
       });
+
+      it('should not duplicate inbox', () => {
+        ensureInboxExists();
+        const listsAfter = getAllLists();
+        const inboxCount = listsAfter.filter((l) => l.id === 'inbox').length;
+        expect(inboxCount).toBe(1);
+      });
+    });
 
       it('should not duplicate inbox', () => {
         ensureInboxExists();

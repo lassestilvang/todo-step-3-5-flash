@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { useStore } from '@/store';
-import * as actions from '@/app/actions';
-import type { Task, TaskList, Label } from '@/types';
+
+// Mock zustand persist middleware to avoid localStorage issues in tests
+vi.mock('zustand/middleware', () => ({
+  persist: (setup: any, options: any) => setup,
+}));
 
 // Mock the actions module before store is imported
 vi.mock('@/app/actions', () => ({
@@ -21,6 +23,11 @@ vi.mock('@/app/actions', () => ({
   updateLabelAction: vi.fn(),
   deleteLabelAction: vi.fn(),
 }));
+
+// Import after mocks are set up
+import { useStore } from '@/store';
+import * as actions from '@/app/actions';
+import type { Task, TaskList, Label } from '@/types';
 
 // Helper to create a sample task
 function createSampleTask(overrides: Partial<Task> = {}): Task {

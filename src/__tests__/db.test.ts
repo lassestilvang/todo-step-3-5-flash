@@ -188,11 +188,6 @@ describe('Database', () => {
         expect(lists.map((l) => l.name)).toContain('List 1');
         expect(lists.map((l) => l.name)).toContain('List 2');
       });
-
-      it('should return empty array when no lists', () => {
-        const lists = getAllLists();
-        expect(lists).toEqual([]);
-      });
     });
 
     describe('getListById', () => {

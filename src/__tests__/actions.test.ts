@@ -375,9 +375,10 @@ describe('List Actions (proxies)', () => {
 
 describe('Label Actions (proxies)', () => {
   it('createLabelAction creates label', async () => {
-    const label = await actions.createLabelAction('Work', '#ff0000', '💼');
+    const labelName = 'TestLabelAction';
+    const label = await actions.createLabelAction(labelName, '#ff0000', '💼');
     expect(label).toBeDefined();
-    expect(label.name).toBe('Work');
+    expect(label.name).toBe(labelName);
   });
 
   it('updateLabelAction updates label', async () => {

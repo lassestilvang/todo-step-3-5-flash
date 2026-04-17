@@ -70,7 +70,7 @@ describe('loadAppData', () => {
       const fetched = result.tasks.find((t) => t.id === task.id);
       expect(fetched).toBeDefined();
       expect(fetched!.labels).toHaveLength(1);
-      expect(fetched!.labels[0].name).toBe('Work');
+      expect(fetched!.labels[0].name).toBe('TestWorkLabel123');
       expect(fetched!.subtasks).toHaveLength(1);
       expect(fetched!.subtasks[0].title).toBe('Sub 1');
     });

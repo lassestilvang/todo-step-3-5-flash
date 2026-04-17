@@ -329,7 +329,8 @@ describe('Database', () => {
       });
 
       it('should attach labels when provided', () => {
-        const label = createLabel({ name: 'Work', color: '#ff0000' });
+        const labelName = 'TaskLabelTest123';
+        const label = createLabel({ name: labelName, color: '#ff0000' });
         const task = createTask({
           list_id: 'inbox',
           title: 'Task with label',
@@ -338,7 +339,7 @@ describe('Database', () => {
 
         const retrieved = getTaskById(task.id);
         expect(retrieved?.labels).toHaveLength(1);
-        expect(retrieved?.labels[0].name).toBe('Work');
+        expect(retrieved?.labels[0].name).toBe(labelName);
       });
 
       it('should set parent_id when provided', () => {

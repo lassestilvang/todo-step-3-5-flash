@@ -56,7 +56,7 @@ describe('loadAppData', () => {
     });
 
     it('should include labels and subtasks', async () => {
-      const label = db.createLabel({ name: 'Work', color: '#f00' });
+      const label = db.createLabel({ name: 'TestWorkLabel123', color: '#f00' });
       const task = createTask({ title: 'With relations', label_ids: [label.id] });
       db.createSubtask({ task_id: task.id, title: 'Sub 1' });
 

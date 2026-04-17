@@ -680,11 +680,12 @@ describe('Database', () => {
 
     describe('getLabelByName', () => {
       it('should return label by name', () => {
-        createLabel({ name: 'Work', color: '#555' });
-        const found = getLabelByName('Work');
+        const uniqueName = 'TestLabelFind';
+        createLabel({ name: uniqueName, color: '#555' });
+        const found = getLabelByName(uniqueName);
 
         expect(found).toBeDefined();
-        expect(found?.name).toBe('Work');
+        expect(found?.name).toBe(uniqueName);
       });
 
       it('should return null for non-existent name', () => {

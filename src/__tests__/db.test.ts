@@ -276,20 +276,6 @@ describe('Database', () => {
         expect(inboxCount).toBe(1);
       });
     });
-
-      it('should not duplicate inbox', () => {
-        ensureInboxExists();
-        const listsAfter = getAllLists();
-        const inboxCount = listsAfter.filter((l) => l.id === 'inbox').length;
-        expect(inboxCount).toBe(1);
-      });
-
-      it('should not duplicate inbox', () => {
-        ensureInboxExists();
-        const listsAfter = getAllLists();
-        const inboxCount = listsAfter.filter((l) => l.id === 'inbox').length;
-        expect(inboxCount).toBe(1);
-      });
     });
   });
 

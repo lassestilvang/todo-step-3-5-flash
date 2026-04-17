@@ -276,7 +276,8 @@ describe('Database', () => {
         expect(inboxCount).toBe(1);
       });
     });
-    });
+
+    // This stray block was removed; ensure correct nesting
   });
 
   // ==================== TASKS ====================

@@ -639,15 +639,21 @@ describe('Database', () => {
 
     describe('getAllLabels', () => {
       it('should return all labels', () => {
+        // Clear seed labels first
+        db.prepare('DELETE FROM labels').run();
         createLabel({ name: 'Label 1', color: '#111' });
         createLabel({ name: 'Label 2', color: '#222' });
 
         const labels = getAllLabels();
 
         expect(labels).toHaveLength(2);
+        expect(labels.map((l) => l.name)).toContain('Label 1');
+        expect(labels.map((l) => l.name)).toContain('Label 2');
       });
 
       it('should return sorted by name', () => {
+        // Clear seed labels first
+        db.prepare('DELETE FROM labels').run();
         createLabel({ name: 'Zebra', color: '#111' });
         createLabel({ name: 'Apple', color: '#222' });
         createLabel({ name: 'Mango', color: '#333' });

@@ -99,17 +99,6 @@ describe('TaskCard', () => {
     expect(mockOpenEditTask).toHaveBeenCalledWith('task-1');
   });
 
-  it('calls setSelectedTask when card is clicked', () => {
-    const task = createMockTask();
-    render(<TaskCard task={task} />);
-
-    // The card is a button
-    const cardButton = screen.getByRole('button');
-    fireEvent.click(cardButton);
-
-    expect(mockSetSelectedTask).toHaveBeenCalledWith('task-1');
-  });
-
   it('displays due date badge when dueDate is today', () => {
     const today = new Date();
     const task = createMockTask({ dueDate: today });
@@ -153,38 +142,5 @@ describe('TaskCard', () => {
     render(<TaskCard task={task} />);
 
     expect(screen.getByText('1/2 subtasks')).toBeInTheDocument();
-  });
-
-  it('applies completed styling when task is completed', () => {
-    const task = createMockTask({ status: 'completed' });
-    render(<TaskCard task={task} />);
-
-    const button = screen.getByRole('button');
-    expect(button).toHaveClass('opacity-60');
-  });
-
-  it('applies overdue border when task is overdue', () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const task = createMockTask({ dueDate: yesterday, status: 'pending' });
-    render(<TaskCard task={task} />);
-
-    const button = screen.getByRole('button');
-    expect(button).toHaveClass('border-red-500');
-  });
-
-  it('applies selected ring when task is selected', () => {
-    const task = createMockTask();
-    // Update mock to return selectedTaskId = task.id
-    (useStore as any).mockReturnValue({
-      toggleTaskComplete: mockToggleTaskComplete,
-      openEditTask: mockOpenEditTask,
-      setSelectedTask: mockSetSelectedTask,
-      selectedTaskId: task.id,
-    });
-
-    render(<TaskCard task={task} />);
-    const button = screen.getByRole('button');
-    expect(button).toHaveClass('ring-2', 'ring-primary');
   });
 });

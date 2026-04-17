@@ -620,14 +620,20 @@ describe('Database', () => {
         expect(label.icon).toBe('⭐');
       });
 
-      it('should have unique name constraint', () => {
-        createLabel({ name: 'Work', color: '#111' });
+      it('should enforce unique constraint on label name', () => {
+        // Use a unique name that does not exist in seed data
+        const uniqueName = 'UniqueLabelTest123';
 
-        // Creating duplicate should still succeed but DB will enforce uniqueness
-        // The second insert might throw, but let's check behavior
-        const labels = getAllLabels();
-        const workCount = labels.filter((l) => l.name === 'Work').length;
-        expect(workCount).toBe(1);
+        createLabel({ name: uniqueName, color: '#111' });
+
+        // Second insert with same name should throw UNIQUE constraint error
+        expect(() => {
+          createLabel({ name: uniqueName, color: '#222' });
+        }).toThrow();
+
+        // Verify only one label with that name exists
+        const all = getAllLabels();
+        expect(all.filter((l) => l.name === uniqueName)).toHaveLength(1);
       });
     });
 

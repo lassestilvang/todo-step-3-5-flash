@@ -274,16 +274,16 @@ describe('setSelectedTask', () => {
 describe('openCreateTask', () => {
   it('should open create task modal with optional listId', () => {
     useStore.getState().openCreateTask('list-abc');
-    const state = useStore.getState();
+    let state = useStore.getState();
     expect(state.isCreateTaskOpen).toBe(true);
     expect(state.editTaskId).toBeNull();
     expect(state.selectedListId).toBe('list-abc');
 
     useStore.getState().closeTaskModal();
-    useStore.getState().openCreateTask(); // no listId
-    const state2 = useStore.getState();
-    expect(state2.isCreateTaskOpen).toBe(true);
-    expect(state2.selectedListId).toBeNull();
+    useStore.getState().openCreateTask(); // no listId should keep current selectedListId
+    state = useStore.getState();
+    expect(state.isCreateTaskOpen).toBe(true);
+    expect(state.selectedListId).toBe('list-abc'); // preserve previous selection
   });
 });
 

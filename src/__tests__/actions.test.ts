@@ -200,7 +200,8 @@ describe('loadAppData', () => {
   describe('when showCompleted is false', () => {
     it('excludes completed tasks', async () => {
       createTask({ title: 'Pending' });
-      createTask({ title: 'Completed', status: 'completed' });
+      const completedTask = createTask({ title: 'Completed' });
+      db.updateTask(completedTask.id, { status: 'completed' });
 
       const result = await actions.loadAppData({
         view: 'all',
@@ -218,7 +219,8 @@ describe('loadAppData', () => {
   describe('when showCompleted is true', () => {
     it('includes completed tasks', async () => {
       createTask({ title: 'Pending' });
-      createTask({ title: 'Completed', status: 'completed' });
+      const completedTask = createTask({ title: 'Completed' });
+      db.updateTask(completedTask.id, { status: 'completed' });
 
       const result = await actions.loadAppData({
         view: 'all',
@@ -270,9 +272,10 @@ describe('loadAppData', () => {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
 
-      db.createTask({ list_id: 'inbox', title: 'Overdue 1', deadline: yesterday, status: 'pending' });
-      db.createTask({ list_id: 'inbox', title: 'Overdue 2', deadline: yesterday, status: 'pending' });
-      db.createTask({ list_id: 'inbox', title: 'Completed overdue', deadline: yesterday, status: 'completed' });
+      db.createTask({ list_id: 'inbox', title: 'Overdue 1', deadline: yesterday });
+      db.createTask({ list_id: 'inbox', title: 'Overdue 2', deadline: yesterday });
+      const completedOverdue = db.createTask({ list_id: 'inbox', title: 'Completed overdue', deadline: yesterday });
+      db.updateTask(completedOverdue.id, { status: 'completed' });
       db.createTask({ list_id: 'inbox', title: 'Future', deadline: new Date(Date.now() + 86400000) });
 
       const result = await actions.loadAppData({

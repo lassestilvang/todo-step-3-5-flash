@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import * as db from '@/lib/db';
 import * as actions from '@/app/actions';
-import type { Task, Label, Subtask } from '@/types';
 
 // Helper to clear all tables before each test
 function clearAllTables() {
@@ -23,13 +22,14 @@ function clearAllTables() {
   db.db.pragma('foreign_keys = ON');
 }
 
-// Run migrations to recreate DB schema (already done on import but after delete we need schema)
-function resetSchema() {
+beforeEach(() => {
+  clearAllTables();
   db.initializeDatabase();
-}
+  db.seedDefaultData();
+});
 
-// Helper to create a task with optional dates
-function createTaskWithDates(overrides = {}) {
+// Helper to create a task with optional overrides
+function createTask(overrides = {}): db.TaskRow {
   return db.createTask({
     list_id: 'inbox',
     title: 'Test Task',
@@ -37,20 +37,13 @@ function createTaskWithDates(overrides = {}) {
   } as any);
 }
 
-beforeEach(() => {
-  // Reset database schema and seed default data
-  clearAllTables();
-  db.initializeDatabase();
-  db.seedDefaultData();
-});
-
 describe('loadAppData', () => {
   describe('when view is "all"', () => {
-    it('should return all tasks', () => {
-      const t1 = createTaskWithDates({ title: 'Task A' });
-      const t2 = createTaskWithDates({ title: 'Task B' });
+    it('should return all tasks', async () => {
+      const t1 = createTask({ title: 'Task A' });
+      const t2 = createTask({ title: 'Task B' });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: null,
         showCompleted: false,
@@ -61,12 +54,12 @@ describe('loadAppData', () => {
       expect(result.tasks.map((t) => t.id)).toContain(t2.id);
     });
 
-    it('should include labels and subtasks', () => {
+    it('should include labels and subtasks', async () => {
       const label = db.createLabel({ name: 'Work', color: '#f00' });
-      const task = createTaskWithDates({ title: 'With relations', label_ids: [label.id] });
+      const task = createTask({ title: 'With relations', label_ids: [label.id] });
       db.createSubtask({ task_id: task.id, title: 'Sub 1' });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: null,
         showCompleted: false,
@@ -81,11 +74,11 @@ describe('loadAppData', () => {
       expect(fetched!.subtasks[0].title).toBe('Sub 1');
     });
 
-    it('should attach list info to tasks', () => {
+    it('should attach list info to tasks', async () => {
       const list = db.createList({ name: 'My List', color: '#0f0', icon: '📁' });
-      const task = createTaskWithDates({ list_id: list.id, title: 'Listed Task' });
+      const task = createTask({ list_id: list.id, title: 'Listed Task' });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: null,
         showCompleted: false,
@@ -97,13 +90,13 @@ describe('loadAppData', () => {
       expect(fetched?.list?.icon).toBe('📁');
     });
 
-    it('should calculate overdueCount correctly', () => {
+    it('should calculate overdueCount correctly', async () => {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      createTaskWithDates({ title: 'Overdue', deadline: yesterday, status: 'pending' });
-      createTaskWithDates({ title: 'Future', deadline: new Date(Date.now() + 86400000) });
+      createTask({ title: 'Overdue', deadline: yesterday, status: 'pending' });
+      createTask({ title: 'Future', deadline: new Date(Date.now() + 86400000) });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: null,
         showCompleted: false,
@@ -115,17 +108,17 @@ describe('loadAppData', () => {
   });
 
   describe('when view is "today"', () => {
-    it('returns tasks due today (due_date or deadline)', () => {
+    it('returns tasks due today (due_date or deadline)', async () => {
       const today = new Date();
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      createTaskWithDates({ title: 'Today Task', due_date: today });
-      createTaskWithDates({ title: 'Today Deadline', deadline: today });
-      createTaskWithDates({ title: 'Tomorrow Task', due_date: tomorrow });
+      createTask({ title: 'Today Task', due_date: today });
+      createTask({ title: 'Today Deadline', deadline: today });
+      createTask({ title: 'Tomorrow Task', due_date: tomorrow });
 
       const result = await actions.loadAppData({
-        view: 'all',
+        view: 'today',
         selectedListId: null,
         showCompleted: false,
         searchQuery: '',
@@ -139,17 +132,17 @@ describe('loadAppData', () => {
   });
 
   describe('when view is "week"', () => {
-    it('returns tasks due within next 7 days', () => {
+    it('returns tasks due within next 7 days', async () => {
       const now = new Date();
       const in3Days = new Date(now);
       in3Days.setDate(now.getDate() + 3);
       const in10Days = new Date(now);
       in10Days.setDate(now.getDate() + 10);
 
-      createTaskWithDates({ title: 'Soon', due_date: in3Days });
-      createTaskWithDates({ title: 'Later', due_date: in10Days });
+      createTask({ title: 'Soon', due_date: in3Days });
+      createTask({ title: 'Later', due_date: in10Days });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'week',
         selectedListId: null,
         showCompleted: false,
@@ -163,15 +156,15 @@ describe('loadAppData', () => {
   });
 
   describe('when view is "upcoming"', () => {
-    it('returns tasks with future due dates (due or deadline)', () => {
+    it('returns tasks with future due dates (due or deadline)', async () => {
       const now = new Date();
       const past = new Date(now.getTime() - 86400000);
       const future = new Date(now.getTime() + 86400000);
 
-      createTaskWithDates({ title: 'Past', due_date: past });
-      createTaskWithDates({ title: 'Future', due_date: future });
+      createTask({ title: 'Past', due_date: past });
+      createTask({ title: 'Future', due_date: future });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'upcoming',
         selectedListId: null,
         showCompleted: false,
@@ -185,13 +178,13 @@ describe('loadAppData', () => {
   });
 
   describe('when selectedListId is provided', () => {
-    it('filters tasks by the selected list', () => {
+    it('filters tasks by the selected list', async () => {
       const listA = db.createList({ name: 'List A', color: '#111', icon: 'A' });
       const listB = db.createList({ name: 'List B', color: '#222', icon: 'B' });
-      createTaskWithDates({ list_id: listA.id, title: 'Task A' });
-      createTaskWithDates({ list_id: listB.id, title: 'Task B' });
+      createTask({ list_id: listA.id, title: 'Task A' });
+      createTask({ list_id: listB.id, title: 'Task B' });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: listA.id,
         showCompleted: false,
@@ -205,11 +198,11 @@ describe('loadAppData', () => {
   });
 
   describe('when showCompleted is false', () => {
-    it('excludes completed tasks', () => {
-      const task1 = createTaskWithDates({ title: 'Pending' });
-      const task2 = createTaskWithDates({ title: 'Completed', status: 'completed' as any });
+    it('excludes completed tasks', async () => {
+      createTask({ title: 'Pending' });
+      createTask({ title: 'Completed', status: 'completed' });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: null,
         showCompleted: false,
@@ -223,11 +216,11 @@ describe('loadAppData', () => {
   });
 
   describe('when showCompleted is true', () => {
-    it('includes completed tasks', () => {
-      createTaskWithDates({ title: 'Pending' });
-      createTaskWithDates({ title: 'Completed', status: 'completed' as any });
+    it('includes completed tasks', async () => {
+      createTask({ title: 'Pending' });
+      createTask({ title: 'Completed', status: 'completed' });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: null,
         showCompleted: true,
@@ -241,11 +234,11 @@ describe('loadAppData', () => {
   });
 
   describe('searchQuery', () => {
-    it('filters tasks by title case-insensitive', () => {
-      createTaskWithDates({ title: 'Buy groceries' });
-      createTaskWithDates({ title: 'Call mom' });
+    it('filters tasks by title case-insensitive', async () => {
+      createTask({ title: 'Buy groceries' });
+      createTask({ title: 'Call mom' });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: null,
         showCompleted: false,
@@ -256,11 +249,11 @@ describe('loadAppData', () => {
       expect(result.tasks[0].title).toBe('Buy groceries');
     });
 
-    it('also searches description', () => {
-      createTaskWithDates({ title: 'Task 1', description: 'Important meeting' });
-      createTaskWithDates({ title: 'Task 2', description: 'Routine checkin' });
+    it('also searches description', async () => {
+      createTask({ title: 'Task 1', description: 'Important meeting' });
+      createTask({ title: 'Task 2', description: 'Routine checkin' });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: null,
         showCompleted: false,
@@ -273,37 +266,16 @@ describe('loadAppData', () => {
   });
 
   describe('overdueCount', () => {
-    it('counts only pending tasks with past deadlines', () => {
+    it('counts only pending tasks with past deadlines', async () => {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
 
-      db.createTask({
-        list_id: 'inbox',
-        title: 'Overdue 1',
-        deadline: yesterday,
-        status: 'pending',
-      });
-      db.createTask({
-        list_id: 'inbox',
-        title: 'Overdue 2',
-        deadline: yesterday,
-        status: 'pending',
-      });
-      db.createTask({
-        list_id: 'inbox',
-        title: 'Completed overdue',
-        deadline: yesterday,
-        status: 'completed',
-      });
-      db.createTask({
-        list_id: 'inbox',
-        title: 'Future',
-        deadline: tomorrow,
-      });
+      db.createTask({ list_id: 'inbox', title: 'Overdue 1', deadline: yesterday, status: 'pending' });
+      db.createTask({ list_id: 'inbox', title: 'Overdue 2', deadline: yesterday, status: 'pending' });
+      db.createTask({ list_id: 'inbox', title: 'Completed overdue', deadline: yesterday, status: 'completed' });
+      db.createTask({ list_id: 'inbox', title: 'Future', deadline: new Date(Date.now() + 86400000) });
 
-      const result = actions.loadAppData({
+      const result = await actions.loadAppData({
         view: 'all',
         selectedListId: null,
         showCompleted: false,
@@ -315,10 +287,9 @@ describe('loadAppData', () => {
   });
 });
 
-// Other action wrappers are thin, but provide minimal coverage
 describe('Task Actions (proxies)', () => {
-  it('createTaskAction should create a task via db', () => {
-    const result = actions.createTaskAction({
+  it('createTaskAction should create a task via db', async () => {
+    const result = await actions.createTaskAction({
       listId: 'inbox',
       title: 'New Task',
     } as any);
@@ -327,97 +298,96 @@ describe('Task Actions (proxies)', () => {
     expect(result.title).toBe('New Task');
   });
 
-  it('updateTaskAction should update task', () => {
+  it('updateTaskAction should update task', async () => {
     const task = db.createTask({ list_id: 'inbox', title: 'Original' });
-    actions.updateTaskAction(task.id, { title: 'Updated' });
+    await actions.updateTaskAction(task.id, { title: 'Updated' });
     const updated = db.getTaskById(task.id);
     expect(updated?.title).toBe('Updated');
   });
 
-  it('deleteTaskAction should delete task', () => {
+  it('deleteTaskAction should delete task', async () => {
     const task = db.createTask({ list_id: 'inbox', title: 'Delete' });
-    actions.deleteTaskAction(task.id);
+    await actions.deleteTaskAction(task.id);
     expect(db.getTaskById(task.id)).toBeNull();
   });
 
-  it('toggleTaskCompleteAction toggles status', () => {
+  it('toggleTaskCompleteAction toggles status', async () => {
     const task = db.createTask({ list_id: 'inbox', title: 'Toggle' });
-    actions.toggleTaskCompleteAction(task.id);
-    const toggled = db.getTaskById(task.id);
+    await actions.toggleTaskCompleteAction(task.id);
+    let toggled = db.getTaskById(task.id);
     expect(toggled?.status).toBe('completed');
-    // toggle again
-    actions.toggleTaskCompleteAction(task.id);
-    const again = db.getTaskById(task.id);
-    expect(again?.status).toBe('pending');
+    await actions.toggleTaskCompleteAction(task.id);
+    toggled = db.getTaskById(task.id);
+    expect(toggled?.status).toBe('pending');
   });
 
-  it('createSubtaskAction creates subtask', () => {
+  it('createSubtaskAction creates subtask', async () => {
     const task = db.createTask({ list_id: 'inbox', title: 'Parent' });
-    const subtask = actions.createSubtaskAction(task.id, 'Subtask');
+    const subtask = await actions.createSubtaskAction(task.id, 'Subtask');
     expect(subtask).toBeDefined();
     expect(subtask.title).toBe('Subtask');
     const retrieved = db.getSubtasksByTaskId(task.id);
     expect(retrieved).toHaveLength(1);
   });
 
-  it('updateSubtaskAction updates subtask', () => {
+  it('updateSubtaskAction updates subtask', async () => {
     const task = db.createTask({ list_id: 'inbox', title: 'Parent' });
     const subtask = db.createSubtask({ task_id: task.id, title: 'Old' });
-    actions.updateSubtaskAction(subtask.id, { title: 'New', completed: true });
+    await actions.updateSubtaskAction(subtask.id, { title: 'New', completed: true });
     const updated = db.getSubtasksByTaskId(task.id)[0];
     expect(updated.title).toBe('New');
     expect(updated.completed).toBe(1);
   });
 
-  it('deleteSubtaskAction deletes subtask', () => {
+  it('deleteSubtaskAction deletes subtask', async () => {
     const task = db.createTask({ list_id: 'inbox', title: 'Parent' });
     const subtask = db.createSubtask({ task_id: task.id, title: 'ToDelete' });
-    actions.deleteSubtaskAction(subtask.id);
+    await actions.deleteSubtaskAction(subtask.id);
     const remaining = db.getSubtasksByTaskId(task.id);
     expect(remaining).toHaveLength(0);
   });
 });
 
 describe('List Actions (proxies)', () => {
-  it('createListAction creates list', () => {
-    const list = actions.createListAction({ name: 'New List', color: '#000', icon: '📁' });
+  it('createListAction creates list', async () => {
+    const list = await actions.createListAction({ name: 'New List', color: '#000', icon: '📁' });
     expect(list).toBeDefined();
     expect(list.name).toBe('New List');
   });
 
-  it('updateListAction updates list', () => {
+  it('updateListAction updates list', async () => {
     const list = db.createList({ name: 'Old', color: '#111', icon: '📁' });
-    actions.updateListAction(list.id, { name: 'New' });
+    await actions.updateListAction(list.id, { name: 'New' });
     const updated = db.getListById(list.id);
     expect(updated?.name).toBe('New');
   });
 
-  it('deleteListAction deletes list', () => {
+  it('deleteListAction deletes list', async () => {
     const list = db.createList({ name: 'Delete', color: '#111', icon: '🗑' });
-    actions.deleteListAction(list.id);
+    await actions.deleteListAction(list.id);
     expect(db.getListById(list.id)).toBeNull();
   });
 });
 
 describe('Label Actions (proxies)', () => {
-  it('createLabelAction creates label', () => {
-    const label = actions.createLabelAction('Work', '#ff0000', '💼');
+  it('createLabelAction creates label', async () => {
+    const label = await actions.createLabelAction('Work', '#ff0000', '💼');
     expect(label).toBeDefined();
     expect(label.name).toBe('Work');
   });
 
-  it('updateLabelAction updates label', () => {
+  it('updateLabelAction updates label', async () => {
     const label = db.createLabel({ name: 'Old', color: '#111' });
-    actions.updateLabelAction(label.id, 'New', '#222', '⭐');
+    await actions.updateLabelAction(label.id, 'New', '#222', '⭐');
     const updated = db.getLabelById(label.id);
     expect(updated?.name).toBe('New');
     expect(updated?.color).toBe('#222');
     expect(updated?.icon).toBe('⭐');
   });
 
-  it('deleteLabelAction deletes label', () => {
+  it('deleteLabelAction deletes label', async () => {
     const label = db.createLabel({ name: 'Delete', color: '#111' });
-    actions.deleteLabelAction(label.id);
+    await actions.deleteLabelAction(label.id);
     expect(db.getLabelById(label.id)).toBeNull();
   });
 });

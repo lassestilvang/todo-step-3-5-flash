@@ -549,45 +549,6 @@ describe('Label Actions', () => {
   });
 });
 
-      await useStore.getState().addLabel('Work', '#ff0000', '💼');
-
-      expect(actions.createLabelAction).toHaveBeenCalledWith('Work', '#ff0000', '💼');
-    });
-  });
-
-  describe('updateLabel', () => {
-    it('should call updateLabelAction and loadData', async () => {
-      (actions.updateLabelAction as any).mockResolvedValue({});
-      (actions.loadAppData as any).mockResolvedValue({
-        tasks: [],
-        lists: [],
-        labels: [],
-        overdueCount: 0,
-      });
-
-      await useStore.getState().updateLabel('label-1', { name: 'New Name' });
-
-      expect(actions.updateLabelAction).toHaveBeenCalledWith('label-1', 'New Name', expect.any(String), expect.any(String));
-    });
-  });
-
-  describe('deleteLabel', () => {
-    it('should call deleteLabelAction and loadData', async () => {
-      (actions.deleteLabelAction as any).mockResolvedValue(undefined);
-      (actions.loadAppData as any).mockResolvedValue({
-        tasks: [],
-        lists: [],
-        labels: [],
-        overdueCount: 0,
-      });
-
-      await useStore.getState().deleteLabel('label-1');
-
-      expect(actions.deleteLabelAction).toHaveBeenCalledWith('label-1');
-    });
-  });
-});
-
 describe('Getters', () => {
   it('getTaskById should return the matching task', () => {
     const task = createSampleTask({ id: 't2', title: 'Task 2' });

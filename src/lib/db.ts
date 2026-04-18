@@ -676,7 +676,7 @@ export function updateSubtask(id: string, data: Partial<{
   order: number;
 }>): SubtaskRow | null {
   const updates: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
 
   if (data.title !== undefined) {
     updates.push("title = ?");

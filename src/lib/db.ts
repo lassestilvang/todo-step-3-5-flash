@@ -395,7 +395,7 @@ export function getTasksDueToday(): (TaskRow & { labels: LabelRow[]; subtasks: S
   });
 }
 
-export function getTasksDueInNextDays(days: number): (TaskRow & { labels: any[]; subtasks: any[] })[] {
+export function getTasksDueInNextDays(days: number): (TaskRow & { labels: LabelRow[]; subtasks: SubtaskRow[] })[] {
   const now = new Date();
   const future = new Date(now);
   future.setDate(future.getDate() + days);
@@ -416,11 +416,11 @@ export function getTasksDueInNextDays(days: number): (TaskRow & { labels: any[];
       SELECT l.* FROM task_labels tl
       JOIN labels l ON tl.label_id = l.id
       WHERE tl.task_id = ?
-    `).all(task.id);
+    `).all(task.id) as LabelRow[];
 
     const subtasks = db.prepare(`
       SELECT * FROM subtasks WHERE task_id = ? ORDER BY order_index
-    `).all(task.id);
+    `).all(task.id) as SubtaskRow[];
 
     return { ...task, labels, subtasks };
   });

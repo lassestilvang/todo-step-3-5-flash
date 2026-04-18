@@ -106,7 +106,7 @@ export async function loadAppData(params: {
         uniqueMap.set(row.id, row);
       }
     }
-   let uniqueTasks = Array.from(uniqueMap.values());
+    let uniqueTasks = Array.from(uniqueMap.values()) as TaskRow[];
 
    // For upcoming view, filter to future tasks only
    if (view === "upcoming") {

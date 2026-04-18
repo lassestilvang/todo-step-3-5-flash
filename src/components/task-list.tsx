@@ -2,7 +2,6 @@
 
 import { useStore } from "@/store";
 import { TaskCard } from "@/components/task-card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { format, isToday, isTomorrow, isThisWeek, isThisYear } from "date-fns";
 
 export function TaskList() {

@@ -55,13 +55,13 @@ export async function loadAppData(params: {
     }
   }
 
-  // Determine which tasks to load
-  let tasksRows: any[] = [];
-  if (selectedListId) {
-    tasksRows = getTasksByListId(selectedListId);
-  } else {
-    const now = new Date();
-    let rawTasks: any[] = [];
+   // Determine which tasks to load
+   let tasksRows: TaskRow[] = [];
+   if (selectedListId) {
+     tasksRows = getTasksByListId(selectedListId);
+   } else {
+     const now = new Date();
+     let rawTasks: TaskRow[] = [];
 
     switch (view) {
       case "today": {

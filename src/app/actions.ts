@@ -134,7 +134,7 @@ export async function loadAppData(params: {
   // Build label map already done above; now just attach
 
    // Map to Task objects
-   const tasks: Task[] = uniqueTasks.map((row) => ({
+   const tasks = uniqueTasks.map((row): Task => ({
      id: row.id,
      listId: row.list_id,
      parentId: row.parent_id || undefined,

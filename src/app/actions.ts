@@ -2,7 +2,7 @@
 
 import { db, getAllLists, getAllLabels, getTasksByListId, getTasksDueToday, getTasksDueInNextDays, getAllTasks, getOverdueTasks, createList, updateList, deleteList, createTask, updateTask, deleteTask, createSubtask, updateSubtask, deleteSubtask, createLabel, updateLabel, deleteLabel } from "@/lib/db";
 import type { CreateTaskData, CreateListData, Task, TaskList, Label, ViewType } from "@/types";
-import type { ListRow, LabelRow } from "@/lib/db";
+import type { TaskRow, SubtaskRow } from "@/lib/db";
 
 // ==================== DATA LOADING ====================
 export async function loadAppData(params: {

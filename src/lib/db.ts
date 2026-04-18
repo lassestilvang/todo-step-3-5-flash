@@ -489,11 +489,11 @@ export function updateTask(id: string, data: Partial<{
   recurrence: string;
   recurrence_rule: string;
 }>): TaskRow | null {
-  const existing = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id) as TaskRow | null;
-  if (!existing) return null;
+   const existing = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id) as TaskRow | null;
+   if (!existing) return null;
 
-  const updates: string[] = [];
-  const values: any[] = [];
+   const updates: string[] = [];
+   const values: unknown[] = [];
 
   if (data.list_id !== undefined) {
     updates.push("list_id = ?");

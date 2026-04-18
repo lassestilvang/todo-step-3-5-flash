@@ -165,9 +165,8 @@ export function runMigrations() {
     );
   `);
 
-  const applied = new Set(
-    db.prepare("SELECT version FROM schema_migrations").all().map((row: { version: number }) => row.version)
-  );
+  const rows = db.prepare("SELECT version FROM schema_migrations").all() as Array<{ version: number }>;
+  const applied = new Set(rows.map((row) => row.version));
 
   for (const migration of migrations) {
     if (!applied.has(migration.version)) {

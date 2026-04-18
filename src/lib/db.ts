@@ -233,7 +233,7 @@ export function updateList(id: string, data: Partial<{
   order: number;
 }>): ListRow | null {
   const updates: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
 
   if (data.name !== undefined) {
     updates.push("name = ?");

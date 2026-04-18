@@ -20,13 +20,22 @@ import {
   Circle,
 } from "lucide-react";
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 
 export function TaskDetailSheet() {
   const { selectedTaskId, tasks, setSelectedTask, toggleTaskComplete } = useStore();
+  const selectedTask = tasks.find((t) => t.id === selectedTaskId);
+
   const [internalOpen, setInternalOpen] = useState(false);
+
+  // Open sheet when a task is selected
+  useEffect(() => {
+    if (selectedTaskId !== null) {
+      setInternalOpen(true);
+    }
+  }, [selectedTaskId]);
 
   const tasksArray = tasks.filter((t) => t.status !== "completed" || t.id === selectedTaskId);
   const currentIndex = tasksArray.findIndex((t) => t.id === selectedTaskId);

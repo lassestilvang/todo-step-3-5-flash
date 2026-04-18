@@ -1,11 +1,10 @@
 "use client";
 
 import { useStore } from "@/store";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
   Flag,
@@ -26,20 +25,8 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 
 export function TaskDetailSheet() {
-  const { selectedTaskId, tasks, setSelectedTask, updateTask, toggleTaskComplete } = useStore();
-  const [open, setOpen] = useState(false);
-
-  const selectedTask = tasks.find((t) => t.id === selectedTaskId);
-
-  // Sheet state
+  const { selectedTaskId, tasks, setSelectedTask, toggleTaskComplete } = useStore();
   const [internalOpen, setInternalOpen] = useState(false);
-
-  // Sync external state
-  useState(() => {
-    if (selectedTaskId !== null && !internalOpen) {
-      setInternalOpen(true);
-    }
-  });
 
   const tasksArray = tasks.filter((t) => t.status !== "completed" || t.id === selectedTaskId);
   const currentIndex = tasksArray.findIndex((t) => t.id === selectedTaskId);

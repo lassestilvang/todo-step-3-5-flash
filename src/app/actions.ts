@@ -214,7 +214,7 @@ export async function updateTaskAction(id: string, data: Partial<CreateTaskData>
     deadline?: Date;
     estimate_minutes?: number;
     priority?: string;
-    recurrence?: string | null;
+    recurrence?: string;
   } = {};
   if (data.listId !== undefined) updateData.list_id = data.listId;
   if (data.title !== undefined) updateData.title = data.title;
@@ -225,7 +225,7 @@ export async function updateTaskAction(id: string, data: Partial<CreateTaskData>
   if (data.priority !== undefined) updateData.priority = data.priority;
   if (data.recurrence !== undefined) updateData.recurrence = data.recurrence;
   if (data.parentId !== undefined) updateData.parent_id = data.parentId;
-  return updateTask(id, updateData);
+  return updateTask(id, updateData as Parameters<typeof updateTask>[1]);
 }
 
 export async function deleteTaskAction(id: string) {

@@ -133,41 +133,41 @@ export async function loadAppData(params: {
 
   // Build label map already done above; now just attach
 
-  // Map to Task objects
-  const tasks: Task[] = uniqueTasks.map((row) => ({
-    id: row.id,
-    listId: row.list_id,
-    parentId: row.parent_id,
-    title: row.title,
-    description: row.description,
-    dueDate: row.due_date ? new Date(row.due_date) : undefined,
-    deadline: row.deadline ? new Date(row.deadline) : undefined,
-    estimateMinutes: row.estimate_minutes,
-    actualMinutes: row.actual_minutes,
-    status: row.status,
-    priority: row.priority,
-    recurrence: row.recurrence,
-    recurrenceRule: row.recurrence_rule,
-    createdAt: new Date(row.created_at),
-    updatedAt: new Date(row.updated_at),
-    completedAt: row.completed_at ? new Date(row.completed_at) : undefined,
-    labels: labelMap[row.id] || [],
-    subtasks: (subtasksMap[row.id] || []).map((s) => ({
-      id: s.id,
-      taskId: s.task_id,
-      title: s.title,
-      completed: s.completed === 1,
-      order: s.order_index,
-      createdAt: new Date(s.created_at),
-    })),
-    attachments: [], // not implementing full for now
-    reminders: [],
-    changeLogs: [],
-    list: (() => {
-    const l = lists.find((l) => l.id === row.list_id);
-    return l ? { name: l.name, icon: l.icon, color: l.color } : undefined;
-  })(),
-  }));
+   // Map to Task objects
+   const tasks: Task[] = uniqueTasks.map((row) => ({
+     id: row.id,
+     listId: row.list_id,
+     parentId: row.parent_id || undefined,
+     title: row.title,
+     description: row.description,
+     dueDate: row.due_date ? new Date(row.due_date) : undefined,
+     deadline: row.deadline ? new Date(row.deadline) : undefined,
+     estimateMinutes: row.estimate_minutes,
+     actualMinutes: row.actual_minutes,
+     status: row.status as TaskStatus,
+     priority: row.priority as Priority,
+     recurrence: row.recurrence as RecurrenceType | undefined,
+     recurrenceRule: row.recurrence_rule,
+     createdAt: new Date(row.created_at),
+     updatedAt: new Date(row.updated_at),
+     completedAt: row.completed_at ? new Date(row.completed_at) : undefined,
+     labels: labelMap[row.id] || [],
+     subtasks: (subtasksMap[row.id] || []).map((s) => ({
+       id: s.id,
+       taskId: s.task_id,
+       title: s.title,
+       completed: s.completed === 1,
+       order: s.order_index,
+       createdAt: new Date(s.created_at),
+     })),
+     attachments: [],
+     reminders: [],
+     changeLogs: [],
+     list: (() => {
+       const l = lists.find((l) => l.id === row.list_id);
+       return l ? { name: l.name, icon: l.icon, color: l.color } : undefined;
+     })(),
+   }));
 
   // Count overdue
   const overdue = getOverdueTasks().length;

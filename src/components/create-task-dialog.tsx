@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, Flag, X } from "lucide-react";
+import { CalendarIcon, Flag, Trash2, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import * as actions from "@/app/actions";

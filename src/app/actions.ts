@@ -233,7 +233,7 @@ export async function deleteTaskAction(id: string) {
 }
 
 export async function toggleTaskCompleteAction(id: string) {
-  const existing = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id) as any;
+  const existing = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id) as TaskRow | null;
   if (!existing) return;
   const newStatus = existing.status === "completed" ? "pending" : "completed";
   return updateTask(id, { status: newStatus });

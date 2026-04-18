@@ -1,7 +1,7 @@
 "use server";
 
 import { db, getAllLists, getAllLabels, getTasksByListId, getTasksDueToday, getTasksDueInNextDays, getAllTasks, getOverdueTasks, createList, updateList, deleteList, createTask, updateTask, deleteTask, createSubtask, updateSubtask, deleteSubtask, createLabel, updateLabel, deleteLabel } from "@/lib/db";
-import type { CreateTaskData, CreateListData, Task, TaskList, Label, ViewType } from "@/types";
+import type { CreateTaskData, CreateListData, Task, TaskList, Label, ViewType, TaskStatus, Priority, RecurrenceType } from "@/types";
 import type { TaskRow, SubtaskRow } from "@/lib/db";
 
 // ==================== DATA LOADING ====================

@@ -329,18 +329,18 @@ export function getTaskById(id: string): (TaskRow & { labels: LabelRow[]; subtas
   return { ...task, labels, subtasks };
 }
 
-export function getTasksByListId(listId: string): (TaskRow & { labels: any[]; subtasks: any[] })[] {
+export function getTasksByListId(listId: string): (TaskRow & { labels: LabelRow[]; subtasks: SubtaskRow[] })[] {
   const tasks = db.prepare("SELECT * FROM tasks WHERE list_id = ? ORDER BY created_at DESC").all(listId) as TaskRow[];
   return tasks.map((task) => {
     const labels = db.prepare(`
       SELECT l.* FROM task_labels tl
       JOIN labels l ON tl.label_id = l.id
       WHERE tl.task_id = ?
-    `).all(task.id);
+    `).all(task.id) as LabelRow[];
 
     const subtasks = db.prepare(`
       SELECT * FROM subtasks WHERE task_id = ? ORDER BY order_index
-    `).all(task.id);
+    `).all(task.id) as SubtaskRow[];
 
     return { ...task, labels, subtasks };
   });

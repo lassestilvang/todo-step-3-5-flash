@@ -100,13 +100,13 @@ export async function loadAppData(params: {
     );
   }
 
-   // Deduplicate (due to OR conditions)
-   const uniqueMap = new Map<string, any>();
-   for (const row of tasksRows) {
-     if (!uniqueMap.has(row.id)) {
-       uniqueMap.set(row.id, row);
-     }
-   }
+    // Deduplicate (due to OR conditions)
+    const uniqueMap = new Map<string, TaskRow>();
+    for (const row of tasksRows) {
+      if (!uniqueMap.has(row.id)) {
+        uniqueMap.set(row.id, row);
+      }
+    }
    let uniqueTasks = Array.from(uniqueMap.values());
 
    // For upcoming view, filter to future tasks only

@@ -76,10 +76,9 @@ const RECURRENCE_OPTIONS = [
 ] as const;
 
 export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { lists, labels, addTask, updateTask, editTaskId, selectedListId } = useStore();
+  const { lists, labels, editTaskId, selectedListId } = useStore();
   const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>([]);
   const [newSubtask, setNewSubtask] = useState("");
-  const [attachments, setAttachments] = useState<File[]>([]);
 
   const isEditing = !!editTaskId;
   const editTask = isEditing ? useStore.getState().getTaskById(editTaskId) : null;

@@ -83,11 +83,11 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
           return (
             <button
               key={view.id}
-              onClick={() => {
-                setCurrentView(view.id as any);
-                setSelectedList(null);
-                onItemClick?.();
-              }}
+               onClick={() => {
+                 setCurrentView(view.id as ViewType);
+                 setSelectedList(null);
+                 onItemClick?.();
+               }}
               className={cn(
                 buttonVariants({ variant: "ghost" }),
                 "w-full justify-start",

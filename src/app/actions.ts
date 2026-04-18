@@ -117,14 +117,14 @@ export async function loadAppData(params: {
      });
    }
 
-  // Fetch subtasks for all tasks
-  const taskIds = uniqueTasks.map((t) => t.id);
-  const subtasksMap: Record<string, any[]> = {};
-  if (taskIds.length > 0) {
-    const placeholders = taskIds.map(() => "?").join(",");
-    const subtasks = db.prepare(`
-      SELECT * FROM subtasks WHERE task_id IN (${placeholders}) ORDER BY task_id, order_index
-    `).all(...taskIds) as any[];
+   // Fetch subtasks for all tasks
+   const taskIds = uniqueTasks.map((t) => t.id);
+   const subtasksMap: Record<string, SubtaskRow[]> = {};
+   if (taskIds.length > 0) {
+     const placeholders = taskIds.map(() => "?").join(",");
+     const subtasks = db.prepare(`
+       SELECT * FROM subtasks WHERE task_id IN (${placeholders}) ORDER BY task_id, order_index
+     `).all(...taskIds) as SubtaskRow[];
     for (const st of subtasks) {
       if (!subtasksMap[st.task_id]) subtasksMap[st.task_id] = [];
       subtasksMap[st.task_id].push(st);

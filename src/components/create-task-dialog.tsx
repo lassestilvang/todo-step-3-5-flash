@@ -100,17 +100,17 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   useEffect(() => {
     if (open) {
       if (isEditing && editTask) {
-        form.reset({
-          title: editTask.title,
-          description: editTask.description,
-          listId: editTask.listId,
-          dueDate: editTask.dueDate,
-          deadline: editTask.deadline,
-          estimateMinutes: editTask.estimateMinutes || 0,
-          priority: editTask.priority,
-          recurrence: editTask.recurrence as any,
-          labelIds: editTask.labels?.map((l) => l.id) || [],
-        });
+         form.reset({
+           title: editTask.title,
+           description: editTask.description,
+           listId: editTask.listId,
+           dueDate: editTask.dueDate,
+           deadline: editTask.deadline,
+           estimateMinutes: editTask.estimateMinutes || 0,
+           priority: editTask.priority,
+           recurrence: editTask.recurrence,
+           labelIds: editTask.labels?.map((l) => l.id) || [],
+         });
         setSubtasks(
           editTask.subtasks?.map((s) => ({
             id: s.id,

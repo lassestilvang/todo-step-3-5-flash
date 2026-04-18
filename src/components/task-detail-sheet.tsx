@@ -57,7 +57,7 @@ export function TaskDetailSheet() {
   };
 
   return (
-    <Sheet open={internalOpen} onOpenChange={setInternalOpen}>
+    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) setSelectedTask(null); }}>
       <SheetContent side="right" className="w-full max-w-xl p-0">
         <div className="flex flex-col h-full">
           {/* Header with navigation */}

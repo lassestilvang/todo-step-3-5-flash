@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useStore } from "@/store";
-import { Search, Command } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { debounce } from "@/lib/utils";
 import Fuse from "fuse.js";

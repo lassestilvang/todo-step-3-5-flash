@@ -129,15 +129,14 @@ export function initializeDatabase() {
 }
 
 // Helper to convert SQLite row to object with dates
-export function rowToObj(row: any): any {
-  if (!row) return null;
-  const obj = { ...row };
+export function rowToObj(row: unknown): Record<string, unknown> | null {
+  if (!row || typeof row !== 'object') return null;
+  const obj = { ...(row as Record<string, unknown>) };
   Object.keys(obj).forEach((key) => {
-    if (obj[key] && (key.endsWith("_at") || key.includes("Date"))) {
-      if (typeof obj[key] === "string") {
-        const d = new Date(obj[key]);
-        obj[key] = isNaN(d.getTime()) ? null : d;
-      }
+    const val = obj[key];
+    if (typeof val === 'string' && (key.endsWith("_at") || key.includes("Date"))) {
+      const d = new Date(val);
+      obj[key] = isNaN(d.getTime()) ? null : d;
     }
   });
   return obj;

@@ -207,15 +207,14 @@ export async function createTaskAction(data: CreateTaskData) {
 export async function updateTaskAction(id: string, data: Partial<CreateTaskData>) {
   const updateData: {
     list_id?: string;
+    parent_id?: string;
     title?: string;
     description?: string;
-    due_date?: Date | null;
-    deadline?: Date | null;
+    due_date?: Date;
+    deadline?: Date;
     estimate_minutes?: number;
     priority?: string;
     recurrence?: string | null;
-    parent_id?: string | null;
-    label_ids?: string[] | null;
   } = {};
   if (data.listId !== undefined) updateData.list_id = data.listId;
   if (data.title !== undefined) updateData.title = data.title;
@@ -226,7 +225,6 @@ export async function updateTaskAction(id: string, data: Partial<CreateTaskData>
   if (data.priority !== undefined) updateData.priority = data.priority;
   if (data.recurrence !== undefined) updateData.recurrence = data.recurrence;
   if (data.parentId !== undefined) updateData.parent_id = data.parentId;
-  if (data.labelIds !== undefined) updateData.label_ids = data.labelIds;
   return updateTask(id, updateData);
 }
 

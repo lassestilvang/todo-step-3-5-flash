@@ -60,10 +60,9 @@ export async function loadAppData(params: {
    if (selectedListId) {
      tasksRows = getTasksByListId(selectedListId);
    } else {
-     const now = new Date();
      let rawTasks: TaskRow[] = [];
 
-    switch (view) {
+     switch (view) {
       case "today": {
         rawTasks = getTasksDueToday();
         break;

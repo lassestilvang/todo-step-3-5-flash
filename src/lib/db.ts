@@ -607,7 +607,7 @@ export function updateLabel(id: string, data: Partial<{
   icon: string;
 }>): LabelRow | null {
   const updates: string[] = [];
-  const values: any[] = [];
+  const values: unknown[] = [];
 
   if (data.name !== undefined) {
     updates.push("name = ?");

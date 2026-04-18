@@ -20,7 +20,6 @@ import {
   Circle,
 } from "lucide-react";
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from "date-fns";
-import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 

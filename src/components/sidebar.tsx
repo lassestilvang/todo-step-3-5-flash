@@ -2,25 +2,17 @@
 
 import { useStore } from "@/store";
 import { buttonVariants } from "@/components/ui/button";
-import { cn, formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import {
   LayoutList,
   Calendar,
   CalendarDays,
   Sparkles,
-  ChevronRight,
-  Tag,
   Plus,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
@@ -30,6 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { ViewType } from "@/types";
 
 const VIEWS = [
   { id: "all", label: "All Tasks", icon: LayoutList },

@@ -307,7 +307,7 @@ export function getAllTasks(): TaskRow[] {
   return db.prepare("SELECT * FROM tasks").all() as TaskRow[];
 }
 
-export function getTaskById(id: string): (TaskRow & { labels: any[]; subtasks: any[] }) | null {
+export function getTaskById(id: string): (TaskRow & { labels: LabelRow[]; subtasks: SubtaskRow[] }) | null {
   const task = rowToObj(
     db.prepare("SELECT * FROM tasks WHERE id = ?").get(id)
   ) as TaskRow | null;
@@ -319,12 +319,12 @@ export function getTaskById(id: string): (TaskRow & { labels: any[]; subtasks: a
     SELECT l.* FROM task_labels tl
     JOIN labels l ON tl.label_id = l.id
     WHERE tl.task_id = ?
-  `).all(id);
+  `).all(id) as LabelRow[];
 
   // Get subtasks
   const subtasks = db.prepare(`
     SELECT * FROM subtasks WHERE task_id = ? ORDER BY order_index
-  `).all(id);
+  `).all(id) as SubtaskRow[];
 
   return { ...task, labels, subtasks };
 }

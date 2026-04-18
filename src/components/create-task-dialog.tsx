@@ -133,15 +133,20 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     }
   }, [open, editTask, isEditing, form, selectedListId]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: TaskFormData) => {
     if (isEditing && editTaskId) {
       await actions.updateTaskAction(editTaskId, {
-        ...data,
-        due_date: data.dueDate,
+        title: data.title,
+        description: data.description,
+        listId: data.listId,
+        dueDate: data.dueDate,
         deadline: data.deadline,
-        estimate_minutes: data.estimateMinutes,
-        label_ids: data.labelIds,
-      } as any);
+        estimateMinutes: data.estimateMinutes,
+        priority: data.priority,
+        recurrence: data.recurrence,
+        labelIds: data.labelIds,
+        parentId: data.parentId,
+      });
 
       // Get existing subtasks from store
       const existingTask = useStore.getState().getTaskById(editTaskId);

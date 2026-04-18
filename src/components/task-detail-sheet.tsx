@@ -28,14 +28,9 @@ export function TaskDetailSheet() {
   const { selectedTaskId, tasks, setSelectedTask, toggleTaskComplete } = useStore();
   const selectedTask = tasks.find((t) => t.id === selectedTaskId);
 
-  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = selectedTaskId !== null;
 
-  // Open sheet when a task is selected
-  useEffect(() => {
-    if (selectedTaskId !== null) {
-      setInternalOpen(true);
-    }
-  }, [selectedTaskId]);
+  if (!selectedTask) return null;
 
   const tasksArray = tasks.filter((t) => t.status !== "completed" || t.id === selectedTaskId);
   const currentIndex = tasksArray.findIndex((t) => t.id === selectedTaskId);

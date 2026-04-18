@@ -169,12 +169,16 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
       }
     } else {
       const newTask = await actions.createTaskAction({
-        ...data,
-        due_date: data.dueDate,
+        title: data.title,
+        description: data.description,
+        listId: data.listId,
+        dueDate: data.dueDate,
         deadline: data.deadline,
-        estimate_minutes: data.estimateMinutes,
-        label_ids: data.labelIds,
-      } as any);
+        estimateMinutes: data.estimateMinutes,
+        priority: data.priority,
+        recurrence: data.recurrence,
+        labelIds: data.labelIds,
+      });
 
       // Add subtasks
       for (let i = 0; i < subtasks.length; i++) {

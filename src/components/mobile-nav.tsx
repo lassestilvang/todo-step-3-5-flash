@@ -1,7 +1,6 @@
 "use client";
 
 import { useStore } from "@/store";
-import { ViewToggle } from "@/components/view-toggle";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 

@@ -17,7 +17,6 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { MobileNav } from "@/components/mobile-nav";
 
 export default function HomePage() {
-  const loadData = useStore((s) => s.loadData);
   const showCompleted = useStore((s) => s.showCompleted);
   const toggleShowCompleted = useStore((s) => s.toggleShowCompleted);
   const createTaskOpen = useStore((s) => s.isCreateTaskOpen);

@@ -145,7 +145,6 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
         priority: data.priority,
         recurrence: data.recurrence,
         labelIds: data.labelIds,
-        parentId: data.parentId,
       });
 
       // Get existing subtasks from store

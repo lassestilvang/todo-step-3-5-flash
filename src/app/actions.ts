@@ -205,7 +205,18 @@ export async function createTaskAction(data: CreateTaskData) {
 }
 
 export async function updateTaskAction(id: string, data: Partial<CreateTaskData>) {
-  const updateData: any = {};
+  const updateData: {
+    list_id?: string;
+    title?: string;
+    description?: string;
+    due_date?: Date | null;
+    deadline?: Date | null;
+    estimate_minutes?: number;
+    priority?: string;
+    recurrence?: string | null;
+    parent_id?: string | null;
+    label_ids?: string[] | null;
+  } = {};
   if (data.listId !== undefined) updateData.list_id = data.listId;
   if (data.title !== undefined) updateData.title = data.title;
   if (data.description !== undefined) updateData.description = data.description;

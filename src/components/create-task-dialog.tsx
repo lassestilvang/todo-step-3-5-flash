@@ -5,7 +5,6 @@ import { useStore } from "@/store";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -41,7 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, Flag, Clock, Link2, Trash2, X } from "lucide-react";
+import { CalendarIcon, Flag, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import * as actions from "@/app/actions";

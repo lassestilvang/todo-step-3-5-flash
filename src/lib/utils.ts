@@ -32,7 +32,7 @@ export function formatDate(date: Date | string | null | undefined): string {
 /**
  * Debounce function
  */
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
   delay: number
 ): ((...args: Parameters<T>) => void) & { cancel: () => void } {
@@ -42,6 +42,6 @@ export function debounce<T extends (...args: any[]) => any>(
     timeoutId = setTimeout(() => fn(...args), delay);
   };
   debounced.cancel = () => clearTimeout(timeoutId);
-  return debounced as any;
+  return debounced as ((...args: Parameters<T>) => void) & { cancel: () => void };
 }
 

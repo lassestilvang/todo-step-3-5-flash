@@ -30,6 +30,15 @@ export function formatDate(date: Date | string | null | undefined): string {
 }
 
 /**
+ * Convert ISO string or date value to Date object, handling null/undefined/invalid
+ */
+export function toDate(value: string | null | undefined): Date | undefined {
+  if (!value) return undefined;
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? undefined : d;
+}
+
+/**
  * Debounce function
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

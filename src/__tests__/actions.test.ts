@@ -298,8 +298,8 @@ describe('Task Actions (proxies)', () => {
       title: 'New Task',
     } as any);
 
-    expect(result).toBeDefined();
-    expect(result.title).toBe('New Task');
+    expect(result).not.toBeNull();
+    expect(result!.title).toBe('New Task');
   });
 
   it('updateTaskAction should update task', async () => {

@@ -100,8 +100,8 @@ function toList(row: ListRow): TaskList {
     isMagic: !!row.is_magic,
     parentId: row.parent_id ?? undefined,
     order: row.order_index,
-    createdAt: new Date(row.created_at),
-    updatedAt: new Date(row.updated_at),
+    createdAt: toDate(row.created_at)!,
+    updatedAt: toDate(row.updated_at)!,
   };
 }
 
@@ -111,7 +111,7 @@ function toLabel(row: LabelRow): Label {
     name: row.name,
     color: row.color,
     icon: row.icon ?? undefined,
-    createdAt: new Date(row.created_at),
+    createdAt: toDate(row.created_at)!,
   };
 }
 

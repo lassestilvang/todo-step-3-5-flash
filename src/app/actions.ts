@@ -148,33 +148,10 @@ export async function loadAppData(params: {
     }
   }
 
-  // Determine which tasks to load
-  let tasksRows: TaskRow[] = [];
-  if (selectedListId) {
-    tasksRows = getTasksByListId(selectedListId);
-  } else {
-    let rawTasks: TaskRow[] = [];
-    switch (view) {
-      case "today":
-        rawTasks = getTasksDueToday();
-        break;
-      case "week":
-        rawTasks = getTasksDueInNextDays(7);
-        break;
-      case "upcoming":
-        rawTasks = getAllTasks();
-        break;
-      case "all":
-        rawTasks = getAllTasks();
-        break;
-    }
-    tasksRows = rawTasks;
-  }
+  // Always load all tasks; filtering happens client-side
+  let tasksRows = getAllTasks();
 
-  // Filter completed
-  if (!showCompleted) {
-    tasksRows = tasksRows.filter((t) => t.status !== "completed");
-  }
+  // No filtering here; all filtering is done client-side in the store
 
   // Search filter
   if (searchQuery.trim()) {
@@ -193,14 +170,7 @@ export async function loadAppData(params: {
   }
   let uniqueTasks = Array.from(uniqueMap.values()) as TaskRow[];
 
-  // For upcoming view, filter to future tasks only
-  if (view === "upcoming") {
-    const now = new Date();
-    uniqueTasks = uniqueTasks.filter((row) => {
-      const due = row.due_date || row.deadline;
-      return due ? new Date(due) >= now : false;
-    });
-  }
+  // No view-based filtering here; handled client-side
 
   // Batch fetch subtasks
   const taskIds = uniqueTasks.map((t) => t.id);

@@ -7,7 +7,7 @@ let db: ReturnType<typeof Database>;
 if (process.env.NODE_ENV === 'test') {
   db = new Database(':memory:');
 } else {
-  const dbDir = path.join(process.cwd(), 'data');
+  const dbDir = path.resolve(process.cwd(), process.env.DATABASE_PATH || 'data');
   const dbPath = path.join(dbDir, 'task-planner.db');
 
   // Ensure data directory exists

@@ -1,3 +1,5 @@
+"use server";
+
 import { createLabel, updateLabel, deleteLabel } from "@/lib/db";
 import type { Label } from "@/types";
 import { toLabel } from "./_helpers";

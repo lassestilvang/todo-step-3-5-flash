@@ -60,31 +60,18 @@ export function TaskCard({ task }: TaskCardProps) {
       )}
     >
       <div className="flex items-start gap-3">
-         {/* Checkbox */}
-         <div
-           role="checkbox"
-           aria-checked={task.status === "completed"}
-           onClick={(e) => {
-            e.stopPropagation();
-            toggleTaskComplete(task.id);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation();
-              toggleTaskComplete(task.id);
-            }
-          }}
-          tabIndex={0}
+        {/* Checkbox */}
+        <Checkbox
+          checked={task.status === "completed"}
+          onCheckedChange={() => toggleTaskComplete(task.id)}
           aria-label={task.status === "completed" ? "Mark as incomplete" : "Mark as complete"}
           className={cn(
-            "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border transition-colors cursor-pointer",
+            "mt-0.5 h-5 w-5 shrink-0",
             task.status === "completed"
               ? "bg-primary border-primary text-primary-foreground"
               : "border-muted-foreground/30 hover:border-primary"
           )}
-        >
-          {task.status === "completed" && <Check className="h-3 w-3" />}
-        </div>
+        />
 
         {/* Content */}
         <div className="flex-1 min-w-0">

@@ -32,6 +32,7 @@ export function formatDate(date: Date | string | null | undefined): string {
 /**
  * Debounce function
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function debounce<T extends (...args: any[]) => any>(
   fn: T,
   delay: number

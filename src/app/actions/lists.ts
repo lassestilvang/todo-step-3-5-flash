@@ -1,3 +1,5 @@
+"use server";
+
 import { createList, updateList, deleteList } from "@/lib/db";
 import type { CreateListData, TaskList } from "@/types";
 import { toList } from "./_helpers";

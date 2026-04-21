@@ -87,12 +87,12 @@ describe('Database', () => {
 
       const obj = rowToObj(row);
 
-      expect(obj).toBeInstanceOf(Object);
-      expect(obj.created_at).toBeInstanceOf(Date);
-      expect(obj.updated_at).toBeInstanceOf(Date);
+      expect(obj!).toBeInstanceOf(Object);
+      expect(obj!.created_at).toBeInstanceOf(Date);
+      expect(obj!.updated_at).toBeInstanceOf(Date);
       // due_date does not end with _at or contain "Date", so remains string
-      expect(obj.due_date).toBe('2024-02-01T00:00:00.000Z');
-      expect(obj.some_other_field).toBe('value');
+      expect(obj!.due_date).toBe('2024-02-01T00:00:00.000Z');
+      expect(obj!.some_other_field).toBe('value');
     });
 
     it('should return null for null input', () => {
@@ -102,7 +102,7 @@ describe('Database', () => {
     it('should handle invalid date strings', () => {
       const row = { created_at: 'not-a-date' };
       const obj = rowToObj(row);
-      expect(obj.created_at).toBeNull();
+      expect(obj!.created_at).toBeNull();
     });
   });
 

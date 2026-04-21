@@ -34,6 +34,7 @@ import type {
   Subtask,
 } from "@/types";
 import type { TaskRow, SubtaskRow, LabelRow, ListRow } from "@/lib/db";
+import { toDate } from "@/lib/utils";
 import {
   createTaskSchema,
   updateTaskSchema,

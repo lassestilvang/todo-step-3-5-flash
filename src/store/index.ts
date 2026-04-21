@@ -6,7 +6,7 @@ import type { Task, TaskList, Label, ViewType, CreateTaskData, CreateListData } 
 import * as actions from "@/app/actions";
 
 interface AppState {
-  // Data
+  // Data (full, unfiltered)
   tasks: Task[];
   lists: TaskList[];
   labels: Label[];
@@ -35,7 +35,7 @@ interface AppState {
   closeTaskModal: () => void;
 
   // Task actions
-  addTask: (data: CreateTaskData) => Promise<Task | void>;
+  addTask: (data: CreateTaskData) => Promise<void>;
   updateTask: (id: string, data: Partial<CreateTaskData>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   toggleTaskComplete: (id: string) => Promise<void>;
@@ -48,7 +48,7 @@ interface AppState {
   updateList: (id: string, data: Partial<CreateListData>) => Promise<void>;
   deleteList: (id: string) => Promise<void>;
 
-  // Label actions (maybe not needed directly)
+  // Label actions
   addLabel: (name: string, color: string, icon?: string) => Promise<void>;
   updateLabel: (id: string, name: string, color: string, icon?: string) => Promise<void>;
   deleteLabel: (id: string) => Promise<void>;
@@ -56,6 +56,41 @@ interface AppState {
   // Getters
   getTaskById: (id: string) => Task | undefined;
   getFilteredTasks: () => Task[];
+}
+
+// Compute overdue count from tasks
+function computeOverdue(tasks: Task[]): number {
+  const now = new Date();
+  return tasks.filter((t) => {
+    if (t.status === "completed") return false;
+    const due = t.deadline || t.dueDate;
+    return due ? new Date(due) < now : false;
+  }).length;
+}
+
+// Check if a task matches the current view filter (client-side)
+function taskMatchesView(task: Task, view: ViewType): boolean {
+  if (!task.dueDate && !task.deadline) return false;
+  const due = task.dueDate || task.deadline!;
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const tomorrowStart = new Date(todayStart);
+  tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+  const weekLater = new Date(todayStart);
+  weekLater.setDate(weekLater.getDate() + 7);
+
+  switch (view) {
+    case "today":
+      return due >= todayStart && due < tomorrowStart;
+    case "week":
+      return due >= todayStart && due <= weekLater;
+    case "upcoming":
+      return due > now;
+    case "all":
+      return true;
+    default:
+      return true;
+  }
 }
 
 export const useStore = create<AppState>()(
@@ -82,7 +117,6 @@ export const useStore = create<AppState>()(
             showCompleted: get().showCompleted,
             searchQuery: get().searchQuery,
           });
-
           set({
             tasks: result.tasks,
             lists: result.lists,
@@ -96,28 +130,22 @@ export const useStore = create<AppState>()(
 
       setCurrentView: (view) => {
         set({ currentView: view, selectedListId: null });
-        get().loadData();
       },
 
       setSelectedList: (listId) => {
         set({ selectedListId: listId });
-        get().loadData();
       },
 
       setSearchQuery: (query) => {
         set({ searchQuery: query });
-        get().loadData();
       },
 
       toggleShowCompleted: () => {
-        const newVal = !get().showCompleted;
-        set({ showCompleted: newVal });
-        get().loadData();
+        set({ showCompleted: !get().showCompleted });
       },
 
       setShowCompleted: (show) => {
         set({ showCompleted: show });
-        get().loadData();
       },
 
       setSelectedTask: (taskId) => {
@@ -137,73 +165,145 @@ export const useStore = create<AppState>()(
       },
 
       addTask: async (data) => {
-        const task = await actions.createTaskAction(data);
-        get().loadData();
-        return task as unknown as Task;
+        const newTask = await actions.createTaskAction(data);
+        if (newTask) {
+          set((state) => {
+            const tasks = [newTask, ...state.tasks];
+            return { tasks, overdueCount: computeOverdue(tasks) };
+          });
+        }
       },
 
       updateTask: async (id, data) => {
-        await actions.updateTaskAction(id, data);
-        get().loadData();
+        const updated = await actions.updateTaskAction(id, data);
+        if (updated) {
+          set((state) => {
+            const tasks = state.tasks.map((t) => (t.id === id ? updated : t));
+            return { tasks, overdueCount: computeOverdue(tasks) };
+          });
+        }
       },
 
       deleteTask: async (id) => {
         await actions.deleteTaskAction(id);
-        get().loadData();
+        set((state) => {
+          const tasks = state.tasks.filter((t) => t.id !== id);
+          return { tasks, overdueCount: computeOverdue(tasks) };
+        });
       },
 
       toggleTaskComplete: async (id) => {
-        await actions.toggleTaskCompleteAction(id);
-        get().loadData();
+        const updated = await actions.toggleTaskCompleteAction(id);
+        if (updated) {
+          set((state) => {
+            const tasks = state.tasks.map((t) => (t.id === id ? updated : t));
+            return { tasks, overdueCount: computeOverdue(tasks) };
+          });
+        }
       },
 
       addSubtask: async (taskId, title) => {
-        await actions.createSubtaskAction(taskId, title);
-        get().loadData();
+        const newSubtask = await actions.createSubtaskAction(taskId, title);
+        if (newSubtask) {
+          set((state) => ({
+            tasks: state.tasks.map((t) =>
+              t.id === taskId ? { ...t, subtasks: [...t.subtasks, newSubtask] } : t
+            ),
+          }));
+        }
       },
 
       toggleSubtask: async (taskId, subtaskId) => {
         const task = get().tasks.find((t) => t.id === taskId);
         const subtask = task?.subtasks.find((s) => s.id === subtaskId);
         if (subtask) {
-          await actions.updateSubtaskAction(subtaskId, { completed: !subtask.completed });
-          get().loadData();
+          const updatedSub = await actions.updateSubtaskAction(subtaskId, { completed: !subtask.completed });
+          if (updatedSub) {
+            set((state) => ({
+              tasks: state.tasks.map((t) =>
+                t.id === taskId
+                  ? {
+                      ...t,
+                      subtasks: t.subtasks.map((s) => (s.id === subtaskId ? updatedSub : s)),
+                    }
+                  : t
+              ),
+            }));
+          }
         }
       },
 
       deleteSubtask: async (taskId, subtaskId) => {
         await actions.deleteSubtaskAction(subtaskId);
-        get().loadData();
+        set((state) => ({
+          tasks: state.tasks.map((t) =>
+            t.id === taskId
+              ? { ...t, subtasks: t.subtasks.filter((s) => s.id !== subtaskId) }
+              : t
+          ),
+        }));
       },
 
       addList: async (data) => {
-        await actions.createListAction(data);
-        get().loadData();
+        const newList = await actions.createListAction(data);
+        if (newList) {
+          set((state) => ({
+            lists: [...state.lists, newList],
+          }));
+        }
       },
 
       updateList: async (id, data) => {
-        await actions.updateListAction(id, data);
-        get().loadData();
+        const updated = await actions.updateListAction(id, data);
+        if (updated) {
+          set((state) => ({
+            lists: state.lists.map((l) => (l.id === id ? updated : l)),
+          }));
+        }
       },
 
       deleteList: async (id) => {
         await actions.deleteListAction(id);
-        get().loadData();
+        set((state) => {
+          const lists = state.lists.filter((l) => l.id !== id);
+          const tasks = state.tasks.filter((t) => t.listId !== id);
+          return { lists, tasks, overdueCount: computeOverdue(tasks) };
+        });
       },
 
       addLabel: async (name, color, icon) => {
-        await actions.createLabelAction(name, color, icon);
-        get().loadData();
+        const newLabel = await actions.createLabelAction(name, color, icon);
+        if (newLabel) {
+          set((state) => ({
+            labels: [...state.labels, newLabel],
+          }));
+        }
       },
 
       updateLabel: async (id, name, color, icon) => {
-        await actions.updateLabelAction(id, name, color, icon);
-        get().loadData();
+        const updated = await actions.updateLabelAction(id, name, color, icon);
+        if (updated) {
+          set((state) => {
+            const labels = state.labels.map((l) => (l.id === id ? updated : l));
+            const tasks = state.tasks.map((t) => ({
+              ...t,
+              labels: t.labels.map((lbl) => (lbl.id === id ? updated : lbl)),
+            }));
+            return { labels, tasks };
+          });
+        }
       },
 
       deleteLabel: async (id) => {
         await actions.deleteLabelAction(id);
-        get().loadData();
+        set((state) => {
+          const labels = state.labels.filter((l) => l.id !== id);
+          const tasks = state.tasks.map((t) => ({
+            ...t,
+            labels: t.labels.filter((l) => l.id !== id),
+          }));
+          return { labels, tasks };
+        });
       },
 
       getTaskById: (id) => {
@@ -211,7 +311,47 @@ export const useStore = create<AppState>()(
       },
 
       getFilteredTasks: () => {
-        return get().tasks;
+        const state = get();
+        let result = state.tasks;
+
+        // If a list is selected, filter by list only
+        if (state.selectedListId) {
+          result = result.filter((t) => t.listId === state.selectedListId);
+        } else {
+          // Otherwise apply view-based date filtering
+          result = result.filter((t) => taskMatchesView(t, state.currentView));
+        }
+
+        // Filter by completion status
+        if (!state.showCompleted) {
+          result = result.filter((t) => t.status !== "completed");
+        }
+
+        // Search filter
+        if (state.searchQuery.trim()) {
+          const q = state.searchQuery.toLowerCase();
+          result = result.filter(
+            (t) =>
+              t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
+          );
+        }
+
+        // Sort
+        result = [...result].sort((a, b) => {
+          if (a.status === "completed" && b.status !== "completed") return 1;
+          if (a.status !== "completed" && b.status === "completed") return -1;
+          const aDue = a.dueDate || a.deadline;
+          const bDue = b.dueDate || b.deadline;
+          if (!aDue && !bDue) return 0;
+          if (!aDue) return 1;
+          if (!bDue) return -1;
+          if (aDue < bDue) return -1;
+          if (aDue > bDue) return 1;
+          const priorityOrder = { high: 0, medium: 1, low: 2, none: 3 };
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
+        });
+
+        return result;
       },
     }),
     {

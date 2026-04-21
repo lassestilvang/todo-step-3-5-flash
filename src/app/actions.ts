@@ -217,12 +217,14 @@ export async function loadAppData(params: {
 // ==================== LISTS ====================
 
 export async function createListAction(data: CreateListData) {
-  const row = createList(data);
+  const parsed = createListSchema.parse(data);
+  const row = createList(parsed);
   return toList(row);
 }
 
 export async function updateListAction(id: string, data: Partial<CreateListData>) {
-  const result = updateList(id, data);
+  const parsed = updateListSchema.parse(data);
+  const result = updateList(id, parsed);
   if (!result) return null;
   return toList(result);
 }

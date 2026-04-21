@@ -180,6 +180,11 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
         labelIds: data.labelIds,
       });
 
+      if (!newTask) {
+        // Optionally show error notification
+        return;
+      }
+
       // Add subtasks
       for (let i = 0; i < subtasks.length; i++) {
         const st = subtasks[i];

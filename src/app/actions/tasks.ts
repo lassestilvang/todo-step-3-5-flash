@@ -1,3 +1,5 @@
+"use server";
+
 import { db, createTask, updateTask, deleteTask, createSubtask, updateSubtask, deleteSubtask, getTaskById } from "@/lib/db";
 import type { CreateTaskData, Task } from "@/types";
 import { toTask } from "./_helpers";

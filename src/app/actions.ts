@@ -4,9 +4,6 @@ import {
   db,
   getAllLists,
   getAllLabels,
-  getTasksByListId,
-  getTasksDueToday,
-  getTasksDueInNextDays,
   getAllTasks,
   getOverdueTasks,
   getTaskById,
@@ -23,7 +20,6 @@ import {
   createLabel,
   updateLabel,
   deleteLabel,
-  getLabelById,
 } from "@/lib/db";
 import type {
   CreateTaskData,
@@ -120,22 +116,20 @@ function toLabel(row: LabelRow): Label {
 
 // ==================== DATA LOADING ====================
 
-export async function loadAppData(params: {
+export async function loadAppData(_params: {
   view: ViewType;
   selectedListId?: string | null;
   showCompleted: boolean;
   searchQuery: string;
 }) {
-  const { view, selectedListId, showCompleted, searchQuery } = params;
-
-  // Fetch lists and labels
   const rawLists = getAllLists();
   const rawLabels = getAllLabels();
+  const rawTasks = getAllTasks();
 
   const lists: TaskList[] = rawLists.map(toList);
   const labels: Label[] = rawLabels.map(toLabel);
 
-  // Build label map using a single batch join query (fixes N+1)
+  // Batch build label map
   const labelMap: Record<string, Label[]> = {};
   if (rawLabels.length > 0) {
     const placeholders = rawLabels.map(() => "?").join(",");
@@ -159,32 +153,8 @@ export async function loadAppData(params: {
     }
   }
 
-  // Always load all tasks; filtering happens client-side
-  let tasksRows = getAllTasks();
-
-  // No filtering here; all filtering is done client-side in the store
-
-  // Search filter
-  if (searchQuery.trim()) {
-    const lower = searchQuery.toLowerCase();
-    tasksRows = tasksRows.filter(
-      (t) =>
-        t.title.toLowerCase().includes(lower) ||
-        t.description.toLowerCase().includes(lower)
-    );
-  }
-
-  // Deduplicate
-  const uniqueMap = new Map<string, TaskRow>();
-  for (const row of tasksRows) {
-    if (!uniqueMap.has(row.id)) uniqueMap.set(row.id, row);
-  }
-  let uniqueTasks = Array.from(uniqueMap.values()) as TaskRow[];
-
-  // No view-based filtering here; handled client-side
-
-  // Batch fetch subtasks
-  const taskIds = uniqueTasks.map((t) => t.id);
+  // Batch build subtasks map
+  const taskIds = rawTasks.map((t) => t.id);
   const subtasksMap: Record<string, SubtaskRow[]> = {};
   if (taskIds.length > 0) {
     const placeholders = taskIds.map(() => "?").join(",");
@@ -198,7 +168,7 @@ export async function loadAppData(params: {
   }
 
   // Build tasks with relations
-  const tasks = uniqueTasks.map((row): Task => {
+  const tasks = rawTasks.map((row): Task => {
     const taskLabels = labelMap[row.id] || [];
     const taskSubtasks = subtasksMap[row.id] || [];
     return toTask({
@@ -208,7 +178,6 @@ export async function loadAppData(params: {
     });
   });
 
-  // Count overdue
   const overdue = getOverdueTasks().length;
 
   return { tasks, lists, labels, overdueCount: overdue };
@@ -244,48 +213,39 @@ export async function deleteListAction(id: string) {
   return { id };
 }
 
-export async function updateListAction(id: string, data: Partial<CreateListData>) {
-  const parsed = updateListSchema.parse(data);
-  const result = updateList(id, parsed);
-  if (!result) return null;
-  return toList(result);
-}
-
-export async function deleteListAction(id: string) {
-  deleteList(id);
-  return { id };
-}
-
 // ==================== TASKS ====================
 
 export async function createTaskAction(data: CreateTaskData) {
+  const parsed = createTaskSchema.parse(data);
   const row = createTask({
-    list_id: data.listId,
-    title: data.title,
-    description: data.description,
-    due_date: data.dueDate,
-    deadline: data.deadline,
-    estimate_minutes: data.estimateMinutes,
-    priority: data.priority,
-    recurrence: data.recurrence,
-    parent_id: data.parentId,
-    label_ids: data.labelIds,
+    list_id: parsed.listId,
+    title: parsed.title,
+    description: parsed.description,
+    due_date: parsed.dueDate,
+    deadline: parsed.deadline,
+    estimate_minutes: parsed.estimateMinutes,
+    priority: parsed.priority,
+    recurrence: parsed.recurrence,
+    parent_id: parsed.parentId,
+    label_ids: parsed.labelIds,
   });
   const full = getTaskById(row.id);
   return full ? toTask(full) : null;
 }
 
 export async function updateTaskAction(id: string, data: Partial<CreateTaskData>) {
+  const parsed = updateTaskSchema.parse(data);
   const updateData: any = {};
-  if (data.listId !== undefined) updateData.list_id = data.listId;
-  if (data.title !== undefined) updateData.title = data.title;
-  if (data.description !== undefined) updateData.description = data.description;
-  if (data.dueDate !== undefined) updateData.due_date = data.dueDate;
-  if (data.deadline !== undefined) updateData.deadline = data.deadline;
-  if (data.estimateMinutes !== undefined) updateData.estimate_minutes = data.estimateMinutes;
-  if (data.priority !== undefined) updateData.priority = data.priority;
-  if (data.recurrence !== undefined) updateData.recurrence = data.recurrence;
-  if (data.parentId !== undefined) updateData.parent_id = data.parentId;
+  if (parsed.listId !== undefined) updateData.list_id = parsed.listId;
+  if (parsed.title !== undefined) updateData.title = parsed.title;
+  if (parsed.description !== undefined) updateData.description = parsed.description;
+  if (parsed.dueDate !== undefined) updateData.due_date = parsed.dueDate;
+  if (parsed.deadline !== undefined) updateData.deadline = parsed.deadline;
+  if (parsed.estimateMinutes !== undefined) updateData.estimate_minutes = parsed.estimateMinutes;
+  if (parsed.priority !== undefined) updateData.priority = parsed.priority;
+  if (parsed.recurrence !== undefined) updateData.recurrence = parsed.recurrence;
+  if (parsed.parentId !== undefined) updateData.parent_id = parsed.parentId;
+  if (parsed.labelIds !== undefined) updateData.label_ids = parsed.labelIds;
   const result = updateTask(id, updateData);
   if (!result) return null;
   const full = getTaskById(id);
@@ -309,7 +269,12 @@ export async function toggleTaskCompleteAction(id: string) {
 // ==================== SUBTASKS ====================
 
 export async function createSubtaskAction(taskId: string, title: string, order?: number) {
-  const row = createSubtask({ task_id: taskId, title, order });
+  const parsed = createSubtaskSchema.parse({ taskId, title, order });
+  const row = createSubtask({
+    task_id: parsed.taskId,
+    title: parsed.title,
+    order: parsed.order,
+  });
   return {
     id: row.id,
     taskId: row.task_id,
@@ -324,7 +289,8 @@ export async function updateSubtaskAction(
   id: string,
   data: { title?: string; completed?: boolean; order?: number }
 ) {
-  const result = updateSubtask(id, data);
+  const parsed = updateSubtaskSchema.parse(data);
+  const result = updateSubtask(id, parsed);
   if (!result) return null;
   return {
     id: result.id,
@@ -344,12 +310,22 @@ export async function deleteSubtaskAction(id: string) {
 // ==================== LABELS ====================
 
 export async function createLabelAction(name: string, color: string, icon?: string) {
-  const row = createLabel({ name, color, icon });
+  const parsed = createLabelSchema.parse({ name, color, icon });
+  const row = createLabel({
+    name: parsed.name,
+    color: parsed.color,
+    icon: parsed.icon,
+  });
   return toLabel(row);
 }
 
 export async function updateLabelAction(id: string, name: string, color: string, icon?: string) {
-  const result = updateLabel(id, { name, color, icon });
+  const parsed = updateLabelSchema.parse({ name, color, icon });
+  const result = updateLabel(id, {
+    name: parsed.name,
+    color: parsed.color,
+    icon: parsed.icon,
+  });
   if (!result) return null;
   return toLabel(result);
 }

@@ -7,31 +7,9 @@ import { format, isToday, isTomorrow, isThisWeek, isThisYear } from "date-fns";
 export function TaskList() {
   const tasks = useStore((s) => s.getFilteredTasks());
 
-  // Sort tasks: by due date, then by priority
-  const sortedTasks = [...tasks].sort((a, b) => {
-    // Completed tasks last
-    if (a.status === "completed" && b.status !== "completed") return 1;
-    if (a.status !== "completed" && b.status === "completed") return -1;
-
-    // By due date
-    const aDue = a.dueDate || a.deadline;
-    const bDue = b.dueDate || b.deadline;
-
-    if (!aDue && !bDue) return 0;
-    if (!aDue) return 1;
-    if (!bDue) return -1;
-
-    if (aDue < bDue) return -1;
-    if (aDue > bDue) return 1;
-
-    // Then by priority
-    const priorityOrder = { high: 0, medium: 1, low: 2, none: 3 };
-    return priorityOrder[a.priority] - priorityOrder[b.priority];
-  });
-
   // Group by date
-  const grouped: Record<string, typeof sortedTasks> = {};
-  sortedTasks.forEach((task) => {
+  const grouped: Record<string, typeof tasks> = {};
+  tasks.forEach((task) => {
     let dateLabel = "No Date";
     const due = task.dueDate || task.deadline;
     if (due) {
@@ -45,7 +23,7 @@ export function TaskList() {
     grouped[dateLabel].push(task);
   });
 
-  if (sortedTasks.length === 0) {
+  if (tasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
         <div className="text-6xl mb-4">📋</div>

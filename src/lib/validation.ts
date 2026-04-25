@@ -28,27 +28,27 @@ export const updateTaskSchema = z.object({
 
 export const createListSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format"),
+  color: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Invalid color format"),
   icon: z.string().optional(),
   parentId: z.string().optional(),
 });
 
 export const updateListSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  color: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/).optional(),
   icon: z.string().optional(),
   parentId: z.string().optional(),
 });
 
 export const createLabelSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid color format"),
+  color: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/, "Invalid color format"),
   icon: z.string().optional(),
 });
 
 export const updateLabelSchema = z.object({
   name: z.string().min(1).max(100).optional(),
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+  color: z.string().regex(/^#([0-9A-Fa-f]{3}){1,2}$/).optional(),
   icon: z.string().optional(),
 });
 

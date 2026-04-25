@@ -53,22 +53,29 @@ export async function loadAppData(params: {
     createdAt: new Date(l.created_at),
   }));
 
-  // Build label map: taskId -> Label[]
+  // Build label map: taskId -> Label[] (single batch query)
   const labelMap: Record<string, Label[]> = {};
-  for (const label of rawLabels) {
-    const tasks = db.prepare(`
-      SELECT task_id FROM task_labels WHERE label_id = ?
-    `).all(label.id) as { task_id: string }[];
-    for (const t of tasks) {
-      if (!labelMap[t.task_id]) labelMap[t.task_id] = [];
-      labelMap[t.task_id].push({
-        id: label.id,
-        name: label.name,
-        color: label.color,
-        icon: label.icon ?? undefined,
-        createdAt: new Date(label.created_at),
-      });
-    }
+  const taskLabels = db.prepare(`
+    SELECT tl.task_id, l.id, l.name, l.color, l.icon, l.created_at
+    FROM task_labels tl
+    JOIN labels l ON tl.label_id = l.id
+  `).all() as Array<{
+    task_id: string;
+    id: string;
+    name: string;
+    color: string;
+    icon: string | null;
+    created_at: string;
+  }>;
+  for (const tl of taskLabels) {
+    if (!labelMap[tl.task_id]) labelMap[tl.task_id] = [];
+    labelMap[tl.task_id].push({
+      id: tl.id,
+      name: tl.name,
+      color: tl.color,
+      icon: tl.icon ?? undefined,
+      createdAt: new Date(tl.created_at),
+    });
   }
 
   // Determine which tasks to load

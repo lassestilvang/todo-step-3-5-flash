@@ -3,7 +3,7 @@
 import { useStore } from "@/store";
 import { Task } from "@/types";
 import { motion } from "framer-motion";
-import { Check, Clock, Flag, Tag, ChevronRight, AlertTriangle } from "lucide-react";
+import { Clock, Flag, Tag, ChevronRight, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";

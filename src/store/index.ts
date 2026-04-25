@@ -111,11 +111,12 @@ export const useStore = create<AppState>()(
 
       loadData: async () => {
         try {
+          // Fetch all data without UI filters for optimistic updates
           const result = await actions.loadAppData({
-            view: get().currentView,
-            selectedListId: get().selectedListId,
-            showCompleted: get().showCompleted,
-            searchQuery: get().searchQuery,
+            view: 'all',
+            selectedListId: null,
+            showCompleted: true,
+            searchQuery: '',
           });
           set({
             tasks: result.tasks,

@@ -30,17 +30,28 @@ export async function createTaskAction(data: CreateTaskData) {
 
 export async function updateTaskAction(id: string, data: Partial<CreateTaskData>) {
   const parsed = updateTaskSchema.parse(data);
-  const updateData: Partial<TaskRow> = {};
-  if (parsed.listId !== undefined) (updateData as Record<string, unknown>).list_id = parsed.listId;
-  if (parsed.title !== undefined) (updateData as Record<string, unknown>).title = parsed.title;
-  if (parsed.description !== undefined) (updateData as Record<string, unknown>).description = parsed.description;
-  if (parsed.dueDate !== undefined) (updateData as Record<string, unknown>).due_date = parsed.dueDate;
-  if (parsed.deadline !== undefined) (updateData as Record<string, unknown>).deadline = parsed.deadline;
-  if (parsed.estimateMinutes !== undefined) (updateData as Record<string, unknown>).estimate_minutes = parsed.estimateMinutes;
-  if (parsed.priority !== undefined) (updateData as Record<string, unknown>).priority = parsed.priority;
-  if (parsed.recurrence !== undefined) (updateData as Record<string, unknown>).recurrence = parsed.recurrence;
-  if (parsed.parentId !== undefined) (updateData as Record<string, unknown>).parent_id = parsed.parentId;
-  if (parsed.labelIds !== undefined) (updateData as Record<string, unknown>).label_ids = parsed.labelIds;
+  const updateData: {
+    list_id?: string;
+    parent_id?: string;
+    title?: string;
+    description?: string;
+    due_date?: Date;
+    deadline?: Date;
+    estimate_minutes?: number;
+    status?: string;
+    priority?: string;
+    recurrence?: string;
+    recurrence_rule?: string;
+  } = {};
+  if (parsed.listId !== undefined) updateData.list_id = parsed.listId;
+  if (parsed.title !== undefined) updateData.title = parsed.title;
+  if (parsed.description !== undefined) updateData.description = parsed.description;
+  if (parsed.dueDate !== undefined) updateData.due_date = parsed.dueDate;
+  if (parsed.deadline !== undefined) updateData.deadline = parsed.deadline;
+  if (parsed.estimateMinutes !== undefined) updateData.estimate_minutes = parsed.estimateMinutes;
+  if (parsed.priority !== undefined) updateData.priority = parsed.priority;
+  if (parsed.recurrence !== undefined) updateData.recurrence = parsed.recurrence;
+  if (parsed.parentId !== undefined) updateData.parent_id = parsed.parentId;
   const result = updateTask(id, updateData);
   if (!result) return null;
   const full = getTaskById(id);

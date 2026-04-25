@@ -8,7 +8,6 @@ import {
   getTasksDueToday,
   getTasksDueInNextDays,
   getAllTasks,
-  getOverdueTasks,
 } from "@/lib/db";
 import type {
   Task,
@@ -188,7 +187,11 @@ export async function loadAppData(params: {
     };
   });
 
-  const overdue = getOverdueTasks().length;
+  const overdueCount = uniqueTasks.filter((t) => {
+    if (t.status === "completed") return false;
+    const d = t.deadline || t.due_date;
+    return d ? new Date(d) < new Date() : false;
+  }).length;
 
-  return { tasks, lists, labels, overdueCount: overdue };
+  return { tasks, lists, labels, overdueCount };
 }

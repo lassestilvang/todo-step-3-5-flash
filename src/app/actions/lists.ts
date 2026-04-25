@@ -1,6 +1,6 @@
 "use server";
 
-import { createList, updateList, deleteList, type ListRow } from "@/lib/db";
+import { createList, updateList, deleteList } from "@/lib/db";
 import type { CreateListData } from "@/types";
 import { toList } from "./_helpers";
 import { createListSchema, updateListSchema } from "@/lib/validation";

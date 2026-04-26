@@ -1,6 +1,7 @@
 "use client";
 
 import { useStore } from "@/store";
+import type { Task } from "@/types";
 import { TaskCard } from "@/components/task-card";
 import { format, isToday, isTomorrow, isThisWeek, isThisYear } from "date-fns";
 
@@ -8,7 +9,7 @@ export function TaskList() {
   const tasks = useStore((s) => s.getFilteredTasks());
 
   // Group by date
-  const grouped: Record<string, typeof tasks> = {};
+  const grouped: Record<string, Task[]> = {};
   tasks.forEach((task) => {
     let dateLabel = "No Date";
     const due = task.dueDate || task.deadline;

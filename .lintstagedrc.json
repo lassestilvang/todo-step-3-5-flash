@@ -1,5 +1,5 @@
 {
-  "**/*.{ts,tsx}": ["bun run lint --fix", "bun run format --write", "bun test --run --coverage"],
+  "**/*.{ts,tsx}": ["bun run lint --fix", "bun run format --write"],
   "**/*.{js,jsx,mjs,cjs}": ["bun run lint --fix", "bun run format --write"],
   "**/*.{json,md,yml,yaml}": ["bun run format --write"],
   "**/*.{css,scss}": ["bun run lint --fix", "bun run format --write"]

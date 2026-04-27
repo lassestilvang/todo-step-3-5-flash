@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
-import { create } from "zustand";
-import { persist } from "zustand/middleware";
-import type { Task, TaskList, Label, ViewType, CreateTaskData, CreateListData } from "@/types";
-import * as actions from "@/app/actions";
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+import * as actions from '@/app/actions';
+import type { Task, TaskList, Label, ViewType, CreateTaskData, CreateListData } from '@/types';
 
 interface AppState {
   // Data (full, unfiltered)
@@ -62,7 +63,7 @@ interface AppState {
 function computeOverdue(tasks: Task[]): number {
   const now = new Date();
   return tasks.filter((t) => {
-    if (t.status === "completed") return false;
+    if (t.status === 'completed') return false;
     const due = t.deadline || t.dueDate;
     return due ? new Date(due) < now : false;
   }).length;
@@ -70,7 +71,12 @@ function computeOverdue(tasks: Task[]): number {
 
 // Check if a task matches the current view filter (client-side)
 function taskMatchesView(task: Task, view: ViewType): boolean {
+  // Show all tasks in "all" view regardless of dates
+  if (view === 'all') return true;
+
+  // Tasks without due date or deadline don't match any date-based view
   if (!task.dueDate && !task.deadline) return false;
+
   const due = task.dueDate || task.deadline!;
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -80,14 +86,12 @@ function taskMatchesView(task: Task, view: ViewType): boolean {
   weekLater.setDate(weekLater.getDate() + 7);
 
   switch (view) {
-    case "today":
+    case 'today':
       return due >= todayStart && due < tomorrowStart;
-    case "week":
+    case 'week':
       return due >= todayStart && due <= weekLater;
-    case "upcoming":
+    case 'upcoming':
       return due > now;
-    case "all":
-      return true;
     default:
       return true;
   }
@@ -100,14 +104,14 @@ export const useStore = create<AppState>()(
       lists: [],
       labels: [],
       overdueCount: 0,
-      currentView: "today",
+      currentView: 'today',
       selectedListId: null,
-      searchQuery: "",
+      searchQuery: '',
       showCompleted: false,
       selectedTaskId: null,
       isCreateTaskOpen: false,
       editTaskId: null,
-      theme: "system",
+      theme: 'system',
 
       loadData: async () => {
         try {
@@ -125,7 +129,7 @@ export const useStore = create<AppState>()(
             overdueCount: result.overdueCount,
           });
         } catch (error) {
-          console.error("Failed to load data:", error);
+          console.error('Failed to load data:', error);
         }
       },
 
@@ -154,7 +158,11 @@ export const useStore = create<AppState>()(
       },
 
       openCreateTask: (listId) => {
-        set({ isCreateTaskOpen: true, editTaskId: null, selectedListId: listId ?? get().selectedListId });
+        set({
+          isCreateTaskOpen: true,
+          editTaskId: null,
+          selectedListId: listId ?? get().selectedListId,
+        });
       },
 
       openEditTask: (taskId) => {
@@ -218,7 +226,9 @@ export const useStore = create<AppState>()(
         const task = get().tasks.find((t) => t.id === taskId);
         const subtask = task?.subtasks.find((s) => s.id === subtaskId);
         if (subtask) {
-          const updatedSub = await actions.updateSubtaskAction(subtaskId, { completed: !subtask.completed });
+          const updatedSub = await actions.updateSubtaskAction(subtaskId, {
+            completed: !subtask.completed,
+          });
           if (updatedSub) {
             set((state) => ({
               tasks: state.tasks.map((t) =>
@@ -238,9 +248,7 @@ export const useStore = create<AppState>()(
         await actions.deleteSubtaskAction(subtaskId);
         set((state) => ({
           tasks: state.tasks.map((t) =>
-            t.id === taskId
-              ? { ...t, subtasks: t.subtasks.filter((s) => s.id !== subtaskId) }
-              : t
+            t.id === taskId ? { ...t, subtasks: t.subtasks.filter((s) => s.id !== subtaskId) } : t
           ),
         }));
       },
@@ -325,22 +333,21 @@ export const useStore = create<AppState>()(
 
         // Filter by completion status
         if (!state.showCompleted) {
-          result = result.filter((t) => t.status !== "completed");
+          result = result.filter((t) => t.status !== 'completed');
         }
 
         // Search filter
         if (state.searchQuery.trim()) {
           const q = state.searchQuery.toLowerCase();
           result = result.filter(
-            (t) =>
-              t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
+            (t) => t.title.toLowerCase().includes(q) || t.description.toLowerCase().includes(q)
           );
         }
 
         // Sort
         result = [...result].sort((a, b) => {
-          if (a.status === "completed" && b.status !== "completed") return 1;
-          if (a.status !== "completed" && b.status === "completed") return -1;
+          if (a.status === 'completed' && b.status !== 'completed') return 1;
+          if (a.status !== 'completed' && b.status === 'completed') return -1;
           const aDue = a.dueDate || a.deadline;
           const bDue = b.dueDate || b.deadline;
           if (!aDue && !bDue) return 0;
@@ -356,7 +363,7 @@ export const useStore = create<AppState>()(
       },
     }),
     {
-      name: "task-planner-storage",
+      name: 'task-planner-storage',
       partialize: (state) => ({
         theme: state.theme,
       }),

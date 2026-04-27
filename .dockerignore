@@ -1,0 +1,15 @@
+node_modules
+.next
+out
+build
+coverage
+.env*
+.env.local
+*.db
+*.db-*
+data/
+.DS_Store
+.git
+.gitignore
+README.md
+docker-compose.yml

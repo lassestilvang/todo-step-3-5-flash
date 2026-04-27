@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import {
   db,
@@ -8,7 +8,8 @@ import {
   getTasksDueToday,
   getTasksDueInNextDays,
   getAllTasks,
-} from "@/lib/db";
+} from '@/lib/db';
+import type { TaskRow, SubtaskRow } from '@/lib/db';
 import type {
   Task,
   TaskList,
@@ -17,8 +18,7 @@ import type {
   TaskStatus,
   Priority,
   RecurrenceType,
-} from "@/types";
-import type { TaskRow, SubtaskRow } from "@/lib/db";
+} from '@/types';
 
 export async function loadAppData(params: {
   view: ViewType;
@@ -54,11 +54,15 @@ export async function loadAppData(params: {
 
   // Build label map: taskId -> Label[] (single batch query)
   const labelMap: Record<string, Label[]> = {};
-  const taskLabels = db.prepare(`
+  const taskLabels = db
+    .prepare(
+      `
     SELECT tl.task_id, l.id, l.name, l.color, l.icon, l.created_at
     FROM task_labels tl
     JOIN labels l ON tl.label_id = l.id
-  `).all() as Array<{
+  `
+    )
+    .all() as Array<{
     task_id: string;
     id: string;
     name: string;
@@ -68,7 +72,7 @@ export async function loadAppData(params: {
   }>;
   for (const tl of taskLabels) {
     if (!labelMap[tl.task_id]) labelMap[tl.task_id] = [];
-    labelMap[tl.task_id].push({
+    labelMap[tl.task_id]!.push({
       id: tl.id,
       name: tl.name,
       color: tl.color,
@@ -84,19 +88,19 @@ export async function loadAppData(params: {
   } else {
     let rawTasks: TaskRow[] = [];
     switch (view) {
-      case "today": {
+      case 'today': {
         rawTasks = getTasksDueToday();
         break;
       }
-      case "week": {
+      case 'week': {
         rawTasks = getTasksDueInNextDays(7);
         break;
       }
-      case "upcoming": {
+      case 'upcoming': {
         rawTasks = getAllTasks();
         break;
       }
-      case "all": {
+      case 'all': {
         rawTasks = getAllTasks();
         break;
       }
@@ -106,15 +110,14 @@ export async function loadAppData(params: {
 
   // Filter completed
   if (!showCompleted) {
-    tasksRows = tasksRows.filter((t) => t.status !== "completed");
+    tasksRows = tasksRows.filter((t) => t.status !== 'completed');
   }
 
   // Search filter
   if (searchQuery.trim()) {
     const lower = searchQuery.toLowerCase();
-    tasksRows = tasksRows.filter((t) =>
-      t.title.toLowerCase().includes(lower) ||
-      t.description.toLowerCase().includes(lower)
+    tasksRows = tasksRows.filter(
+      (t) => t.title.toLowerCase().includes(lower) || t.description.toLowerCase().includes(lower)
     );
   }
 
@@ -128,7 +131,7 @@ export async function loadAppData(params: {
   let uniqueTasks = Array.from(uniqueMap.values()) as TaskRow[];
 
   // For upcoming view, filter to future tasks only
-  if (view === "upcoming") {
+  if (view === 'upcoming') {
     const now = new Date();
     uniqueTasks = uniqueTasks.filter((row) => {
       const due = row.due_date || row.deadline;
@@ -140,13 +143,17 @@ export async function loadAppData(params: {
   const taskIds = uniqueTasks.map((t) => t.id);
   const subtasksMap: Record<string, SubtaskRow[]> = {};
   if (taskIds.length > 0) {
-    const placeholders = taskIds.map(() => "?").join(",");
-    const subtasks = db.prepare(`
+    const placeholders = taskIds.map(() => '?').join(',');
+    const subtasks = db
+      .prepare(
+        `
       SELECT * FROM subtasks WHERE task_id IN (${placeholders}) ORDER BY task_id, order_index
-    `).all(...taskIds) as SubtaskRow[];
+    `
+      )
+      .all(...taskIds) as SubtaskRow[];
     for (const st of subtasks) {
       if (!subtasksMap[st.task_id]) subtasksMap[st.task_id] = [];
-      subtasksMap[st.task_id].push(st);
+      subtasksMap[st.task_id]!.push(st);
     }
   }
 
@@ -183,12 +190,14 @@ export async function loadAppData(params: {
       attachments: [],
       reminders: [],
       changeLogs: [],
-      list: taskList ? { name: taskList.name, icon: taskList.icon, color: taskList.color } : undefined,
+      list: taskList
+        ? { name: taskList.name, icon: taskList.icon, color: taskList.color }
+        : undefined,
     };
   });
 
   const overdueCount = uniqueTasks.filter((t) => {
-    if (t.status === "completed") return false;
+    if (t.status === 'completed') return false;
     const d = t.deadline || t.due_date;
     return d ? new Date(d) < new Date() : false;
   }).length;

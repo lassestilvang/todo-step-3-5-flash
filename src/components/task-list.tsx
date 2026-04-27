@@ -1,9 +1,10 @@
-"use client";
+'use client';
 
-import { useStore } from "@/store";
-import type { Task } from "@/types";
-import { TaskCard } from "@/components/task-card";
-import { format, isToday, isTomorrow, isThisWeek, isThisYear } from "date-fns";
+import { format, isToday, isTomorrow, isThisWeek, isThisYear } from 'date-fns';
+
+import { TaskCard } from '@/components/task-card';
+import { useStore } from '@/store';
+import type { Task } from '@/types';
 
 export function TaskList() {
   const tasks = useStore((s) => s.getFilteredTasks());
@@ -11,17 +12,17 @@ export function TaskList() {
   // Group by date
   const grouped: Record<string, Task[]> = {};
   tasks.forEach((task) => {
-    let dateLabel = "No Date";
+    let dateLabel = 'No Date';
     const due = task.dueDate || task.deadline;
     if (due) {
-      if (isToday(due)) dateLabel = "Today";
-      else if (isTomorrow(due)) dateLabel = "Tomorrow";
-      else if (isThisWeek(due)) dateLabel = format(due, "EEEE");
-      else if (isThisYear(due)) dateLabel = format(due, "MMM d");
-      else dateLabel = format(due, "MMM d, yyyy");
+      if (isToday(due)) dateLabel = 'Today';
+      else if (isTomorrow(due)) dateLabel = 'Tomorrow';
+      else if (isThisWeek(due)) dateLabel = format(due, 'EEEE');
+      else if (isThisYear(due)) dateLabel = format(due, 'MMM d');
+      else dateLabel = format(due, 'MMM d, yyyy');
     }
     if (!grouped[dateLabel]) grouped[dateLabel] = [];
-    grouped[dateLabel].push(task);
+    grouped[dateLabel]!.push(task);
   });
 
   if (tasks.length === 0) {

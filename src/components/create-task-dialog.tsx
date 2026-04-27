@@ -1,18 +1,30 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useMemo } from "react";
-import { useStore } from "@/store";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from 'date-fns';
+import { CalendarIcon, Flag, Trash2, X } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import * as actions from '@/app/actions';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Form,
   FormControl,
@@ -20,65 +32,56 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, Flag, Trash2, X } from "lucide-react";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import * as actions from "@/app/actions";
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
+import { useStore } from '@/store';
 
 const taskSchema = z.object({
-  title: z.string().min(1, "Title is required").max(200),
+  title: z.string().min(1, 'Title is required').max(200),
   description: z.string().optional(),
-  listId: z.string().min(1, "List is required"),
+  listId: z.string().min(1, 'List is required'),
   dueDate: z.date().optional(),
   deadline: z.date().optional(),
   estimateMinutes: z.number().min(0).optional(),
-  priority: z.enum(["none", "low", "medium", "high"]).default("none"),
-  recurrence: z.enum(["daily", "weekly", "weekday", "monthly", "yearly", "custom"]).optional(),
+  priority: z.enum(['none', 'low', 'medium', 'high']).default('none'),
+  recurrence: z.enum(['daily', 'weekly', 'weekday', 'monthly', 'yearly', 'custom']).optional(),
   labelIds: z.array(z.string()).optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
 
 const PRIORITIES = [
-  { value: "none", label: "None", color: "default" },
-  { value: "low", label: "Low", color: "green" },
-  { value: "medium", label: "Medium", color: "amber" },
-  { value: "high", label: "High", color: "red" },
+  { value: 'none', label: 'None', color: 'default' },
+  { value: 'low', label: 'Low', color: 'green' },
+  { value: 'medium', label: 'Medium', color: 'amber' },
+  { value: 'high', label: 'High', color: 'red' },
 ] as const;
 
 const RECURRENCE_OPTIONS = [
-  { value: "daily", label: "Every day" },
-  { value: "weekly", label: "Every week" },
-  { value: "weekday", label: "Every weekday" },
-  { value: "monthly", label: "Every month" },
-  { value: "yearly", label: "Every year" },
-  { value: "custom", label: "Custom..." },
+  { value: 'daily', label: 'Every day' },
+  { value: 'weekly', label: 'Every week' },
+  { value: 'weekday', label: 'Every weekday' },
+  { value: 'monthly', label: 'Every month' },
+  { value: 'yearly', label: 'Every year' },
+  { value: 'custom', label: 'Custom...' },
 ] as const;
 
 export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { lists, labels, editTaskId, selectedListId } = useStore();
-  const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>([]);
-  const [newSubtask, setNewSubtask] = useState("");
+  const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>(
+    []
+  );
+  const [newSubtask, setNewSubtask] = useState('');
 
   const isEditing = !!editTaskId;
   const editTask = isEditing ? useStore.getState().getTaskById(editTaskId) : null;
@@ -86,10 +89,10 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const form = useForm({
     resolver: zodResolver(taskSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      listId: selectedListId || "inbox",
-      priority: "none",
+      title: '',
+      description: '',
+      listId: selectedListId || 'inbox',
+      priority: 'none',
       estimateMinutes: 0,
       recurrence: undefined,
       labelIds: [],
@@ -100,17 +103,17 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   useEffect(() => {
     if (open) {
       if (isEditing && editTask) {
-         form.reset({
-           title: editTask.title,
-           description: editTask.description,
-           listId: editTask.listId,
-           dueDate: editTask.dueDate,
-           deadline: editTask.deadline,
-           estimateMinutes: editTask.estimateMinutes || 0,
-           priority: editTask.priority,
-           recurrence: editTask.recurrence,
-           labelIds: editTask.labels?.map((l) => l.id) || [],
-         });
+        form.reset({
+          title: editTask.title,
+          description: editTask.description,
+          listId: editTask.listId,
+          dueDate: editTask.dueDate,
+          deadline: editTask.deadline,
+          estimateMinutes: editTask.estimateMinutes || 0,
+          priority: editTask.priority,
+          recurrence: editTask.recurrence,
+          labelIds: editTask.labels?.map((l) => l.id) || [],
+        });
         setSubtasks(
           editTask.subtasks?.map((s) => ({
             id: s.id,
@@ -120,10 +123,10 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
         );
       } else {
         form.reset({
-          title: "",
-          description: "",
-          listId: selectedListId || "inbox",
-          priority: "none",
+          title: '',
+          description: '',
+          listId: selectedListId || 'inbox',
+          priority: 'none',
           estimateMinutes: 0,
           recurrence: undefined,
           labelIds: [],
@@ -160,9 +163,13 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
 
       // Update/create subtasks
       for (let i = 0; i < subtasks.length; i++) {
-        const st = subtasks[i];
+        const st = subtasks[i]!;
         if (st.id) {
-          await actions.updateSubtaskAction(st.id, { title: st.title, completed: st.completed, order: i });
+          await actions.updateSubtaskAction(st.id, {
+            title: st.title,
+            completed: st.completed,
+            order: i,
+          });
         } else {
           await actions.createSubtaskAction(editTaskId, st.title, i);
         }
@@ -187,7 +194,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
 
       // Add subtasks
       for (let i = 0; i < subtasks.length; i++) {
-        const st = subtasks[i];
+        const st = subtasks[i]!;
         await actions.createSubtaskAction(newTask.id, st.title, i);
       }
     }
@@ -198,7 +205,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const addSubtask = () => {
     if (!newSubtask.trim()) return;
     setSubtasks([...subtasks, { title: newSubtask, completed: false }]);
-    setNewSubtask("");
+    setNewSubtask('');
   };
 
   const removeSubtask = (index: number) => {
@@ -207,13 +214,13 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
 
   const toggleSubtask = (index: number) => {
     const updated = [...subtasks];
-    updated[index].completed = !updated[index].completed;
+    updated[index]!.completed = !updated[index]!.completed;
     setSubtasks(updated);
   };
 
   // Filter out already selected labels
   const availableLabels = useMemo(() => {
-    const selectedIds = form.watch("labelIds") || [];
+    const selectedIds = form.watch('labelIds') || [];
     return labels.filter((l) => !selectedIds.includes(l.id));
   }, [labels, form]);
 
@@ -221,10 +228,11 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEditing ? "Edit Task" : "Create New Task"}</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Task' : 'Create New Task'}</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
+          {}
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Title */}
             <FormField
@@ -249,7 +257,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Add details..." {...field} value={field.value || ""} />
+                    <Textarea placeholder="Add details..." {...field} value={field.value || ''} />
                   </FormControl>
                 </FormItem>
               )}
@@ -320,7 +328,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                         min={0}
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
-                        value={field.value || ""}
+                        value={field.value || ''}
                         placeholder="0"
                       />
                     </FormControl>
@@ -331,77 +339,77 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
 
             {/* Row: Due Date + Deadline */}
             <div className="grid grid-cols-2 gap-4">
-               <FormField
-                 control={form.control}
-                 name="dueDate"
-                 render={({ field }) => (
-                   <FormItem className="flex flex-col">
-<FormLabel>Due Date</FormLabel>
-                       <Popover>
-                         <PopoverTrigger
-                           render={
-                             <FormControl>
-                               <Button
-                                 variant="outline"
-                                 className={cn(
-                                   "pl-3 text-left font-normal",
-                                   !field.value && "text-muted-foreground"
-                                 )}
-                               >
-                                 {field.value ? format(field.value, "MMM d, yyyy") : "Pick a date"}
-                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                               </Button>
-                             </FormControl>
-                           }
-                         />
-                         <PopoverContent className="w-auto p-0" align="start">
-                           <Calendar
-                             mode="single"
-                             selected={field.value}
-                             onSelect={field.onChange}
-                             initialFocus
-                           />
-                         </PopoverContent>
-                       </Popover>
-                   </FormItem>
-                 )}
-               />
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Due Date</FormLabel>
+                    <Popover>
+                      <PopoverTrigger
+                        render={
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                'pl-3 text-left font-normal',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              {field.value ? format(field.value, 'MMM d, yyyy') : 'Pick a date'}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        }
+                      />
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormItem>
+                )}
+              />
 
-               <FormField
-                 control={form.control}
-                 name="deadline"
-                 render={({ field }) => (
-                   <FormItem className="flex flex-col">
-<FormLabel>Deadline</FormLabel>
-                       <Popover>
-                         <PopoverTrigger
-                           render={
-                             <FormControl>
-                               <Button
-                                 variant="outline"
-                                 className={cn(
-                                   "pl-3 text-left font-normal",
-                                   !field.value && "text-muted-foreground"
-                                 )}
-                               >
-                                 {field.value ? format(field.value, "MMM d, yyyy") : "Pick a date"}
-                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                               </Button>
-                             </FormControl>
-                           }
-                         />
-                         <PopoverContent className="w-auto p-0" align="start">
-                           <Calendar
-                             mode="single"
-                             selected={field.value}
-                             onSelect={field.onChange}
-                             initialFocus
-                           />
-                         </PopoverContent>
-                       </Popover>
-                   </FormItem>
-                 )}
-               />
+              <FormField
+                control={form.control}
+                name="deadline"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Deadline</FormLabel>
+                    <Popover>
+                      <PopoverTrigger
+                        render={
+                          <FormControl>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                'pl-3 text-left font-normal',
+                                !field.value && 'text-muted-foreground'
+                              )}
+                            >
+                              {field.value ? format(field.value, 'MMM d, yyyy') : 'Pick a date'}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        }
+                      />
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Recurrence */}
@@ -433,7 +441,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
             <div className="space-y-2">
               <FormLabel>Labels</FormLabel>
               <div className="flex flex-wrap gap-2">
-                {form.watch("labelIds")?.map((labelId) => {
+                {form.watch('labelIds')?.map((labelId) => {
                   const label = labels.find((l) => l.id === labelId);
                   if (!label) return null;
                   return (
@@ -448,8 +456,11 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                       <button
                         type="button"
                         onClick={() => {
-                          const current = form.getValues("labelIds") || [];
-                          form.setValue("labelIds", current.filter((id) => id !== labelId));
+                          const current = form.getValues('labelIds') || [];
+                          form.setValue(
+                            'labelIds',
+                            current.filter((id) => id !== labelId)
+                          );
                         }}
                         className="ml-1"
                       >
@@ -458,29 +469,26 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                     </Badge>
                   );
                 })}
-                  {availableLabels.length > 0 && (
-                    <DropdownMenu>
-<DropdownMenuTrigger
-                        render={
-                          <Button variant="outline" size="sm" type="button">
-                            + Add Label
-                          </Button>
-                        }
-                      />
+                {availableLabels.length > 0 && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button variant="outline" size="sm" type="button">
+                          + Add Label
+                        </Button>
+                      }
+                    />
                     <DropdownMenuContent>
                       {availableLabels.map((label) => (
                         <DropdownMenuItem
                           key={label.id}
                           onClick={() => {
-                            const current = form.getValues("labelIds") || [];
-                            form.setValue("labelIds", [...current, label.id]);
+                            const current = form.getValues('labelIds') || [];
+                            form.setValue('labelIds', [...current, label.id]);
                           }}
                         >
                           <span className="mr-2">{label.icon}</span>
-                          <span
-                            className="flex-1"
-                            style={{ color: label.color }}
-                          >
+                          <span className="flex-1" style={{ color: label.color }}>
                             {label.name}
                           </span>
                         </DropdownMenuItem>
@@ -496,18 +504,15 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
               <FormLabel>Subtasks</FormLabel>
               <div className="space-y-2">
                 {subtasks.map((subtask, index) => (
-                  <div
-                    key={subtask.id || index}
-                    className="flex items-center gap-2"
-                  >
+                  <div key={subtask.id || index} className="flex items-center gap-2">
                     <Checkbox
                       checked={subtask.completed}
                       onCheckedChange={() => toggleSubtask(index)}
                     />
                     <span
                       className={cn(
-                        "flex-1 text-sm",
-                        subtask.completed && "line-through text-muted-foreground"
+                        'flex-1 text-sm',
+                        subtask.completed && 'line-through text-muted-foreground'
                       )}
                     >
                       {subtask.title}
@@ -530,7 +535,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                   value={newSubtask}
                   onChange={(e) => setNewSubtask(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") {
+                    if (e.key === 'Enter') {
                       e.preventDefault();
                       addSubtask();
                     }
@@ -555,7 +560,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit">{isEditing ? "Save Changes" : "Create Task"}</Button>
+              <Button type="submit">{isEditing ? 'Save Changes' : 'Create Task'}</Button>
             </DialogFooter>
           </form>
         </Form>

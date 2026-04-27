@@ -1,12 +1,13 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useMemo } from "react";
-import { useStore } from "@/store";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { debounce } from "@/lib/utils";
-import Fuse from "fuse.js";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from 'framer-motion';
+import Fuse from 'fuse.js';
+import { Search } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+
+import { Input } from '@/components/ui/input';
+import { debounce } from '@/lib/utils';
+import { useStore } from '@/store';
 
 export function SearchBar() {
   const { tasks, searchQuery, setSearchQuery } = useStore();
@@ -19,14 +20,14 @@ export function SearchBar() {
       id: t.id,
       title: t.title,
       description: t.description,
-      listName: t.list?.name || "",
+      listName: t.list?.name || '',
     }));
   }, [tasks]);
 
   // Fuse instance
   const fuse = useMemo(() => {
     return new Fuse(searchableTasks, {
-      keys: ["title", "description", "listName"],
+      keys: ['title', 'description', 'listName'],
       threshold: 0.3,
       includeScore: true,
     });
@@ -35,14 +36,18 @@ export function SearchBar() {
   // Filtered results
   const results = useMemo(() => {
     if (!localQuery.trim()) return [];
-    return fuse.search(localQuery).slice(0, 10).map((r) => r.item);
+    return fuse
+      .search(localQuery)
+      .slice(0, 10)
+      .map((r) => r.item);
   }, [fuse, localQuery]);
 
   // Debounced search update
   const debouncedSetSearch = useMemo(
-    () => debounce((value: string) => {
-      setSearchQuery(value);
-    }, 300),
+    () =>
+      debounce((value: string) => {
+        setSearchQuery(value);
+      }, 300),
     [setSearchQuery]
   );
 
@@ -54,17 +59,17 @@ export function SearchBar() {
   // Keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setIsOpen(true);
       }
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setIsOpen(false);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const handleFocus = () => setIsOpen(true);
@@ -116,9 +121,7 @@ export function SearchBar() {
                           {task.description}
                         </div>
                       )}
-                      <div className="text-xs text-muted-foreground mt-1">
-                        in {task.listName}
-                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">in {task.listName}</div>
                     </button>
                   </li>
                 ))}
@@ -137,6 +140,8 @@ export function SearchBar() {
         <div
           className="fixed inset-0 z-40"
           onClick={() => setIsOpen(false)}
+          onKeyDown={(e) => e.key === 'Escape' && setIsOpen(false)}
+          role="presentation"
         />
       )}
     </div>

@@ -69,14 +69,14 @@ DATABASE_PATH=./data
 
 ## Scripts
 
-| Command | Description |
-|---------|-------------|
-| `bun dev` | Start development server |
-| `bun run build` | Build for production |
-| `bun start` | Start production server |
-| `bun run lint` | Run ESLint |
-| `bun run test` | Run tests with Vitest |
-| `bun run test:ui` | Open Vitest UI |
+| Command                 | Description              |
+| ----------------------- | ------------------------ |
+| `bun dev`               | Start development server |
+| `bun run build`         | Build for production     |
+| `bun start`             | Start production server  |
+| `bun run lint`          | Run ESLint               |
+| `bun run test`          | Run tests with Vitest    |
+| `bun run test:ui`       | Open Vitest UI           |
 | `bun run test:coverage` | Generate coverage report |
 
 ## Database
@@ -102,6 +102,7 @@ src/
 ## Code Style
 
 This project uses:
+
 - ESLint with Next.js recommended rules + custom rules
 - TypeScript strict mode
 - Prettier formatting (run with `bun format` if installed)

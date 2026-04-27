@@ -1,18 +1,19 @@
-"use client";
+'use client';
 
-import { useStore } from "@/store";
-import { ViewType } from "@/types";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutList, Calendar, CalendarDays, Sparkles } from "lucide-react";
+import { LayoutList, Calendar, CalendarDays, Sparkles } from 'lucide-react';
+
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useStore } from '@/store';
+import type { ViewType } from '@/types';
 
 export function ViewToggle() {
   const { currentView, setCurrentView } = useStore();
 
   const views: { id: ViewType; label: string; icon: React.ElementType }[] = [
-    { id: "today", label: "Today", icon: Calendar },
-    { id: "week", label: "Week", icon: CalendarDays },
-    { id: "upcoming", label: "Upcoming", icon: Sparkles },
-    { id: "all", label: "All", icon: LayoutList },
+    { id: 'today', label: 'Today', icon: Calendar },
+    { id: 'week', label: 'Week', icon: CalendarDays },
+    { id: 'upcoming', label: 'Upcoming', icon: Sparkles },
+    { id: 'all', label: 'All', icon: LayoutList },
   ];
 
   return (

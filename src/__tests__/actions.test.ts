@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach } from 'vitest';
-import * as db from '@/lib/db';
+
 import * as actions from '@/app/actions';
+import * as db from '@/lib/db';
 
 // Helper to clear all tables before each test
 function clearAllTables() {
@@ -275,9 +276,17 @@ describe('loadAppData', () => {
 
       db.createTask({ list_id: 'inbox', title: 'Overdue 1', deadline: yesterday });
       db.createTask({ list_id: 'inbox', title: 'Overdue 2', deadline: yesterday });
-      const completedOverdue = db.createTask({ list_id: 'inbox', title: 'Completed overdue', deadline: yesterday });
+      const completedOverdue = db.createTask({
+        list_id: 'inbox',
+        title: 'Completed overdue',
+        deadline: yesterday,
+      });
       db.updateTask(completedOverdue.id, { status: 'completed' });
-      db.createTask({ list_id: 'inbox', title: 'Future', deadline: new Date(Date.now() + 86400000) });
+      db.createTask({
+        list_id: 'inbox',
+        title: 'Future',
+        deadline: new Date(Date.now() + 86400000),
+      });
 
       const result = await actions.loadAppData({
         view: 'all',

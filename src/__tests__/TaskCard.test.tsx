@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { TaskCard } from '@/components/task-card';
+import { useStore } from '@/store';
 import type { Task } from '@/types';
 
 // Mock framer-motion to avoid animation issues in jsdom
@@ -15,8 +17,6 @@ vi.mock('framer-motion', () => ({
 vi.mock('@/store', () => ({
   useStore: vi.fn(),
 }));
-
-import { useStore } from '@/store';
 
 const mockToggleTaskComplete = vi.fn();
 const mockOpenEditTask = vi.fn();
@@ -136,7 +136,14 @@ describe('TaskCard', () => {
     const task = createMockTask({
       subtasks: [
         { id: 's1', taskId: 't1', title: 'Sub1', completed: true, order: 0, createdAt: new Date() },
-        { id: 's2', taskId: 't1', title: 'Sub2', completed: false, order: 1, createdAt: new Date() },
+        {
+          id: 's2',
+          taskId: 't1',
+          title: 'Sub2',
+          completed: false,
+          order: 1,
+          createdAt: new Date(),
+        },
       ],
     });
     render(<TaskCard task={task} />);

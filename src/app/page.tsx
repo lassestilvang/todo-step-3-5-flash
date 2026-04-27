@@ -1,20 +1,21 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useStore } from "@/store";
-import { Sidebar } from "@/components/sidebar";
-import { TaskList } from "@/components/task-list";
-import { CreateTaskDialog } from "@/components/create-task-dialog";
-import { TaskDetailSheet } from "@/components/task-detail-sheet";
-import { SearchBar } from "@/components/search-bar";
-import { ViewToggle } from "@/components/view-toggle";
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { AnimatePresence } from "framer-motion";
-import { PanelLeft } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { MobileNav } from "@/components/mobile-nav";
+import { AnimatePresence } from 'framer-motion';
+import { PanelLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
+import { CreateTaskDialog } from '@/components/create-task-dialog';
+import { MobileNav } from '@/components/mobile-nav';
+import { SearchBar } from '@/components/search-bar';
+import { Sidebar } from '@/components/sidebar';
+import { TaskDetailSheet } from '@/components/task-detail-sheet';
+import { TaskList } from '@/components/task-list';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ViewToggle } from '@/components/view-toggle';
+import { useStore } from '@/store';
 
 export default function HomePage() {
   const showCompleted = useStore((s) => s.showCompleted);
@@ -51,9 +52,9 @@ export default function HomePage() {
                   variant="ghost"
                   size="sm"
                   onClick={toggleShowCompleted}
-                  className={showCompleted ? "text-primary" : ""}
+                  className={showCompleted ? 'text-primary' : ''}
                 >
-                  {showCompleted ? "✓" : "○"}
+                  {showCompleted ? '✓' : '○'}
                 </Button>
               </div>
             </div>
@@ -80,72 +81,70 @@ export default function HomePage() {
               variant="ghost"
               size="sm"
               onClick={toggleShowCompleted}
-              className={showCompleted ? "text-primary" : ""}
+              className={showCompleted ? 'text-primary' : ''}
             >
-              {showCompleted ? "✓" : "○"}
+              {showCompleted ? '✓' : '○'}
             </Button>
           </div>
         </div>
       </aside>
 
-{/* Main Content */}
-        <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
-          {/* Header */}
-          <header className="flex-shrink-0 border-b border-border p-2 md:p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 md:gap-3">
-                 {/* Mobile menu button */}
-                 <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                   <SheetTrigger
-                     render={
-                       <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
-                         <PanelLeft className="h-5 w-5" />
-                       </Button>
-                     }
-                   />
-                 </Sheet>
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
+        {/* Header */}
+        <header className="flex-shrink-0 border-b border-border p-2 md:p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-3">
+              {/* Mobile menu button */}
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger
+                  render={
+                    <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
+                      <PanelLeft className="h-5 w-5" />
+                    </Button>
+                  }
+                />
+              </Sheet>
 
-                <div>
-                  <h2 className="text-lg md:text-2xl font-semibold capitalize">
-                    {currentView === "week" ? "Next 7 Days" : currentView}
-                  </h2>
-                  <p className="text-xs md:text-sm text-muted-foreground">
-                    {useStore.getState().tasks.length} tasks
-                    {useStore.getState().overdueCount > 0 && (
-                      <span className="ml-2 text-red-500">
-                        ({useStore.getState().overdueCount} overdue)
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <div className="hidden md:block">
-                  <ViewToggle />
-                </div>
-                <Button size="sm" onClick={() => useStore.getState().openCreateTask()}>
-                  <span className="hidden sm:inline">+ New Task</span>
-                  <span className="sm:hidden">+</span>
-                </Button>
+              <div>
+                <h2 className="text-lg md:text-2xl font-semibold capitalize">
+                  {currentView === 'week' ? 'Next 7 Days' : currentView}
+                </h2>
+                <p className="text-xs md:text-sm text-muted-foreground">
+                  {useStore.getState().tasks.length} tasks
+                  {useStore.getState().overdueCount > 0 && (
+                    <span className="ml-2 text-red-500">
+                      ({useStore.getState().overdueCount} overdue)
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
-          </header>
 
-          {/* Task List */}
-          <ScrollArea className="flex-1 p-2 md:p-4">
-            <TaskList />
-          </ScrollArea>
-        </main>
+            <div className="flex items-center gap-2">
+              <div className="hidden md:block">
+                <ViewToggle />
+              </div>
+              <Button size="sm" onClick={() => useStore.getState().openCreateTask()}>
+                <span className="hidden sm:inline">+ New Task</span>
+                <span className="sm:hidden">+</span>
+              </Button>
+            </div>
+          </div>
+        </header>
 
-        {/* Mobile Bottom Navigation */}
-        <MobileNav />
+        {/* Task List */}
+        <ScrollArea className="flex-1 p-2 md:p-4">
+          <TaskList />
+        </ScrollArea>
+      </main>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileNav />
 
       {/* Modals */}
       <AnimatePresence>
-        {createTaskOpen && (
-          <CreateTaskDialog open={createTaskOpen} onClose={closeTaskModal} />
-        )}
+        {createTaskOpen && <CreateTaskDialog open={createTaskOpen} onClose={closeTaskModal} />}
       </AnimatePresence>
 
       <TaskDetailSheet />

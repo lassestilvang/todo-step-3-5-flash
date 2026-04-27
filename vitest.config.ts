@@ -1,6 +1,7 @@
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
 import path from 'path';
+
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   plugins: [react()],
@@ -12,14 +13,7 @@ export default defineConfig({
     exclude: ['**/node_modules/**', '**/.next/**', '**/dist/**'],
     coverage: {
       reporter: ['text', 'json', 'html', 'lcov'],
-      exclude: [
-        'node_modules/',
-        '.next/',
-        'dist/',
-        '**/*.config.*',
-        '**/setup.ts',
-        '**/types/**',
-      ],
+      exclude: ['node_modules/', '.next/', 'dist/', '**/*.config.*', '**/setup.ts', '**/types/**'],
       thresholds: {
         lines: 70,
         functions: 70,

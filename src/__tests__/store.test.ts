@@ -25,8 +25,8 @@ vi.mock('@/app/actions', () => ({
 }));
 
 // Import after mocks are set up
-import { useStore } from '@/store';
 import * as actions from '@/app/actions';
+import { useStore } from '@/store';
 import type { Task, TaskList, Label } from '@/types';
 
 // Helper to create a sample task
@@ -400,7 +400,16 @@ describe('Task Actions', () => {
     it('should call updateSubtaskAction with toggled completed value', async () => {
       const task = createSampleTask({
         id: 't1',
-        subtasks: [{ id: 's1', taskId: 't1', title: 'Sub', completed: false, order: 0, createdAt: new Date() }],
+        subtasks: [
+          {
+            id: 's1',
+            taskId: 't1',
+            title: 'Sub',
+            completed: false,
+            order: 0,
+            createdAt: new Date(),
+          },
+        ],
       });
       useStore.setState({ tasks: [task] });
 

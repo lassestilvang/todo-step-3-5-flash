@@ -1,6 +1,6 @@
-import { getListById } from "@/lib/db";
-import type { Task, TaskList, Label, TaskStatus, Priority, RecurrenceType } from "@/types";
-import type { TaskRow, SubtaskRow, LabelRow, ListRow } from "@/lib/db";
+import { getListById } from '@/lib/db';
+import type { TaskRow, SubtaskRow, LabelRow, ListRow } from '@/lib/db';
+import type { Task, TaskList, Label, TaskStatus, Priority, RecurrenceType } from '@/types';
 
 export function toTask(row: TaskRow & { labels: LabelRow[]; subtasks: SubtaskRow[] }): Task {
   return {

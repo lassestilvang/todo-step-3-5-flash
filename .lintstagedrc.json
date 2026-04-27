@@ -1,12 +1,6 @@
 {
-  "**/*.{ts,tsx}": [
-    "bun run lint --fix",
-    "bun test --run --coverage"
-  ],
-  "**/*.{js,jsx,mjs,cjs}": [
-    "bun run lint --fix"
-  ],
-  "**/*.{json,md,css,scss}": [
-    "bun run lint --fix"
-  ]
+  "**/*.{ts,tsx}": ["bun run lint --fix", "bun run format --write", "bun test --run --coverage"],
+  "**/*.{js,jsx,mjs,cjs}": ["bun run lint --fix", "bun run format --write"],
+  "**/*.{json,md,yml,yaml}": ["bun run format --write"],
+  "**/*.{css,scss}": ["bun run lint --fix", "bun run format --write"]
 }

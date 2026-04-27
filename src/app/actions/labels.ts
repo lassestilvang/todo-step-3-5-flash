@@ -1,8 +1,9 @@
-"use server";
+'use server';
 
-import { createLabel, updateLabel, deleteLabel } from "@/lib/db";
-import { toLabel } from "./_helpers";
-import { createLabelSchema, updateLabelSchema } from "@/lib/validation";
+import { createLabel, updateLabel, deleteLabel } from '@/lib/db';
+import { createLabelSchema, updateLabelSchema } from '@/lib/validation';
+
+import { toLabel } from './_helpers';
 
 export async function createLabelAction(name: string, color: string, icon?: string) {
   const parsed = createLabelSchema.parse({ name, color, icon });

@@ -1,14 +1,25 @@
-"use server";
+'use server';
 
-import { db, createTask, updateTask, deleteTask, createSubtask, updateSubtask, deleteSubtask, getTaskById, type TaskRow } from "@/lib/db";
-import type { CreateTaskData } from "@/types";
-import { toTask } from "./_helpers";
+import {
+  db,
+  createTask,
+  updateTask,
+  deleteTask,
+  createSubtask,
+  updateSubtask,
+  deleteSubtask,
+  getTaskById,
+  type TaskRow,
+} from '@/lib/db';
 import {
   createTaskSchema,
   updateTaskSchema,
   createSubtaskSchema,
   updateSubtaskSchema,
-} from "@/lib/validation";
+} from '@/lib/validation';
+import type { CreateTaskData } from '@/types';
+
+import { toTask } from './_helpers';
 
 export async function createTaskAction(data: CreateTaskData) {
   const parsed = createTaskSchema.parse(data);
@@ -64,9 +75,9 @@ export async function deleteTaskAction(id: string) {
 }
 
 export async function toggleTaskCompleteAction(id: string) {
-  const existing = db.prepare("SELECT * FROM tasks WHERE id = ?").get(id) as TaskRow | undefined;
+  const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow | undefined;
   if (!existing) return null;
-  const newStatus = existing.status === "completed" ? "pending" : "completed";
+  const newStatus = existing.status === 'completed' ? 'pending' : 'completed';
   updateTask(id, { status: newStatus });
   const full = getTaskById(id);
   return full ? toTask(full) : null;

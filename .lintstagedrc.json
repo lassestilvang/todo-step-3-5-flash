@@ -1,0 +1,12 @@
+{
+  "**/*.{ts,tsx}": [
+    "bun run lint --fix",
+    "bun test --run --coverage"
+  ],
+  "**/*.{js,jsx,mjs,cjs}": [
+    "bun run lint --fix"
+  ],
+  "**/*.{json,md,css,scss}": [
+    "bun run lint --fix"
+  ]
+}

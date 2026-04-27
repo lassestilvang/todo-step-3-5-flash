@@ -1,16 +1,17 @@
-"use server";
+'use server';
 
-import { createList, updateList, deleteList } from "@/lib/db";
-import type { CreateListData } from "@/types";
-import { toList } from "./_helpers";
-import { createListSchema, updateListSchema } from "@/lib/validation";
+import { createList, updateList, deleteList } from '@/lib/db';
+import { createListSchema, updateListSchema } from '@/lib/validation';
+import type { CreateListData } from '@/types';
+
+import { toList } from './_helpers';
 
 export async function createListAction(data: CreateListData) {
   const parsed = createListSchema.parse(data);
   const row = createList({
     name: parsed.name,
     color: parsed.color,
-    icon: parsed.icon ?? "📋",
+    icon: parsed.icon ?? '📋',
     parent_id: parsed.parentId,
   });
   return toList(row);

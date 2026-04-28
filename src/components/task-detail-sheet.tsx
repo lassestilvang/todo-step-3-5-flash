@@ -1,10 +1,6 @@
-"use client";
+'use client';
 
-import { useStore } from "@/store";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
+import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
 import {
   Clock,
   Flag,
@@ -18,10 +14,15 @@ import {
   ChevronRight,
   CheckCircle,
   Circle,
-} from "lucide-react";
-import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
+} from 'lucide-react';
+
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
+import { useStore } from '@/store';
 
 export function TaskDetailSheet() {
   const { selectedTaskId, tasks, setSelectedTask, toggleTaskComplete } = useStore();
@@ -31,7 +32,7 @@ export function TaskDetailSheet() {
 
   if (!selectedTask) return null;
 
-  const tasksArray = tasks.filter((t) => t.status !== "completed" || t.id === selectedTaskId);
+  const tasksArray = tasks.filter((t) => t.status !== 'completed' || t.id === selectedTaskId);
   const currentIndex = tasksArray.findIndex((t) => t.id === selectedTaskId);
   const prevTask = currentIndex > 0 ? tasksArray[currentIndex - 1] : null;
   const nextTask = currentIndex < tasksArray.length - 1 ? tasksArray[currentIndex + 1] : null;
@@ -49,44 +50,35 @@ export function TaskDetailSheet() {
   const getDueLabel = () => {
     const date = selectedTask.dueDate ?? selectedTask.deadline;
     if (!date) return null;
-    if (isToday(date)) return "Today";
-    if (isTomorrow(date)) return "Tomorrow";
-    if (isThisWeek(date)) return format(date, "EEEE");
-    return format(date, "MMM d, yyyy");
+    if (isToday(date)) return 'Today';
+    if (isTomorrow(date)) return 'Tomorrow';
+    if (isThisWeek(date)) return format(date, 'EEEE');
+    return format(date, 'MMM d, yyyy');
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => { if (!open) setSelectedTask(null); }}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) setSelectedTask(null);
+      }}
+    >
       <SheetContent side="right" className="w-full max-w-xl p-0">
         <div className="flex flex-col h-full">
           {/* Header with navigation */}
           <div className="flex items-center justify-between p-4 border-b">
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handlePrev}
-                disabled={!prevTask}
-              >
+              <Button variant="ghost" size="icon" onClick={handlePrev} disabled={!prevTask}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <span className="text-sm text-muted-foreground">
                 {currentIndex + 1} of {tasksArray.length}
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleNext}
-                disabled={!nextTask}
-              >
+              <Button variant="ghost" size="icon" onClick={handleNext} disabled={!nextTask}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedTask(null)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setSelectedTask(null)}>
               Close
             </Button>
           </div>
@@ -96,11 +88,8 @@ export function TaskDetailSheet() {
             <div className="p-6 space-y-6">
               {/* Title & complete */}
               <div className="flex items-start gap-4">
-                <button
-                  onClick={() => toggleTaskComplete(selectedTask.id)}
-                  className="mt-1"
-                >
-                  {selectedTask.status === "completed" ? (
+                <button onClick={() => toggleTaskComplete(selectedTask.id)} className="mt-1">
+                  {selectedTask.status === 'completed' ? (
                     <CheckCircle className="h-6 w-6 text-green-500" />
                   ) : (
                     <Circle className="h-6 w-6 text-muted-foreground" />
@@ -161,7 +150,8 @@ export function TaskDetailSheet() {
                     <div>
                       <div className="text-xs text-muted-foreground">Estimate</div>
                       <div className="font-medium">
-                        {Math.floor(selectedTask.estimateMinutes / 60)}h {selectedTask.estimateMinutes % 60}m
+                        {Math.floor(selectedTask.estimateMinutes / 60)}h{' '}
+                        {selectedTask.estimateMinutes % 60}m
                       </div>
                     </div>
                   </div>
@@ -174,7 +164,8 @@ export function TaskDetailSheet() {
                     <div>
                       <div className="text-xs text-muted-foreground">Actual</div>
                       <div className="font-medium">
-                        {Math.floor(selectedTask.actualMinutes / 60)}h {selectedTask.actualMinutes % 60}m
+                        {Math.floor(selectedTask.actualMinutes / 60)}h{' '}
+                        {selectedTask.actualMinutes % 60}m
                       </div>
                     </div>
                   </div>
@@ -223,12 +214,11 @@ export function TaskDetailSheet() {
                   </div>
                   <div className="space-y-2">
                     {selectedTask.subtasks.map((subtask) => (
-                      <div
-                        key={subtask.id}
-                        className="flex items-center gap-2 text-sm"
-                      >
+                      <div key={subtask.id} className="flex items-center gap-2 text-sm">
                         <button
-                          onClick={() => useStore.getState().toggleSubtask(selectedTask.id, subtask.id)}
+                          onClick={() =>
+                            useStore.getState().toggleSubtask(selectedTask.id, subtask.id)
+                          }
                         >
                           {subtask.completed ? (
                             <CheckCircle className="h-4 w-4 text-green-500" />
@@ -237,9 +227,7 @@ export function TaskDetailSheet() {
                           )}
                         </button>
                         <span
-                          className={cn(
-                            subtask.completed && "line-through text-muted-foreground"
-                          )}
+                          className={cn(subtask.completed && 'line-through text-muted-foreground')}
                         >
                           {subtask.title}
                         </span>
@@ -281,14 +269,13 @@ export function TaskDetailSheet() {
                 <div className="space-y-2">
                   {selectedTask.changeLogs && selectedTask.changeLogs.length > 0 ? (
                     selectedTask.changeLogs.map((log) => (
-                      <div
-                        key={log.id}
-                        className="text-sm border-l-2 pl-3 border-muted"
-                      >
+                      <div key={log.id} className="text-sm border-l-2 pl-3 border-muted">
                         <div className="font-medium capitalize">{log.field}</div>
                         <div className="text-muted-foreground text-xs">
-                          {log.oldValue !== null && <span className="line-through">{log.oldValue}</span>}
-                          {log.oldValue !== null && log.newValue !== null && " → "}
+                          {log.oldValue !== null && (
+                            <span className="line-through">{log.oldValue}</span>
+                          )}
+                          {log.oldValue !== null && log.newValue !== null && ' → '}
                           {log.newValue !== null && <span>{log.newValue}</span>}
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
@@ -305,9 +292,14 @@ export function TaskDetailSheet() {
               {/* Created/updated */}
               <div className="text-xs text-muted-foreground pt-4 border-t">
                 Created {formatDistanceToNow(new Date(selectedTask.createdAt), { addSuffix: true })}
-                {selectedTask.updatedAt && selectedTask.updatedAt.getTime() !== selectedTask.createdAt.getTime() && (
-                  <> · Updated {formatDistanceToNow(new Date(selectedTask.updatedAt), { addSuffix: true })}</>
-                )}
+                {selectedTask.updatedAt &&
+                  selectedTask.updatedAt.getTime() !== selectedTask.createdAt.getTime() && (
+                    <>
+                      {' '}
+                      · Updated{' '}
+                      {formatDistanceToNow(new Date(selectedTask.updatedAt), { addSuffix: true })}
+                    </>
+                  )}
               </div>
             </div>
           </ScrollArea>

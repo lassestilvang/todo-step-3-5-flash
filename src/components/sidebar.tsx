@@ -1,43 +1,46 @@
-"use client";
+'use client';
 
-import { useStore } from "@/store";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import {
-  LayoutList,
-  Calendar,
-  CalendarDays,
-  Sparkles,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { LayoutList, Calendar, CalendarDays, Sparkles, Plus, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import type { ViewType } from "@/types";
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import { useStore } from '@/store';
+import type { ViewType } from '@/types';
 
 const VIEWS = [
-  { id: "all", label: "All Tasks", icon: LayoutList },
-  { id: "today", label: "Today", icon: Calendar },
-  { id: "week", label: "Next 7 Days", icon: CalendarDays },
-  { id: "upcoming", label: "Upcoming", icon: Sparkles },
+  { id: 'all', label: 'All Tasks', icon: LayoutList },
+  { id: 'today', label: 'Today', icon: Calendar },
+  { id: 'week', label: 'Next 7 Days', icon: CalendarDays },
+  { id: 'upcoming', label: 'Upcoming', icon: Sparkles },
 ];
 
 export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
-  const { lists, currentView, setCurrentView, selectedListId, setSelectedList, addList, deleteList, overdueCount } = useStore();
+  const {
+    lists,
+    currentView,
+    setCurrentView,
+    selectedListId,
+    setSelectedList,
+    addList,
+    deleteList,
+    overdueCount,
+  } = useStore();
 
   const [newListDialogOpen, setNewListDialogOpen] = useState(false);
-  const [newListName, setNewListName] = useState("");
-  const [newListColor, setNewListColor] = useState("#3b82f6");
-  const [newListIcon, setNewListIcon] = useState("📋");
+  const [newListName, setNewListName] = useState('');
+  const [newListColor, setNewListColor] = useState('#3b82f6');
+  const [newListIcon, setNewListIcon] = useState('📋');
 
   const handleCreateList = () => {
     if (!newListName.trim()) return;
@@ -47,12 +50,12 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
       icon: newListIcon,
     });
     setNewListDialogOpen(false);
-    setNewListName("");
+    setNewListName('');
   };
 
   const handleDeleteList = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (id === "inbox") return;
+    if (id === 'inbox') return;
     deleteList(id);
     if (selectedListId === id) {
       setSelectedList(null);
@@ -62,13 +65,13 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const handleListClick = (id: string | null) => {
     setSelectedList(id);
     if (id) {
-      setCurrentView("all");
+      setCurrentView('all');
     }
     onItemClick?.();
   };
 
   // Common emoji list
-  const emojis = ["📋", "📅", "📆", "💼", "🏠", "🛒", "🎯", "🚀", "💡", "❤️", "⭐", "🔥"];
+  const emojis = ['📋', '📅', '📆', '💼', '🏠', '🛒', '🎯', '🚀', '💡', '❤️', '⭐', '🔥'];
 
   return (
     <nav className="space-y-6">
@@ -83,15 +86,15 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
           return (
             <button
               key={view.id}
-               onClick={() => {
-                 setCurrentView(view.id as ViewType);
-                 setSelectedList(null);
-                 onItemClick?.();
-               }}
+              onClick={() => {
+                setCurrentView(view.id as ViewType);
+                setSelectedList(null);
+                onItemClick?.();
+              }}
               className={cn(
-                buttonVariants({ variant: "ghost" }),
-                "w-full justify-start",
-                isActive && "bg-accent text-accent-foreground font-medium"
+                buttonVariants({ variant: 'ghost' }),
+                'w-full justify-start',
+                isActive && 'bg-accent text-accent-foreground font-medium'
               )}
             >
               <Icon className="mr-2 h-4 w-4" />
@@ -110,7 +113,12 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
           <Dialog open={newListDialogOpen} onOpenChange={setNewListDialogOpen}>
             <DialogTrigger
               render={
-                <Button variant="ghost" size="icon" className="h-6 w-6" aria-label="Create new list">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  aria-label="Create new list"
+                >
                   <Plus className="h-4 w-4" />
                 </Button>
               }
@@ -132,12 +140,12 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
                 <div className="space-y-2">
                   <Label>Color</Label>
                   <div className="flex gap-2">
-                    {["#3b82f6", "#ef4444", "#22c55e", "#f97316", "#8b5cf6", "#ec4899"].map((c) => (
+                    {['#3b82f6', '#ef4444', '#22c55e', '#f97316', '#8b5cf6', '#ec4899'].map((c) => (
                       <button
                         key={c}
                         className={cn(
-                          "w-8 h-8 rounded-full border-2",
-                          newListColor === c ? "border-foreground" : "border-transparent"
+                          'w-8 h-8 rounded-full border-2',
+                          newListColor === c ? 'border-foreground' : 'border-transparent'
                         )}
                         style={{ backgroundColor: c }}
                         onClick={() => setNewListColor(c)}
@@ -152,8 +160,8 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
                       <button
                         key={emoji}
                         className={cn(
-                          "w-10 h-10 text-xl rounded border",
-                          newListIcon === emoji ? "bg-accent" : "bg-background"
+                          'w-10 h-10 text-xl rounded border',
+                          newListIcon === emoji ? 'bg-accent' : 'bg-background'
                         )}
                         onClick={() => setNewListIcon(emoji)}
                       >
@@ -178,9 +186,9 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
               <button
                 onClick={() => handleListClick(list.id)}
                 className={cn(
-                  buttonVariants({ variant: "ghost" }),
-                  "w-full justify-start pr-8",
-                  isActive && "bg-accent text-accent-foreground font-medium"
+                  buttonVariants({ variant: 'ghost' }),
+                  'w-full justify-start pr-8',
+                  isActive && 'bg-accent text-accent-foreground font-medium'
                 )}
                 style={{
                   borderLeft: `3px solid ${list.color}`,
@@ -189,11 +197,9 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
                 <span className="mr-2">{list.icon}</span>
                 <span className="flex-1 truncate">{list.name}</span>
                 <span className="ml-2 text-xs text-muted-foreground">{taskCount}</span>
-                {list.isMagic && (
-                  <Sparkles className="ml-2 h-3 w-3 text-amber-500" />
-                )}
+                {list.isMagic && <Sparkles className="ml-2 h-3 w-3 text-amber-500" />}
               </button>
-              {list.id !== "inbox" && (
+              {list.id !== 'inbox' && (
                 <button
                   onClick={(e) => handleDeleteList(e, list.id)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -212,7 +218,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
       {overdueCount > 0 && (
         <div className="px-2 py-2 text-sm text-red-500 flex items-center">
           <span className="mr-2">⚠️</span>
-          {overdueCount} overdue task{overdueCount > 1 ? "s" : ""}
+          {overdueCount} overdue task{overdueCount > 1 ? 's' : ''}
         </div>
       )}
     </nav>

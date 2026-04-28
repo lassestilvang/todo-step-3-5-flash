@@ -36,7 +36,7 @@ interface AppState {
   closeTaskModal: () => void;
 
   // Task actions
-  addTask: (data: CreateTaskData) => Promise<void>;
+  addTask: (data: CreateTaskData) => Promise<Task | null>;
   updateTask: (id: string, data: Partial<CreateTaskData>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   toggleTaskComplete: (id: string) => Promise<void>;
@@ -181,6 +181,7 @@ export const useStore = create<AppState>()(
             return { tasks, overdueCount: computeOverdue(tasks) };
           });
         }
+        return newTask;
       },
 
       updateTask: async (id, data) => {

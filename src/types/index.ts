@@ -1,7 +1,7 @@
-export type Priority = "none" | "low" | "medium" | "high";
-export type RecurrenceType = "daily" | "weekly" | "weekday" | "monthly" | "yearly" | "custom";
-export type TaskStatus = "pending" | "in_progress" | "completed";
-export type ViewType = "today" | "week" | "upcoming" | "all";
+export type Priority = 'none' | 'low' | 'medium' | 'high';
+export type RecurrenceType = 'daily' | 'weekly' | 'weekday' | 'monthly' | 'yearly' | 'custom';
+export type TaskStatus = 'pending' | 'in_progress' | 'completed';
+export type ViewType = 'today' | 'week' | 'upcoming' | 'all';
 
 export interface Label {
   id: string;
@@ -115,7 +115,7 @@ export interface CreateTaskData {
   priority?: Priority;
   recurrence?: RecurrenceType;
   labelIds?: string[];
-  subtasks?: Pick<Subtask, "title">[];
+  subtasks?: Pick<Subtask, 'title'>[];
   parentId?: string;
 }
 

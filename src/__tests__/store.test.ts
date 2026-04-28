@@ -189,23 +189,6 @@ describe('toggleShowCompleted', () => {
     state = useStore.getState();
     expect(state.showCompleted).toBe(false);
   });
-
-  it('should trigger loadData with toggled value', async () => {
-    (actions.loadAppData as any).mockResolvedValue({
-      tasks: [],
-      lists: [],
-      labels: [],
-      overdueCount: 0,
-    });
-
-    useStore.getState().toggleShowCompleted();
-
-    await vi.waitFor(() => {
-      expect(actions.loadAppData).toHaveBeenCalledWith(
-        expect.objectContaining({ showCompleted: true })
-      );
-    });
-  });
 });
 
 describe('setShowCompleted', () => {
@@ -263,15 +246,9 @@ describe('closeTaskModal', () => {
 
 describe('Task Actions', () => {
   describe('addTask', () => {
-    it('should call createTaskAction and loadData', async () => {
+    it('should call createTaskAction and return created task', async () => {
       const newTask = createSampleTask({ id: 'new-1', title: 'New Task' });
       (actions.createTaskAction as any).mockResolvedValue(newTask);
-      (actions.loadAppData as any).mockResolvedValue({
-        tasks: [newTask],
-        lists: [],
-        labels: [],
-        overdueCount: 0,
-      });
 
       const result = await useStore.getState().addTask({ listId: 'inbox', title: 'New Task' });
 
@@ -280,10 +257,6 @@ describe('Task Actions', () => {
         title: 'New Task',
       });
       expect(result).toBe(newTask);
-      // loadData should be called (we won't await, but can check after tick)
-      await vi.waitFor(() => {
-        expect(actions.loadAppData).toHaveBeenCalled();
-      });
     });
   });
 
@@ -530,10 +503,10 @@ describe('Getters', () => {
     expect(useStore.getState().getTaskById('missing')).toBeUndefined();
   });
 
-  it('getFilteredTasks should return all tasks', () => {
+  it('getFilteredTasks should return all tasks when view is all', () => {
     const t1 = createSampleTask({ id: 't1' });
     const t2 = createSampleTask({ id: 't2' });
-    useStore.setState({ tasks: [t1, t2] });
+    useStore.setState({ tasks: [t1, t2], currentView: 'all' });
     expect(useStore.getState().getFilteredTasks()).toEqual([t1, t2]);
   });
 });

@@ -332,7 +332,7 @@ describe('Database', () => {
 
         const retrieved = getTaskById(task.id);
         expect(retrieved?.labels).toHaveLength(1);
-        expect(retrieved?.labels[0].name).toBe(labelName);
+        expect(retrieved?.labels[0]!.name).toBe(labelName);
       });
 
       it('should set parent_id when provided', () => {
@@ -373,7 +373,7 @@ describe('Database', () => {
         expect(retrieved).toBeDefined();
         expect(retrieved?.labels).toHaveLength(1);
         expect(retrieved?.subtasks).toHaveLength(1);
-        expect(retrieved?.subtasks[0].title).toBe('Subtask 1');
+        expect(retrieved?.subtasks[0]!.title).toBe('Subtask 1');
       });
 
       it('should return null for non-existent task', () => {
@@ -409,7 +409,7 @@ describe('Database', () => {
         const overdue = getOverdueTasks();
 
         expect(overdue).toHaveLength(1);
-        expect(overdue[0].title).toBe('Overdue');
+        expect(overdue[0]!.title).toBe('Overdue');
       });
 
       it('should not include completed tasks', () => {
@@ -440,7 +440,7 @@ describe('Database', () => {
         const todayTasks = getTasksDueToday();
 
         expect(todayTasks).toHaveLength(1);
-        expect(todayTasks[0].title).toBe('Today Task');
+        expect(todayTasks[0]!.title).toBe('Today Task');
       });
 
       it('should match due_date OR deadline', () => {
@@ -484,7 +484,7 @@ describe('Database', () => {
         const tasks = getTasksDueInNextDays(7);
 
         expect(tasks).toHaveLength(1);
-        expect(tasks[0].title).toBe('Soon');
+        expect(tasks[0]!.title).toBe('Soon');
       });
 
       it('should exclude completed tasks', () => {
@@ -734,7 +734,7 @@ describe('Database', () => {
 
         const retrieved = getTaskById(task.id);
         expect(retrieved?.labels).toHaveLength(1);
-        expect(retrieved?.labels[0].name).toBe('Test');
+        expect(retrieved?.labels[0]!.name).toBe('Test');
       });
 
       it('should not duplicate attachments', () => {
@@ -812,9 +812,9 @@ describe('Database', () => {
         const subtasks = getSubtasksByTaskId(taskId);
 
         expect(subtasks).toHaveLength(3);
-        expect(subtasks[0].title).toBe('A');
-        expect(subtasks[1].title).toBe('B');
-        expect(subtasks[2].title).toBe('C');
+        expect(subtasks[0]!.title).toBe('A');
+        expect(subtasks[1]!.title).toBe('B');
+        expect(subtasks[2]!.title).toBe('C');
       });
 
       it('should return empty array for task with no subtasks', () => {
@@ -1002,7 +1002,7 @@ describe('Database', () => {
         markReminderSent(reminder.id);
 
         const reminders = getRemindersByTaskId(taskId);
-        expect(reminders[0].sent).toBe(1);
+        expect(reminders[0]!.sent).toBe(1);
       });
     });
 

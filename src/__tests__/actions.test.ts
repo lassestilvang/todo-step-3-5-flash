@@ -71,9 +71,9 @@ describe('loadAppData', () => {
       const fetched = result.tasks.find((t) => t.id === task.id);
       expect(fetched).toBeDefined();
       expect(fetched!.labels).toHaveLength(1);
-      expect(fetched!.labels[0].name).toBe('TestWorkLabel123');
+      expect(fetched!.labels[0]!.name).toBe('TestWorkLabel123');
       expect(fetched!.subtasks).toHaveLength(1);
-      expect(fetched!.subtasks[0].title).toBe('Sub 1');
+      expect(fetched!.subtasks[0]!.title).toBe('Sub 1');
     });
 
     it('should attach list info to tasks', async () => {
@@ -250,7 +250,7 @@ describe('loadAppData', () => {
       });
 
       expect(result.tasks).toHaveLength(1);
-      expect(result.tasks[0].title).toBe('Buy groceries');
+      expect(result.tasks[0]!.title).toBe('Buy groceries');
     });
 
     it('also searches description', async () => {
@@ -265,7 +265,7 @@ describe('loadAppData', () => {
       });
 
       expect(result.tasks).toHaveLength(1);
-      expect(result.tasks[0].title).toBe('Task 1');
+      expect(result.tasks[0]!.title).toBe('Task 1');
     });
   });
 
@@ -347,7 +347,7 @@ describe('Task Actions (proxies)', () => {
     const task = db.createTask({ list_id: 'inbox', title: 'Parent' });
     const subtask = db.createSubtask({ task_id: task.id, title: 'Old' });
     await actions.updateSubtaskAction(subtask.id, { title: 'New', completed: true });
-    const updated = db.getSubtasksByTaskId(task.id)[0];
+    const updated = db.getSubtasksByTaskId(task.id)[0]!;
     expect(updated.title).toBe('New');
     expect(updated.completed).toBe(1);
   });

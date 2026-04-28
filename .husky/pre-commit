@@ -1,4 +1,8 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Run typecheck first to catch errors early
+bun run typecheck
+
+# Then run lint-staged for formatting and linting
 bunx lint-staged

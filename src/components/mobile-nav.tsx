@@ -1,17 +1,18 @@
-"use client";
+'use client';
 
-import { useStore } from "@/store";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { useStore } from '@/store';
 
 export function MobileNav() {
   const { currentView, setCurrentView, openCreateTask } = useStore();
 
   const views = [
-    { id: "all", label: "All", icon: "📋" },
-    { id: "today", label: "Today", icon: "📅" },
-    { id: "week", label: "Week", icon: "📆" },
-    { id: "upcoming", label: "Upcoming", icon: "✨" },
+    { id: 'all', label: 'All', icon: '📋' },
+    { id: 'today', label: 'Today', icon: '📅' },
+    { id: 'week', label: 'Week', icon: '📆' },
+    { id: 'upcoming', label: 'Upcoming', icon: '✨' },
   ] as const;
 
   return (
@@ -28,7 +29,7 @@ export function MobileNav() {
                 className={`
                   flex-1 flex flex-col items-center justify-center gap-1
                   text-xs
-                  ${isActive ? "text-primary" : "text-muted-foreground"}
+                  ${isActive ? 'text-primary' : 'text-muted-foreground'}
                 `}
               >
                 <span className="text-lg">{view.icon}</span>
@@ -40,11 +41,7 @@ export function MobileNav() {
 
         {/* New Task button */}
         <div className="w-16 flex items-center justify-center border-l border-border">
-          <Button
-            size="icon"
-            onClick={() => openCreateTask()}
-            className="h-10 w-10 rounded-full"
-          >
+          <Button size="icon" onClick={() => openCreateTask()} className="h-10 w-10 rounded-full">
             <Plus className="h-5 w-5" />
           </Button>
         </div>

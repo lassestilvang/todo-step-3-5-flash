@@ -24,7 +24,7 @@ const eslintConfig = defineConfig([
           'newlines-between': 'always',
         },
       ],
-      'no-console': 'warn',
+      'no-console': ['error', { allow: ['error'] }],
       'no-debugger': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': 'error',

@@ -18,6 +18,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "check": "bun run lint && bun run typecheck && bun run test",
     "prepare": "husky install"
   },
   "dependencies": {

@@ -173,7 +173,6 @@ export function runMigrations() {
 
   for (const migration of migrations) {
     if (!applied.has(migration.version)) {
-      console.log(`Applying migration ${migration.version}: ${migration.name}`);
       migration.up();
       db.prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)').run(
         migration.version,

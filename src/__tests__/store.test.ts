@@ -113,7 +113,7 @@ describe('Initial State', () => {
 });
 
 describe('loadData', () => {
-  it('should call loadAppData with current state parameters', async () => {
+  it('should call loadAppData with server-side parameters (ignoring UI filters)', async () => {
     (actions.loadAppData as any).mockResolvedValue({
       tasks: [],
       lists: [],
@@ -124,9 +124,9 @@ describe('loadData', () => {
     await useStore.getState().loadData();
 
     expect(actions.loadAppData).toHaveBeenCalledWith({
-      view: 'today',
+      view: 'all',
       selectedListId: null,
-      showCompleted: false,
+      showCompleted: true,
       searchQuery: '',
     });
   });
@@ -159,65 +159,20 @@ describe('setCurrentView', () => {
     expect(state.currentView).toBe('week');
     expect(state.selectedListId).toBeNull();
   });
-
-  it('should trigger loadData with the new view', async () => {
-    (actions.loadAppData as any).mockResolvedValue({
-      tasks: [],
-      lists: [],
-      labels: [],
-      overdueCount: 0,
-    });
-
-    useStore.getState().setCurrentView('upcoming');
-
-    await vi.waitFor(() => {
-      expect(actions.loadAppData).toHaveBeenCalledWith(
-        expect.objectContaining({ view: 'upcoming' })
-      );
-    });
-  });
 });
 
 describe('setSelectedList', () => {
-  it('should set selectedListId and trigger loadData', async () => {
-    (actions.loadAppData as any).mockResolvedValue({
-      tasks: [],
-      lists: [],
-      labels: [],
-      overdueCount: 0,
-    });
-
+  it('should set selectedListId', () => {
     useStore.getState().setSelectedList('list-123');
-
     const state = useStore.getState();
     expect(state.selectedListId).toBe('list-123');
-
-    await vi.waitFor(() => {
-      expect(actions.loadAppData).toHaveBeenCalledWith(
-        expect.objectContaining({ selectedListId: 'list-123' })
-      );
-    });
   });
 });
 
 describe('setSearchQuery', () => {
-  it('should update searchQuery and trigger loadData', async () => {
-    (actions.loadAppData as any).mockResolvedValue({
-      tasks: [],
-      lists: [],
-      labels: [],
-      overdueCount: 0,
-    });
-
+  it('should update searchQuery', () => {
     useStore.getState().setSearchQuery('search term');
-
     expect(useStore.getState().searchQuery).toBe('search term');
-
-    await vi.waitFor(() => {
-      expect(actions.loadAppData).toHaveBeenCalledWith(
-        expect.objectContaining({ searchQuery: 'search term' })
-      );
-    });
   });
 });
 

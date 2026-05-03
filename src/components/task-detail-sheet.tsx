@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { DATE_FORMATS, STRINGS } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 
@@ -50,10 +51,10 @@ export function TaskDetailSheet() {
   const getDueLabel = () => {
     const date = selectedTask.dueDate ?? selectedTask.deadline;
     if (!date) return null;
-    if (isToday(date)) return 'Today';
-    if (isTomorrow(date)) return 'Tomorrow';
-    if (isThisWeek(date)) return format(date, 'EEEE');
-    return format(date, 'MMM d, yyyy');
+    if (isToday(date)) return STRINGS.TODAY;
+    if (isTomorrow(date)) return STRINGS.TOMORROW;
+    if (isThisWeek(date)) return format(date, DATE_FORMATS.FULL_WEEKDAY);
+    return format(date, DATE_FORMATS.FULL_DATE);
   };
 
   return (
@@ -88,7 +89,12 @@ export function TaskDetailSheet() {
             <div className="p-6 space-y-6">
               {/* Title & complete */}
               <div className="flex items-start gap-4">
-                <button onClick={() => toggleTaskComplete(selectedTask.id)} className="mt-1">
+                <button
+                  onClick={() => {
+                    void toggleTaskComplete(selectedTask.id);
+                  }}
+                  className="mt-1"
+                >
                   {selectedTask.status === 'completed' ? (
                     <CheckCircle className="h-6 w-6 text-green-500" />
                   ) : (
@@ -216,9 +222,9 @@ export function TaskDetailSheet() {
                     {selectedTask.subtasks.map((subtask) => (
                       <div key={subtask.id} className="flex items-center gap-2 text-sm">
                         <button
-                          onClick={() =>
-                            useStore.getState().toggleSubtask(selectedTask.id, subtask.id)
-                          }
+                          onClick={() => {
+                            void useStore.getState().toggleSubtask(selectedTask.id, subtask.id);
+                          }}
                         >
                           {subtask.completed ? (
                             <CheckCircle className="h-4 w-4 text-green-500" />

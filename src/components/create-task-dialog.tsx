@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable max-lines */
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Flag, Trash2, X } from 'lucide-react';
@@ -93,7 +95,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
       description: '',
       listId: selectedListId || 'inbox',
       priority: 'none',
-      estimateMinutes: 0,
+      estimateMinutes: undefined,
       recurrence: undefined,
       labelIds: [],
     },
@@ -127,7 +129,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
           description: '',
           listId: selectedListId || 'inbox',
           priority: 'none',
-          estimateMinutes: 0,
+          estimateMinutes: undefined,
           recurrence: undefined,
           labelIds: [],
         });
@@ -154,16 +156,14 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
       const existingTask = useStore.getState().getTaskById(editTaskId);
       const existingSubtasks = existingTask?.subtasks || [];
 
-      // Delete removed subtasks
-      for (const st of existingSubtasks) {
-        if (!subtasks.find((s) => s.id === st.id)) {
-          await actions.deleteSubtaskAction(st.id);
-        }
-      }
+      // Delete removed subtasks in parallel
+      const deletePromises = existingSubtasks
+        .filter((st) => !subtasks.some((s) => s.id === st.id))
+        .map((st) => actions.deleteSubtaskAction(st.id));
+      await Promise.all(deletePromises);
 
-      // Update/create subtasks
-      for (let i = 0; i < subtasks.length; i++) {
-        const st = subtasks[i]!;
+      // Update/create subtasks in parallel
+      const subtaskPromises = subtasks.map(async (st, i) => {
         if (st.id) {
           await actions.updateSubtaskAction(st.id, {
             title: st.title,
@@ -173,7 +173,8 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
         } else {
           await actions.createSubtaskAction(editTaskId, st.title, i);
         }
-      }
+      });
+      await Promise.all(subtaskPromises);
     } else {
       const newTask = await actions.createTaskAction({
         title: data.title,
@@ -192,11 +193,11 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
         return;
       }
 
-      // Add subtasks
-      for (let i = 0; i < subtasks.length; i++) {
-        const st = subtasks[i]!;
-        await actions.createSubtaskAction(newTask.id, st.title, i);
-      }
+      // Add subtasks in parallel
+      const subtaskPromises = subtasks.map((st, i) =>
+        actions.createSubtaskAction(newTask.id, st.title, i)
+      );
+      await Promise.all(subtaskPromises);
     }
 
     onClose();
@@ -232,7 +233,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
         </DialogHeader>
 
         <Form {...form}>
-          {}
+          {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Title */}
             <FormField

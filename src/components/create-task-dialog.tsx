@@ -1,7 +1,6 @@
 'use client';
 
 /* eslint-disable max-lines */
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Flag, Trash2, X } from 'lucide-react';
@@ -45,6 +44,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { INBOX_LIST_ID, DATE_FORMATS, PRIORITIES, RECURRENCE_OPTIONS, STRINGS } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 
@@ -62,21 +62,7 @@ const taskSchema = z.object({
 
 type TaskFormData = z.infer<typeof taskSchema>;
 
-const PRIORITIES = [
-  { value: 'none', label: 'None', color: 'default' },
-  { value: 'low', label: 'Low', color: 'green' },
-  { value: 'medium', label: 'Medium', color: 'amber' },
-  { value: 'high', label: 'High', color: 'red' },
-] as const;
-
-const RECURRENCE_OPTIONS = [
-  { value: 'daily', label: 'Every day' },
-  { value: 'weekly', label: 'Every week' },
-  { value: 'weekday', label: 'Every weekday' },
-  { value: 'monthly', label: 'Every month' },
-  { value: 'yearly', label: 'Every year' },
-  { value: 'custom', label: 'Custom...' },
-] as const;
+// Form default values and UI constants are imported from @/constants
 
 export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { lists, labels, editTaskId, selectedListId } = useStore();
@@ -93,7 +79,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     defaultValues: {
       title: '',
       description: '',
-      listId: selectedListId || 'inbox',
+      listId: selectedListId || INBOX_LIST_ID,
       priority: 'none',
       estimateMinutes: undefined,
       recurrence: undefined,
@@ -127,7 +113,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
         form.reset({
           title: '',
           description: '',
-          listId: selectedListId || 'inbox',
+          listId: selectedListId || INBOX_LIST_ID,
           priority: 'none',
           estimateMinutes: undefined,
           recurrence: undefined,
@@ -357,7 +343,9 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                                 !field.value && 'text-muted-foreground'
                               )}
                             >
-                              {field.value ? format(field.value, 'MMM d, yyyy') : 'Pick a date'}
+                              {field.value
+                                ? format(field.value, DATE_FORMATS.FULL_DATE)
+                                : STRINGS.PICK_A_DATE}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -393,7 +381,9 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                                 !field.value && 'text-muted-foreground'
                               )}
                             >
-                              {field.value ? format(field.value, 'MMM d, yyyy') : 'Pick a date'}
+                              {field.value
+                                ? format(field.value, DATE_FORMATS.FULL_DATE)
+                                : STRINGS.PICK_A_DATE}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -475,7 +465,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                     <DropdownMenuTrigger
                       render={
                         <Button variant="outline" size="sm" type="button">
-                          + Add Label
+                          {STRINGS.ADD_LABEL}
                         </Button>
                       }
                     />

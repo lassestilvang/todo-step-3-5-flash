@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { INBOX_LIST_ID } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { ViewType } from '@/types';
@@ -55,7 +56,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
 
   const handleDeleteList = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (id === 'inbox') return;
+    if (id === INBOX_LIST_ID) return;
     deleteList(id);
     if (selectedListId === id) {
       setSelectedList(null);
@@ -199,7 +200,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
                 <span className="ml-2 text-xs text-muted-foreground">{taskCount}</span>
                 {list.isMagic && <Sparkles className="ml-2 h-3 w-3 text-amber-500" />}
               </button>
-              {list.id !== 'inbox' && (
+              {list.id !== INBOX_LIST_ID && (
                 <button
                   onClick={(e) => handleDeleteList(e, list.id)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"

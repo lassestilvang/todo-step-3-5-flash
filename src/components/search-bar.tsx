@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Fuse from 'fuse.js';
 import { Search } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { debounce } from '@/lib/utils';
@@ -13,6 +13,7 @@ export function SearchBar() {
   const { tasks, searchQuery, setSearchQuery } = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const [localQuery, setLocalQuery] = useState(searchQuery);
+  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   // Prepare searchable data
   const searchableTasks = useMemo(() => {
@@ -42,6 +43,12 @@ export function SearchBar() {
       .map((r) => r.item);
   }, [fuse, localQuery]);
 
+  // Reset focus index when results change
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFocusedIndex(-1);
+  }, [localQuery]);
+
   // Debounced search update
   const debouncedSetSearch = useMemo(
     () =>
@@ -56,7 +63,7 @@ export function SearchBar() {
     return () => debouncedSetSearch.cancel();
   }, [localQuery, debouncedSetSearch]);
 
-  // Keyboard shortcut
+  // Keyboard shortcut & navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -65,6 +72,7 @@ export function SearchBar() {
       }
       if (e.key === 'Escape') {
         setIsOpen(false);
+        setFocusedIndex(-1);
       }
     };
 
@@ -72,7 +80,45 @@ export function SearchBar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Arrow key navigation inside results
+  const handleResultsKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!isOpen) return;
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocusedIndex((prev) => Math.min(prev + 1, results.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocusedIndex((prev) => Math.max(prev - 1, 0));
+      } else if (e.key === 'Enter' && focusedIndex >= 0) {
+        e.preventDefault();
+        const selected = results[focusedIndex];
+        if (selected) {
+          setSearchQuery(selected.title);
+          setLocalQuery(selected.title);
+          setIsOpen(false);
+          setFocusedIndex(-1);
+          useStore.getState().setSelectedTask(selected.id);
+        }
+      } else if (e.key === 'Escape') {
+        setIsOpen(false);
+        setFocusedIndex(-1);
+      }
+    },
+    [isOpen, results, focusedIndex, setSearchQuery]
+  );
+
   const handleFocus = () => setIsOpen(true);
+
+  const handleResultClick = (task: (typeof results)[0]) => {
+    setSearchQuery(task.title);
+    setLocalQuery(task.title);
+    setIsOpen(false);
+    setFocusedIndex(-1);
+    useStore.getState().setSelectedTask(task.id);
+  };
+
+  const resultListId = 'search-results-list';
 
   return (
     <div className="relative">
@@ -86,6 +132,12 @@ export function SearchBar() {
           onChange={(e) => setLocalQuery(e.target.value)}
           onFocus={handleFocus}
           className="pl-9 pr-12"
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          aria-controls={isOpen ? resultListId : undefined}
+          aria-activedescendant={
+            isOpen && focusedIndex >= 0 ? `search-result-${results[focusedIndex]?.id}` : undefined
+          }
         />
         <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden md:inline-flex h-5 items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
           <span className="text-xs">⌘</span>K
@@ -100,20 +152,21 @@ export function SearchBar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             className="absolute top-full left-0 right-0 mt-2 rounded-lg border bg-popover shadow-lg z-50 overflow-hidden"
+            onKeyDown={handleResultsKeyDown}
           >
             {results.length > 0 ? (
-              <ul className="py-1">
-                {results.map((task) => (
-                  <li key={task.id}>
+              <ul id={resultListId} role="listbox" className="py-1 max-h-60 overflow-auto">
+                {results.map((task, index) => (
+                  <li key={task.id} id={`search-result-${task.id}`}>
                     <button
-                      onClick={() => {
-                        setSearchQuery(task.title);
-                        setLocalQuery(task.title);
-                        setIsOpen(false);
-                        // Navigate to task
-                        useStore.getState().setSelectedTask(task.id);
-                      }}
-                      className="w-full px-4 py-2 text-left hover:bg-accent transition-colors"
+                      type="button"
+                      onClick={() => handleResultClick(task)}
+                      className={`w-full px-4 py-2 text-left transition-colors ${
+                        index === focusedIndex ? 'bg-accent' : 'hover:bg-accent/50'
+                      }`}
+                      role="option"
+                      aria-selected={index === focusedIndex}
+                      aria-label={`${task.title}${task.description ? ', ' + task.description : ''} in ${task.listName}`}
                     >
                       <div className="font-medium text-sm">{task.title}</div>
                       {task.description && (
@@ -141,7 +194,8 @@ export function SearchBar() {
           className="fixed inset-0 z-40"
           onClick={() => setIsOpen(false)}
           onKeyDown={(e) => e.key === 'Escape' && setIsOpen(false)}
-          role="presentation"
+          aria-hidden="true"
+          tabIndex={-1}
         />
       )}
     </div>

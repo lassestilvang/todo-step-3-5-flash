@@ -6,6 +6,7 @@ import { Search } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 
 import { Input } from '@/components/ui/input';
+import { DEBOUNCE_DELAY_MS } from '@/constants';
 import { debounce } from '@/lib/utils';
 import { useStore } from '@/store';
 
@@ -54,7 +55,7 @@ export function SearchBar() {
     () =>
       debounce((value: string) => {
         setSearchQuery(value);
-      }, 300),
+      }, DEBOUNCE_DELAY_MS),
     [setSearchQuery]
   );
 

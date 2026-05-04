@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { PRIORITY_VALUES, RECURRENCE_VALUES } from '@/constants';
+
 export const createTaskSchema = z.object({
   listId: z.string().min(1, 'List is required'),
   title: z.string().min(1, 'Title is required').max(200),
@@ -7,8 +9,8 @@ export const createTaskSchema = z.object({
   dueDate: z.date().optional(),
   deadline: z.date().optional(),
   estimateMinutes: z.number().min(0).optional(),
-  priority: z.enum(['none', 'low', 'medium', 'high']).default('none'),
-  recurrence: z.enum(['daily', 'weekly', 'weekday', 'monthly', 'yearly', 'custom']).optional(),
+  priority: z.enum(PRIORITY_VALUES).default('none'),
+  recurrence: z.enum(RECURRENCE_VALUES).optional(),
   labelIds: z.array(z.string()).optional(),
   parentId: z.string().optional(),
 });
@@ -20,8 +22,8 @@ export const updateTaskSchema = z.object({
   dueDate: z.date().optional(),
   deadline: z.date().optional(),
   estimateMinutes: z.number().min(0).optional(),
-  priority: z.enum(['none', 'low', 'medium', 'high']).optional(),
-  recurrence: z.enum(['daily', 'weekly', 'weekday', 'monthly', 'yearly', 'custom']).optional(),
+  priority: z.enum(PRIORITY_VALUES).optional(),
+  recurrence: z.enum(RECURRENCE_VALUES).optional(),
   labelIds: z.array(z.string()).optional(),
   parentId: z.string().optional(),
 });

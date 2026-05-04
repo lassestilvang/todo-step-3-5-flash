@@ -45,6 +45,8 @@ export const RECURRENCE_OPTIONS = [
   { value: 'custom', label: 'Custom...' },
 ] as const;
 
+export const RECURRENCE_VALUES = RECURRENCE_OPTIONS.map((o) => o.value);
+
 // Validation limits
 export const MAX_LENGTHS = {
   TITLE: 200,

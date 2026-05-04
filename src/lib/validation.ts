@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { PRIORITY_VALUES, RECURRENCE_VALUES } from '@/constants';
 
-export const createTaskSchema = z.object({
+const taskBaseSchema = z.object({
   listId: z.string().min(1, 'List is required'),
   title: z.string().min(1, 'Title is required').max(200),
   description: z.string().optional(),
@@ -15,18 +15,34 @@ export const createTaskSchema = z.object({
   parentId: z.string().optional(),
 });
 
-export const updateTaskSchema = z.object({
-  listId: z.string().min(1).optional(),
-  title: z.string().min(1).max(200).optional(),
-  description: z.string().optional(),
-  dueDate: z.date().optional(),
-  deadline: z.date().optional(),
-  estimateMinutes: z.number().min(0).optional(),
-  priority: z.enum(PRIORITY_VALUES).optional(),
-  recurrence: z.enum(RECURRENCE_VALUES).optional(),
-  labelIds: z.array(z.string()).optional(),
-  parentId: z.string().optional(),
-});
+// Cross-field validation: deadline must be >= dueDate if both present
+export const createTaskSchema = taskBaseSchema.refine(
+  (data) => {
+    if (data.dueDate && data.deadline) {
+      return data.deadline >= data.dueDate;
+    }
+    return true;
+  },
+  {
+    message: 'Deadline cannot be earlier than due date',
+    path: ['deadline'],
+  }
+);
+
+export const updateTaskSchema = taskBaseSchema
+  .refine(
+    (data) => {
+      if (data.dueDate && data.deadline) {
+        return data.deadline >= data.dueDate;
+      }
+      return true;
+    },
+    {
+      message: 'Deadline cannot be earlier than due date',
+      path: ['deadline'],
+    }
+  )
+  .partial();
 
 export const createListSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),

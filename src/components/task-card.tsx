@@ -7,7 +7,7 @@ import { Clock, Flag, Tag, ChevronRight, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { PRIORITY_COLORS, PRIORITY_LABELS } from '@/constants';
+import { PRIORITY_COLORS, PRIORITY_LABELS, DATE_FORMATS, STRINGS } from '@/constants';
 import { cn, formatDuration } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { Task } from '@/types';
@@ -24,9 +24,9 @@ export function TaskCard({ task }: TaskCardProps) {
   const getDueLabel = () => {
     const date = task.dueDate ?? task.deadline;
     if (!date) return null;
-    if (isToday(date)) return 'Today';
-    if (isTomorrow(date)) return 'Tomorrow';
-    return format(date, 'MMM d');
+    if (isToday(date)) return STRINGS.TODAY;
+    if (isTomorrow(date)) return STRINGS.TOMORROW;
+    return format(date, DATE_FORMATS.SHORT_DATE);
   };
 
   const due = task.dueDate ?? task.deadline;

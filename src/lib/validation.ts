@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 import { PRIORITY_VALUES, RECURRENCE_VALUES } from '@/constants';
 
-const taskBaseSchema = z.object({
-  listId: z.string().min(1, 'List is required'),
-  title: z.string().min(1, 'Title is required').max(200),
+const taskCommonFields = {
+  listId: z.string(),
+  title: z.string(),
   description: z.string().optional(),
   dueDate: z.date().optional(),
   deadline: z.date().optional(),
@@ -13,36 +13,39 @@ const taskBaseSchema = z.object({
   recurrence: z.enum(RECURRENCE_VALUES).optional(),
   labelIds: z.array(z.string()).optional(),
   parentId: z.string().optional(),
-});
+};
 
 // Cross-field validation: deadline must be >= dueDate if both present
-export const createTaskSchema = taskBaseSchema.refine(
-  (data) => {
-    if (data.dueDate && data.deadline) {
-      return data.deadline >= data.dueDate;
-    }
-    return true;
-  },
-  {
+function deadlineAfterDueDate(data: unknown): boolean {
+  const d = data as { dueDate?: Date; deadline?: Date };
+  if (d.dueDate && d.deadline) {
+    return d.deadline >= d.dueDate;
+  }
+  return true;
+}
+
+export const createTaskSchema = z
+  .object({
+    ...taskCommonFields,
+    listId: z.string().min(1, 'List is required'),
+    title: z.string().min(1, 'Title is required').max(200),
+  })
+  .refine(deadlineAfterDueDate, {
     message: 'Deadline cannot be earlier than due date',
     path: ['deadline'],
-  }
-);
+  });
 
-export const updateTaskSchema = taskBaseSchema
-  .refine(
-    (data) => {
-      if (data.dueDate && data.deadline) {
-        return data.deadline >= data.dueDate;
-      }
-      return true;
-    },
-    {
-      message: 'Deadline cannot be earlier than due date',
-      path: ['deadline'],
-    }
-  )
-  .partial();
+export const updateTaskSchema = z
+  .object({
+    ...taskCommonFields,
+    listId: z.string().min(1).optional(),
+    title: z.string().min(1).max(200).optional(),
+  })
+  .partial()
+  .refine(deadlineAfterDueDate, {
+    message: 'Deadline cannot be earlier than due date',
+    path: ['deadline'],
+  });
 
 export const createListSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),

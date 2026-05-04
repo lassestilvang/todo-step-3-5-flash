@@ -7,6 +7,7 @@ import { Clock, Flag, Tag, ChevronRight, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { PRIORITY_COLORS, PRIORITY_LABELS } from '@/constants';
 import { cn, formatDuration } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { Task } from '@/types';
@@ -14,20 +15,6 @@ import type { Task } from '@/types';
 interface TaskCardProps {
   task: Task;
 }
-
-const priorityColors = {
-  high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-  medium: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  none: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
-};
-
-const priorityLabels = {
-  high: 'High',
-  medium: 'Medium',
-  low: 'Low',
-  none: 'None',
-};
 
 export function TaskCard({ task }: TaskCardProps) {
   const { toggleTaskComplete, openEditTask, setSelectedTask, selectedTaskId } = useStore();
@@ -122,9 +109,9 @@ export function TaskCard({ task }: TaskCardProps) {
 
             {/* Priority */}
             {task.priority !== 'none' && (
-              <Badge variant="outline" className={cn('text-xs', priorityColors[task.priority])}>
+              <Badge variant="outline" className={cn('text-xs', PRIORITY_COLORS[task.priority])}>
                 <Flag className="mr-1 h-3 w-3" />
-                {priorityLabels[task.priority]}
+                {PRIORITY_LABELS[task.priority]}
               </Badge>
             )}
 

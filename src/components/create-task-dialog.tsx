@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Flag, Trash2, X } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import * as actions from '@/app/actions';
@@ -212,11 +212,11 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     setSubtasks(updated);
   };
 
-  // Filter out already selected labels
+  // Filter out already selected labels (using useWatch for better performance)
+  const selectedLabelIds = useWatch({ control: form.control, name: 'labelIds' }) || [];
   const availableLabels = useMemo(() => {
-    const selectedIds = form.watch('labelIds') || [];
-    return labels.filter((l) => !selectedIds.includes(l.id));
-  }, [labels, form]);
+    return labels.filter((l) => !selectedLabelIds.includes(l.id));
+  }, [labels, selectedLabelIds]);
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>

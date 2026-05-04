@@ -1,7 +1,10 @@
+/* eslint-disable max-lines */
 import fs from 'fs';
 import path from 'path';
 
 import Database from 'better-sqlite3';
+
+import { INBOX_LIST_ID } from '@/constants';
 
 let db: ReturnType<typeof Database>;
 
@@ -281,10 +284,10 @@ export function deleteList(id: string): boolean {
 
 // Ensure Inbox exists
 export function ensureInboxExists() {
-  const inbox = getListById('inbox');
+  const inbox = getListById(INBOX_LIST_ID);
   if (!inbox) {
     createList({
-      id: 'inbox',
+      id: INBOX_LIST_ID,
       name: 'Inbox',
       color: '#3b82f6',
       icon: '📥',

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, max-lines */
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Mock zustand persist middleware to avoid localStorage issues in tests

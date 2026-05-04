@@ -23,10 +23,17 @@ export const PRIORITY_LABELS: Record<Priority, string> = {
 };
 
 export const PRIORITY_COLORS: Record<Priority, string> = {
-  none: 'default',
-  low: 'green',
-  medium: 'amber',
-  high: 'red',
+  none: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200',
+  low: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  medium: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+  high: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+};
+
+export const PRIORITY_TEXT_COLORS: Record<Priority, string> = {
+  none: 'text-foreground',
+  low: 'text-green-500',
+  medium: 'text-amber-500',
+  high: 'text-red-500',
 };
 
 export const PRIORITIES = PRIORITY_VALUES.map((value) => ({

@@ -44,7 +44,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { INBOX_LIST_ID, DATE_FORMATS, PRIORITIES, RECURRENCE_OPTIONS, STRINGS } from '@/constants';
+import {
+  INBOX_LIST_ID,
+  DATE_FORMATS,
+  PRIORITIES,
+  PRIORITY_TEXT_COLORS,
+  RECURRENCE_OPTIONS,
+  STRINGS,
+} from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 
@@ -293,7 +300,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                       <SelectContent>
                         {PRIORITIES.map((p) => (
                           <SelectItem key={p.value} value={p.value}>
-                            <Flag className={`mr-2 h-4 w-4 text-${p.color}-500`} />
+                            <Flag className={`mr-2 h-4 w-4 ${PRIORITY_TEXT_COLORS[p.value]}`} />
                             {p.label}
                           </SelectItem>
                         ))}

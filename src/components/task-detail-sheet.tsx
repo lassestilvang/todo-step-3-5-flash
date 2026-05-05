@@ -7,9 +7,6 @@ import {
   Calendar,
   Tag,
   Repeat,
-  Link2,
-  FileText,
-  History,
   ChevronLeft,
   ChevronRight,
   CheckCircle,
@@ -24,13 +21,200 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { DATE_FORMATS, STRINGS } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
+import type { Task } from '@/types';
+
+import { TaskAttachmentsSection } from './task-attachments-section';
+import { TaskHistorySection } from './task-history-section';
+
+function TaskDetailHeader({
+  currentIndex,
+  total,
+  onPrev,
+  onNext,
+  onClose,
+}: {
+  currentIndex: number;
+  total: number;
+  onPrev: () => void;
+  onNext: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="icon" onClick={onPrev} disabled={currentIndex <= 0}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <span className="text-sm text-muted-foreground">
+          {currentIndex + 1} of {total}
+        </span>
+        <Button variant="ghost" size="icon" onClick={onNext} disabled={currentIndex >= total - 1}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
+      <Button variant="ghost" size="sm" onClick={onClose}>
+        Close
+      </Button>
+    </div>
+  );
+}
+
+function TaskTitleSection({
+  selectedTask,
+  toggleTaskComplete,
+}: {
+  selectedTask: Task;
+  toggleTaskComplete: (id: string) => Promise<void> | void;
+}) {
+  return (
+    <div className="flex items-start gap-4">
+      <button
+        onClick={() => {
+          void toggleTaskComplete(selectedTask.id);
+        }}
+        className="mt-1"
+      >
+        {selectedTask.status === 'completed' ? (
+          <CheckCircle className="h-6 w-6 text-green-500" />
+        ) : (
+          <Circle className="h-6 w-6 text-muted-foreground" />
+        )}
+      </button>
+      <div className="flex-1">
+        <h2 className="text-2xl font-semibold mb-2">{selectedTask.title}</h2>
+        {selectedTask.description && (
+          <p className="text-muted-foreground whitespace-pre-wrap">{selectedTask.description}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TaskMetaGrid({ selectedTask, dueLabel }: { selectedTask: Task; dueLabel: string | null }) {
+  return (
+    <div className="grid grid-cols-2 gap-4">
+      {selectedTask.list && (
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">{selectedTask.list.icon}</span>
+          <div>
+            <div className="text-xs text-muted-foreground">List</div>
+            <div className="font-medium">{selectedTask.list.name}</div>
+          </div>
+        </div>
+      )}
+      <div className="flex items-center gap-2">
+        <Flag className="h-5 w-5 text-muted-foreground" />
+        <div>
+          <div className="text-xs text-muted-foreground">Priority</div>
+          <div className="font-medium capitalize">{selectedTask.priority}</div>
+        </div>
+      </div>
+      {dueLabel && (
+        <div className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <div className="text-xs text-muted-foreground">Due</div>
+            <div className="font-medium">{dueLabel}</div>
+            {selectedTask.dueDate && (
+              <div className="text-xs text-muted-foreground">
+                {formatDistanceToNow(selectedTask.dueDate, { addSuffix: true })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {selectedTask.estimateMinutes && selectedTask.estimateMinutes > 0 && (
+        <div className="flex items-center gap-2">
+          <Clock className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <div className="text-xs text-muted-foreground">Estimate</div>
+            <div className="font-medium">
+              {Math.floor(selectedTask.estimateMinutes / 60)}h {selectedTask.estimateMinutes % 60}m
+            </div>
+          </div>
+        </div>
+      )}
+      {selectedTask.actualMinutes && selectedTask.actualMinutes > 0 && (
+        <div className="flex items-center gap-2">
+          <Clock className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <div className="text-xs text-muted-foreground">Actual</div>
+            <div className="font-medium">
+              {Math.floor(selectedTask.actualMinutes / 60)}h {selectedTask.actualMinutes % 60}m
+            </div>
+          </div>
+        </div>
+      )}
+      {selectedTask.recurrence && (
+        <div className="flex items-center gap-2">
+          <Repeat className="h-5 w-5 text-muted-foreground" />
+          <div>
+            <div className="text-xs text-muted-foreground">Repeats</div>
+            <div className="font-medium capitalize">{selectedTask.recurrence}</div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TaskLabelsSection({ labels }: { labels: Task['labels'] }) {
+  if (!labels || labels.length === 0) return null;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <Tag className="h-4 w-4" /> Labels
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {labels.map((label) => (
+          <Badge
+            key={label.id}
+            variant="outline"
+            style={{ borderColor: label.color, color: label.color }}
+          >
+            {label.icon && <span className="mr-1">{label.icon}</span>}
+            {label.name}
+          </Badge>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TaskSubtasksSection({ subtasks, taskId }: { subtasks: Task['subtasks']; taskId: string }) {
+  if (!subtasks || subtasks.length === 0) return null;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2 text-sm font-medium">
+        <CheckCircle className="h-4 w-4" /> Subtasks
+      </div>
+      <div className="space-y-2">
+        {subtasks.map((subtask) => (
+          <div key={subtask.id} className="flex items-center gap-2 text-sm">
+            <button
+              onClick={() => {
+                void useStore.getState().toggleSubtask(taskId, subtask.id);
+              }}
+            >
+              {subtask.completed ? (
+                <CheckCircle className="h-4 w-4 text-green-500" />
+              ) : (
+                <Circle className="h-4 w-4 text-muted-foreground" />
+              )}
+            </button>
+            <span className={cn(subtask.completed && 'line-through text-muted-foreground')}>
+              {subtask.title}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function TaskDetailSheet() {
   const { selectedTaskId, tasks, setSelectedTask, toggleTaskComplete } = useStore();
   const selectedTask = tasks.find((t) => t.id === selectedTaskId);
-
-  const isOpen = selectedTaskId !== null;
-
   if (!selectedTask) return null;
 
   const tasksArray = tasks.filter((t) => t.status !== 'completed' || t.id === selectedTaskId);
@@ -46,263 +230,50 @@ export function TaskDetailSheet() {
     if (nextTask) setSelectedTask(nextTask.id);
   };
 
-  if (!selectedTask) return null;
-
-  const getDueLabel = () => {
+  const dueLabel = (() => {
     const date = selectedTask.dueDate ?? selectedTask.deadline;
     if (!date) return null;
     if (isToday(date)) return STRINGS.TODAY;
     if (isTomorrow(date)) return STRINGS.TOMORROW;
     if (isThisWeek(date)) return format(date, DATE_FORMATS.FULL_WEEKDAY);
     return format(date, DATE_FORMATS.FULL_DATE);
-  };
+  })();
 
   return (
     <Sheet
-      open={isOpen}
+      open={selectedTaskId !== null}
       onOpenChange={(open) => {
         if (!open) setSelectedTask(null);
       }}
     >
       <SheetContent side="right" className="w-full max-w-xl p-0">
         <div className="flex flex-col h-full">
-          {/* Header with navigation */}
-          <div className="flex items-center justify-between p-4 border-b">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={handlePrev} disabled={!prevTask}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                {currentIndex + 1} of {tasksArray.length}
-              </span>
-              <Button variant="ghost" size="icon" onClick={handleNext} disabled={!nextTask}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-            <Button variant="ghost" size="sm" onClick={() => setSelectedTask(null)}>
-              Close
-            </Button>
-          </div>
-
-          {/* Content */}
+          <TaskDetailHeader
+            currentIndex={currentIndex}
+            total={tasksArray.length}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onClose={() => setSelectedTask(null)}
+          />
           <ScrollArea className="flex-1">
             <div className="p-6 space-y-6">
-              {/* Title & complete */}
-              <div className="flex items-start gap-4">
-                <button
-                  onClick={() => {
-                    void toggleTaskComplete(selectedTask.id);
-                  }}
-                  className="mt-1"
-                >
-                  {selectedTask.status === 'completed' ? (
-                    <CheckCircle className="h-6 w-6 text-green-500" />
-                  ) : (
-                    <Circle className="h-6 w-6 text-muted-foreground" />
-                  )}
-                </button>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-semibold mb-2">{selectedTask.title}</h2>
-                  {selectedTask.description && (
-                    <p className="text-muted-foreground whitespace-pre-wrap">
-                      {selectedTask.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-
+              <TaskTitleSection
+                selectedTask={selectedTask}
+                toggleTaskComplete={toggleTaskComplete}
+              />
               <Separator />
-
-              {/* Meta grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* List */}
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">{selectedTask.list?.icon}</span>
-                  <div>
-                    <div className="text-xs text-muted-foreground">List</div>
-                    <div className="font-medium">{selectedTask.list?.name}</div>
-                  </div>
-                </div>
-
-                {/* Priority */}
-                <div className="flex items-center gap-2">
-                  <Flag className="h-5 w-5 text-muted-foreground" />
-                  <div>
-                    <div className="text-xs text-muted-foreground">Priority</div>
-                    <div className="font-medium capitalize">{selectedTask.priority}</div>
-                  </div>
-                </div>
-
-                {/* Due Date */}
-                {getDueLabel() && (
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <div className="text-xs text-muted-foreground">Due</div>
-                      <div className="font-medium">{getDueLabel()}</div>
-                      {selectedTask.dueDate && (
-                        <div className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(selectedTask.dueDate, { addSuffix: true })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Estimate */}
-                {selectedTask.estimateMinutes && selectedTask.estimateMinutes > 0 && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <div className="text-xs text-muted-foreground">Estimate</div>
-                      <div className="font-medium">
-                        {Math.floor(selectedTask.estimateMinutes / 60)}h{' '}
-                        {selectedTask.estimateMinutes % 60}m
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Actual time */}
-                {selectedTask.actualMinutes && selectedTask.actualMinutes > 0 && (
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <div className="text-xs text-muted-foreground">Actual</div>
-                      <div className="font-medium">
-                        {Math.floor(selectedTask.actualMinutes / 60)}h{' '}
-                        {selectedTask.actualMinutes % 60}m
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Recurrence */}
-                {selectedTask.recurrence && (
-                  <div className="flex items-center gap-2">
-                    <Repeat className="h-5 w-5 text-muted-foreground" />
-                    <div>
-                      <div className="text-xs text-muted-foreground">Repeats</div>
-                      <div className="font-medium capitalize">{selectedTask.recurrence}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Labels */}
-              {selectedTask.labels && selectedTask.labels.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Tag className="h-4 w-4" />
-                    Labels
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedTask.labels.map((label) => (
-                      <Badge
-                        key={label.id}
-                        variant="outline"
-                        style={{ borderColor: label.color, color: label.color }}
-                      >
-                        {label.icon && <span className="mr-1">{label.icon}</span>}
-                        {label.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Subtasks */}
-              {selectedTask.subtasks && selectedTask.subtasks.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <CheckCircle className="h-4 w-4" />
-                    Subtasks
-                  </div>
-                  <div className="space-y-2">
-                    {selectedTask.subtasks.map((subtask) => (
-                      <div key={subtask.id} className="flex items-center gap-2 text-sm">
-                        <button
-                          onClick={() => {
-                            void useStore.getState().toggleSubtask(selectedTask.id, subtask.id);
-                          }}
-                        >
-                          {subtask.completed ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Circle className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </button>
-                        <span
-                          className={cn(subtask.completed && 'line-through text-muted-foreground')}
-                        >
-                          {subtask.title}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Attachments (placeholder) */}
-              {selectedTask.attachments && selectedTask.attachments.length > 0 && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Link2 className="h-4 w-4" />
-                    Attachments
-                  </div>
-                  <div className="space-y-1">
-                    {selectedTask.attachments.map((att) => (
-                      <div key={att.id} className="flex items-center gap-2 text-sm">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <span>{att.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          ({Math.round(att.size / 1024)} KB)
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
+              <TaskMetaGrid selectedTask={selectedTask} dueLabel={dueLabel} />
+              <TaskLabelsSection labels={selectedTask.labels} />
+              <TaskSubtasksSection subtasks={selectedTask.subtasks} taskId={selectedTask.id} />
+              <TaskAttachmentsSection attachments={selectedTask.attachments} />
               <Separator />
-
-              {/* Change History */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <History className="h-4 w-4" />
-                  History
-                </div>
-                <div className="space-y-2">
-                  {selectedTask.changeLogs && selectedTask.changeLogs.length > 0 ? (
-                    selectedTask.changeLogs.map((log) => (
-                      <div key={log.id} className="text-sm border-l-2 pl-3 border-muted">
-                        <div className="font-medium capitalize">{log.field}</div>
-                        <div className="text-muted-foreground text-xs">
-                          {log.oldValue !== null && (
-                            <span className="line-through">{log.oldValue}</span>
-                          )}
-                          {log.oldValue !== null && log.newValue !== null && ' → '}
-                          {log.newValue !== null && <span>{log.newValue}</span>}
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {formatDistanceToNow(new Date(log.changedAt), { addSuffix: true })}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-sm text-muted-foreground">No changes yet</div>
-                  )}
-                </div>
-              </div>
-
-              {/* Created/updated */}
+              <TaskHistorySection changeLogs={selectedTask.changeLogs} />
               <div className="text-xs text-muted-foreground pt-4 border-t">
                 Created {formatDistanceToNow(new Date(selectedTask.createdAt), { addSuffix: true })}
                 {selectedTask.updatedAt &&
                   selectedTask.updatedAt.getTime() !== selectedTask.createdAt.getTime() && (
                     <>
-                      {' '}
-                      · Updated{' '}
+                      {' · Updated '}
                       {formatDistanceToNow(new Date(selectedTask.updatedAt), { addSuffix: true })}
                     </>
                   )}

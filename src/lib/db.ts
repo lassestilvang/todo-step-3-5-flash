@@ -524,6 +524,15 @@ export function createTask(data: {
   const id = generateId();
   const now = new Date().toISOString();
 
+  const description = data.description ?? '';
+  const due_date = data.due_date ? data.due_date.toISOString() : null;
+  const deadline = data.deadline ? data.deadline.toISOString() : null;
+  const estimate_minutes = data.estimate_minutes ?? 0;
+  const priority = data.priority ?? 'none';
+  const recurrence = data.recurrence ?? null;
+  const recurrence_rule = data.recurrence_rule ?? null;
+  const parent_id = data.parent_id ?? null;
+
   db.prepare(
     `
     INSERT INTO tasks (
@@ -536,25 +545,28 @@ export function createTask(data: {
     id,
     data.list_id,
     data.title,
-    data.description ?? '',
-    data.due_date?.toISOString() ?? null,
-    data.deadline?.toISOString() ?? null,
-    data.estimate_minutes ?? 0,
-    data.priority ?? 'none',
-    data.recurrence ?? null,
-    data.recurrence_rule ?? null,
-    data.parent_id ?? null,
+    description,
+    due_date,
+    deadline,
+    estimate_minutes,
+    priority,
+    recurrence,
+    recurrence_rule,
+    parent_id,
     now,
     now
   );
 
-  // Attach labels if provided
-  if (data.label_ids && data.label_ids.length > 0) {
-    const insertLabel = db.prepare('INSERT INTO task_labels (task_id, label_id) VALUES (?, ?)');
-    for (const labelId of data.label_ids) {
-      insertLabel.run(id, labelId);
+  function attachLabels(taskId: string, labelIds?: string[]) {
+    if (labelIds && labelIds.length > 0) {
+      const insertLabel = db.prepare('INSERT INTO task_labels (task_id, label_id) VALUES (?, ?)');
+      for (const labelId of labelIds) {
+        insertLabel.run(taskId, labelId);
+      }
     }
   }
+
+  attachLabels(id, data.label_ids);
 
   return db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow;
 }
@@ -582,38 +594,27 @@ export function updateTask(
   const updates: string[] = [];
   const values: unknown[] = [];
 
-  if (data.list_id !== undefined) {
-    updates.push('list_id = ?');
-    values.push(data.list_id);
+  const fieldMap: Array<{ column: string; value: unknown; transform?: (v: unknown) => unknown }> = [
+    { column: 'list_id', value: data.list_id },
+    { column: 'parent_id', value: data.parent_id },
+    { column: 'title', value: data.title },
+    { column: 'description', value: data.description },
+    { column: 'due_date', value: data.due_date, transform: (v) => (v as Date).toISOString() },
+    { column: 'deadline', value: data.deadline, transform: (v) => (v as Date).toISOString() },
+    { column: 'estimate_minutes', value: data.estimate_minutes },
+    { column: 'actual_minutes', value: data.actual_minutes },
+    { column: 'priority', value: data.priority },
+    { column: 'recurrence', value: data.recurrence },
+    { column: 'recurrence_rule', value: data.recurrence_rule },
+  ];
+
+  for (const { column, value, transform } of fieldMap) {
+    if (value !== undefined) {
+      updates.push(`${column} = ?`);
+      values.push(transform ? transform(value) : value);
+    }
   }
-  if (data.parent_id !== undefined) {
-    updates.push('parent_id = ?');
-    values.push(data.parent_id);
-  }
-  if (data.title !== undefined) {
-    updates.push('title = ?');
-    values.push(data.title);
-  }
-  if (data.description !== undefined) {
-    updates.push('description = ?');
-    values.push(data.description);
-  }
-  if (data.due_date !== undefined) {
-    updates.push('due_date = ?');
-    values.push(data.due_date.toISOString());
-  }
-  if (data.deadline !== undefined) {
-    updates.push('deadline = ?');
-    values.push(data.deadline.toISOString());
-  }
-  if (data.estimate_minutes !== undefined) {
-    updates.push('estimate_minutes = ?');
-    values.push(data.estimate_minutes);
-  }
-  if (data.actual_minutes !== undefined) {
-    updates.push('actual_minutes = ?');
-    values.push(data.actual_minutes);
-  }
+
   if (data.status !== undefined) {
     updates.push('status = ?');
     values.push(data.status);
@@ -622,18 +623,6 @@ export function updateTask(
     } else {
       updates.push('completed_at = NULL');
     }
-  }
-  if (data.priority !== undefined) {
-    updates.push('priority = ?');
-    values.push(data.priority);
-  }
-  if (data.recurrence !== undefined) {
-    updates.push('recurrence = ?');
-    values.push(data.recurrence);
-  }
-  if (data.recurrence_rule !== undefined) {
-    updates.push('recurrence_rule = ?');
-    values.push(data.recurrence_rule);
   }
 
   if (updates.length > 0) {

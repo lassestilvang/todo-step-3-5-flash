@@ -78,17 +78,20 @@ function filterBySearch(tasks: Task[], query: string): Task[] {
 }
 
 function sortTasks(tasks: Task[]): Task[] {
+  const priorityOrder: Record<Task['priority'], number> = { high: 0, medium: 1, low: 2, none: 3 };
   return [...tasks].sort((a, b) => {
-    if (a.status === 'completed' && b.status !== 'completed') return 1;
-    if (a.status !== 'completed' && b.status === 'completed') return -1;
+    const aCompleted = Number(a.status === 'completed');
+    const bCompleted = Number(b.status === 'completed');
+    if (aCompleted !== bCompleted) return aCompleted - bCompleted;
+
     const aDue = a.dueDate || a.deadline;
     const bDue = b.dueDate || b.deadline;
-    if (!aDue && !bDue) return 0;
-    if (!aDue) return 1;
-    if (!bDue) return -1;
-    if (aDue < bDue) return -1;
-    if (aDue > bDue) return 1;
-    const priorityOrder = { high: 0, medium: 1, low: 2, none: 3 };
-    return priorityOrder[a.priority] - priorityOrder[b.priority];
+    const aTime = aDue ? new Date(aDue).getTime() : Infinity;
+    const bTime = bDue ? new Date(bDue).getTime() : Infinity;
+    if (aTime !== bTime) return aTime - bTime;
+
+    const aPri = priorityOrder[a.priority] ?? 3;
+    const bPri = priorityOrder[b.priority] ?? 3;
+    return aPri - bPri;
   });
 }

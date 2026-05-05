@@ -10,7 +10,7 @@ import {
   getTasksDueInNextDays,
   getAllTasks,
 } from '@/lib/db';
-import type { TaskRow, SubtaskRow } from '@/lib/db';
+import type { TaskRow, SubtaskRow, ListRow, LabelRow } from '@/lib/db';
 import { AppError } from '@/lib/errors';
 import type {
   Task,
@@ -37,7 +37,7 @@ function handleDbError(error: Error, context: string): AppError {
   return new AppError(`Unexpected error during ${context}`, 'INTERNAL', error);
 }
 
-function mapLists(rawLists): TaskList[] {
+function mapLists(rawLists: ListRow[]): TaskList[] {
   return rawLists.map((l) => ({
     id: l.id,
     name: l.name,
@@ -51,7 +51,7 @@ function mapLists(rawLists): TaskList[] {
   }));
 }
 
-function mapLabels(rawLabels): Label[] {
+function mapLabels(rawLabels: LabelRow[]): Label[] {
   return rawLabels.map((l) => ({
     id: l.id,
     name: l.name,
@@ -154,8 +154,7 @@ async function fetchSubtasksMap(taskIds: string[]): Promise<Record<string, Subta
     .all(...taskIds) as SubtaskRow[];
   const map: Record<string, SubtaskRow[]> = {};
   for (const st of subtasks) {
-    if (!map[st.task_id]) map[st.task_id] = [];
-    map[st.task_id].push(st);
+    (map[st.task_id] ??= []).push(st);
   }
   return map;
 }

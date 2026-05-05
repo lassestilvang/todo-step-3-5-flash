@@ -213,7 +213,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   };
 
   // Filter out already selected labels (using useWatch for better performance)
-  const selectedLabelIds = useWatch({ control: form.control, name: 'labelIds' }) || [];
+  const selectedLabelIds = useWatch({ control: form.control, name: 'labelIds' })!;
   const availableLabels = useMemo(() => {
     return labels.filter((l) => !selectedLabelIds.includes(l.id));
   }, [labels, selectedLabelIds]);

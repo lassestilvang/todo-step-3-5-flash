@@ -5,7 +5,7 @@ echo "🔍 Running pre-commit checks..."
 
 # Run lint-staged first to fix formatting and lint issues
 echo "📝 Running lint-staged..."
-bun run lint-staged
+bunx lint-staged
 lint_staged_exit=$?
 
 if [ $lint_staged_exit -ne 0 ]; then

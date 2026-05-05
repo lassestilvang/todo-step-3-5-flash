@@ -149,14 +149,25 @@ export function TaskCard({ task }: TaskCardProps) {
   const due = task.dueDate ?? task.deadline;
   const isOverdue = due ? new Date(due) < new Date() && task.status !== 'completed' : false;
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setSelectedTask(task.id);
+    }
+  };
+
   return (
-    <motion.button
+    <motion.div
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.2 }}
       onClick={() => setSelectedTask(task.id)}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-selected={isSelected}
       className={cn(
         'group relative w-full rounded-lg border bg-card p-4 text-left transition-all hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         task.status === 'completed' && 'opacity-60 bg-muted/30',
@@ -188,6 +199,6 @@ export function TaskCard({ task }: TaskCardProps) {
           <TaskMeta task={task} due={due} isOverdue={isOverdue} />
         </div>
       </div>
-    </motion.button>
+    </motion.div>
   );
 }

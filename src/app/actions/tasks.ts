@@ -66,29 +66,35 @@ export async function createTaskAction(data: CreateTaskData) {
 export async function updateTaskAction(id: string, data: Partial<CreateTaskData>) {
   try {
     const parsed = updateTaskSchema.parse(data);
-    const updateData: {
-      list_id?: string;
-      parent_id?: string;
-      title?: string;
-      description?: string;
-      due_date?: Date;
-      deadline?: Date;
-      estimate_minutes?: number;
-      status?: string;
-      priority?: string;
-      recurrence?: string;
-      recurrence_rule?: string;
-    } = {};
-    if (parsed.listId !== undefined) updateData.list_id = parsed.listId;
-    if (parsed.title !== undefined) updateData.title = parsed.title;
-    if (parsed.description !== undefined) updateData.description = parsed.description;
-    if (parsed.dueDate !== undefined) updateData.due_date = parsed.dueDate;
-    if (parsed.deadline !== undefined) updateData.deadline = parsed.deadline;
-    if (parsed.estimateMinutes !== undefined) updateData.estimate_minutes = parsed.estimateMinutes;
-    if (parsed.priority !== undefined) updateData.priority = parsed.priority;
-    if (parsed.recurrence !== undefined) updateData.recurrence = parsed.recurrence;
-    if (parsed.parentId !== undefined) updateData.parent_id = parsed.parentId;
-    const result = updateTask(id, updateData);
+    type UpdateKey =
+      | 'listId'
+      | 'parentId'
+      | 'title'
+      | 'description'
+      | 'dueDate'
+      | 'deadline'
+      | 'estimateMinutes'
+      | 'priority'
+      | 'recurrence';
+    const fieldMap: Array<{ key: UpdateKey; dbKey: string }> = [
+      { key: 'listId', dbKey: 'list_id' },
+      { key: 'parentId', dbKey: 'parent_id' },
+      { key: 'title', dbKey: 'title' },
+      { key: 'description', dbKey: 'description' },
+      { key: 'dueDate', dbKey: 'due_date' },
+      { key: 'deadline', dbKey: 'deadline' },
+      { key: 'estimateMinutes', dbKey: 'estimate_minutes' },
+      { key: 'priority', dbKey: 'priority' },
+      { key: 'recurrence', dbKey: 'recurrence' },
+    ];
+    const updateData: Record<string, unknown> = {};
+    for (const { key, dbKey } of fieldMap) {
+      const value = parsed[key];
+      if (value !== undefined) {
+        updateData[dbKey] = value;
+      }
+    }
+    const result = updateTask(id, updateData as Parameters<typeof updateTask>[1]);
     if (!result) return null;
     const full = getTaskById(id);
     return full ? toTask(full) : null;

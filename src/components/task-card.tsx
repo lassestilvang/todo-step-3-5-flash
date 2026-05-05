@@ -167,7 +167,7 @@ export function TaskCard({ task }: TaskCardProps) {
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
-      aria-selected={isSelected}
+      aria-pressed={isSelected}
       className={cn(
         'group relative w-full rounded-lg border bg-card p-4 text-left transition-all hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         task.status === 'completed' && 'opacity-60 bg-muted/30',

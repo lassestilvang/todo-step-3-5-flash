@@ -9,6 +9,7 @@ import type { Task } from '@/types';
 // Mock framer-motion to avoid animation issues in jsdom
 vi.mock('framer-motion', () => ({
   motion: {
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
     button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
   },
 }));

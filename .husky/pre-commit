@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+set -u
+
 echo "🔍 Running pre-commit checks..."
 
 # Run lint-staged first to fix formatting and lint issues

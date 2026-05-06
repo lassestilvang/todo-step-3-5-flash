@@ -1,6 +1,6 @@
 {
-  "**/*.{ts,tsx}": ["bun run lint --fix", "prettier --write"],
-  "**/*.{js,jsx,mjs,cjs}": ["bun run lint --fix", "prettier --write"],
-  "**/*.{json,md,yml,yaml}": ["prettier --write"],
-  "**/*.{css,scss}": ["bun run lint --fix", "prettier --write"]
+  "**/*.{ts,tsx}": ["bun run lint --fix", "prettier --write --cache"],
+  "**/*.{js,jsx,mjs,cjs}": ["bun run lint --fix", "prettier --write --cache"],
+  "**/*.{json,md,yml,yaml}": ["prettier --write --cache"],
+  "**/*.{css,scss}": ["bun run lint --fix", "prettier --write --cache"]
 }

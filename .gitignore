@@ -56,5 +56,9 @@ next-env.d.ts
 *.swp
 *.swo
 
+# Tool caches
+.eslintcache
+.prettiercache
+
 # OS
 Thumbs.db

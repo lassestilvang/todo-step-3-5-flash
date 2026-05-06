@@ -1,6 +1,10 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
+import importPlugin from 'eslint-plugin-import';
+import jsxA11yPlugin from 'eslint-plugin-jsx-a11y';
+import reactPlugin from 'eslint-plugin-react';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -14,6 +18,12 @@ const eslintConfig = defineConfig([
         project: './tsconfig.json',
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+    plugins: {
+      import: importPlugin,
+      'jsx-a11y': jsxA11yPlugin,
+      react: reactPlugin,
+      '@typescript-eslint': tsPlugin,
     },
     rules: {
       'import/order': [

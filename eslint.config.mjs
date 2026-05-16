@@ -3,12 +3,6 @@ import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
 import importPlugin from 'eslint-plugin-import';
 
-console.log('jsx-a11y plugin from nextVitals[0]:', nextVitals[0].plugins['jsx-a11y']);
-console.log(
-  'jsx-a11y rules:',
-  Object.keys(nextVitals[0].plugins['jsx-a11y'].rules || {}).slice(0, 5)
-);
-
 const rawConfig = [
   ...nextVitals,
   ...nextTs,
@@ -23,6 +17,9 @@ const rawConfig = [
     },
     plugins: {
       import: importPlugin,
+      'jsx-a11y': nextVitals[0].plugins['jsx-a11y'],
+      react: nextVitals[0].plugins.react,
+      'react-hooks': nextVitals[0].plugins['react-hooks'],
     },
     rules: {
       'import/order': [
@@ -57,21 +54,6 @@ const rawConfig = [
       'react/jsx-key': 'error',
     },
   },
-  {
-    ignores: ['**/*.test.ts', '**/*.test.tsx', '**/*.spec.ts', '**/*.spec.tsx'],
-    rules: {
-      'no-console': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-    },
-  },
 ];
-
-console.log('Config array:');
-rawConfig.forEach((c, i) => {
-  const plugins = c.plugins ? Object.keys(c.plugins) : [];
-  const files = c.files ? c.files.join(', ') : 'none';
-  const rules = c.rules ? Object.keys(c.rules) : [];
-  console.log(i, 'files:', files, '| plugins:', plugins, '| rules:', rules);
-});
 
 export default defineConfig(rawConfig);

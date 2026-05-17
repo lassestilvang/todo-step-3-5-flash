@@ -5,8 +5,8 @@ import { createLabel, updateLabel, deleteLabel } from '@/lib/db';
 import { AppError } from '@/lib/errors';
 import { createLabelSchema, updateLabelSchema } from '@/lib/validation';
 
-import { toLabel } from './_helpers';
 import { handleDbError } from './_db-error';
+import { toLabel } from './_helpers';
 
 export async function createLabelAction(name: string, color: string, icon?: string) {
   try {

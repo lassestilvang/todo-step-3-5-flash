@@ -181,7 +181,7 @@ function TaskLabelsSection({ labels }: { labels: Task['labels'] }) {
   );
 }
 
-function TaskSubtasksSection({ subtasks, taskId }: { subtasks: Task['subtasks']; taskId: string }) {
+function TaskSubtasksSection({ subtasks, taskId, onToggle }: { subtasks: Task['subtasks']; taskId: string; onToggle: (taskId: string, subtaskId: string) => void }) {
   if (!subtasks || subtasks.length === 0) return null;
   return (
     <div className="space-y-2">
@@ -191,11 +191,11 @@ function TaskSubtasksSection({ subtasks, taskId }: { subtasks: Task['subtasks'];
       <div className="space-y-2">
         {subtasks.map((subtask) => (
           <div key={subtask.id} className="flex items-center gap-2 text-sm">
-            <button
-              onClick={() => {
-                void useStore.getState().toggleSubtask(taskId, subtask.id);
-              }}
-            >
+              <button
+                onClick={() => {
+                  void onToggle(taskId, subtask.id);
+                }}
+              >
               {subtask.completed ? (
                 <CheckCircle className="h-4 w-4 text-green-500" />
               ) : (
@@ -213,7 +213,7 @@ function TaskSubtasksSection({ subtasks, taskId }: { subtasks: Task['subtasks'];
 }
 
 export function TaskDetailSheet() {
-  const { selectedTaskId, tasks, setSelectedTask, toggleTaskComplete } = useStore();
+  const { selectedTaskId, tasks, setSelectedTask, toggleTaskComplete, toggleSubtask } = useStore();
   const selectedTask = tasks.find((t) => t.id === selectedTaskId);
   if (!selectedTask) return null;
 
@@ -264,7 +264,7 @@ export function TaskDetailSheet() {
               <Separator />
               <TaskMetaGrid selectedTask={selectedTask} dueLabel={dueLabel} />
               <TaskLabelsSection labels={selectedTask.labels} />
-              <TaskSubtasksSection subtasks={selectedTask.subtasks} taskId={selectedTask.id} />
+              <TaskSubtasksSection subtasks={selectedTask.subtasks} taskId={selectedTask.id} onToggle={(taskId, subtaskId) => { void toggleSubtask(taskId, subtaskId); }} />
               <TaskAttachmentsSection attachments={selectedTask.attachments} />
               <Separator />
               <TaskHistorySection changeLogs={selectedTask.changeLogs} />

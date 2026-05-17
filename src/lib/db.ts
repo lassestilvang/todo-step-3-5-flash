@@ -213,7 +213,7 @@ export function getAllLists(): ListRow[] {
 }
 
 export function getListById(id: string): ListRow | null {
-  return rowToObj(db.prepare('SELECT * FROM lists WHERE id = ?').get(id)) as ListRow | null;
+  return db.prepare('SELECT * FROM lists WHERE id = ?').get(id) as ListRow | null;
 }
 
 export function createList(data: {

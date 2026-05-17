@@ -6,7 +6,7 @@ import importPlugin from 'eslint-plugin-import';
 const rawConfig = [
   ...nextVitals,
   ...nextTs,
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'commitlint.config.*']),
   {
     files: ['**/*.{ts,tsx}', '!src/__tests__/**'],
     languageOptions: {

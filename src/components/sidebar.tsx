@@ -3,8 +3,7 @@
 import { LayoutList, Calendar, CalendarDays, Sparkles, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,

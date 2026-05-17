@@ -23,6 +23,9 @@ export default function HomePage() {
   const createTaskOpen = useStore((s) => s.isCreateTaskOpen);
   const closeTaskModal = useStore((s) => s.closeTaskModal);
   const currentView = useStore((s) => s.currentView);
+  const taskCount = useStore((s) => s.tasks.length);
+  const overdueCount = useStore((s) => s.overdueCount);
+  const openCreateTask = useStore((s) => s.openCreateTask);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -111,10 +114,10 @@ export default function HomePage() {
                   {currentView === 'week' ? 'Next 7 Days' : currentView}
                 </h2>
                 <p className="text-xs md:text-sm text-muted-foreground">
-                  {useStore.getState().tasks.length} tasks
-                  {useStore.getState().overdueCount > 0 && (
+                  {taskCount} tasks
+                  {overdueCount > 0 && (
                     <span className="ml-2 text-red-500">
-                      ({useStore.getState().overdueCount} overdue)
+                      ({overdueCount} overdue)
                     </span>
                   )}
                 </p>
@@ -125,7 +128,7 @@ export default function HomePage() {
               <div className="hidden md:block">
                 <ViewToggle />
               </div>
-              <Button size="sm" onClick={() => useStore.getState().openCreateTask()}>
+              <Button size="sm" onClick={() => openCreateTask()}>
                 <span className="hidden sm:inline">+ New Task</span>
                 <span className="sm:hidden">+</span>
               </Button>

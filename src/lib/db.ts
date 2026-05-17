@@ -866,7 +866,12 @@ export function deleteReminder(id: string): boolean {
 
 // ==================== SEED DATA ====================
 
+let __hasSeeded = false;
+
 export function seedDefaultData() {
+  if (__hasSeeded) return;
+  __hasSeeded = true;
+
   ensureInboxExists();
 
   const labels = getAllLabels();
@@ -885,5 +890,3 @@ export function seedDefaultData() {
     createList({ name: 'Someday', color: '#6b7280', icon: '☁️', order: 3 });
   }
 }
-
-seedDefaultData();

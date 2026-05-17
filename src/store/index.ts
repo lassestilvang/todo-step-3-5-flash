@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import * as actions from '@/app/actions';
+import { seedDefaultData } from '@/lib/db';
 
 import { createLabelActions } from './actions/labels';
 import { createListActions } from './actions/lists';
@@ -30,6 +31,7 @@ export const useStore = create<AppState>()(
       error: null,
 
       loadData: async () => {
+        seedDefaultData();
         set({ loading: true, error: null });
         try {
           const result = await actions.loadAppData({

@@ -47,8 +47,10 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   INBOX_LIST_ID,
   DATE_FORMATS,
-  PRIORITIES,
+  PRIORITY_VALUES,
+  PRIORITY_LABELS,
   PRIORITY_TEXT_COLORS,
+  RECURRENCE_VALUES,
   RECURRENCE_OPTIONS,
   STRINGS,
 } from '@/constants';
@@ -62,8 +64,8 @@ const taskSchema = z.object({
   dueDate: z.date().optional(),
   deadline: z.date().optional(),
   estimateMinutes: z.number().min(0).optional(),
-  priority: z.enum(['none', 'low', 'medium', 'high']).default('none'),
-  recurrence: z.enum(['daily', 'weekly', 'weekday', 'monthly', 'yearly', 'custom']).optional(),
+  priority: z.enum(PRIORITY_VALUES).default('none'),
+  recurrence: z.enum(RECURRENCE_VALUES).optional(),
   labelIds: z.array(z.string()).optional(),
 });
 
@@ -72,14 +74,14 @@ type TaskFormData = z.infer<typeof taskSchema>;
 // Form default values and UI constants are imported from @/constants
 
 export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { lists, labels, editTaskId, selectedListId } = useStore();
+  const { lists, labels, editTaskId, selectedListId, tasks } = useStore();
   const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>(
     []
   );
   const [newSubtask, setNewSubtask] = useState('');
 
   const isEditing = !!editTaskId;
-  const editTask = isEditing ? useStore.getState().getTaskById(editTaskId) : null;
+  const editTask = isEditing ? tasks.find((t) => t.id === editTaskId) : null;
 
   const form = useForm({
     resolver: zodResolver(taskSchema),
@@ -109,6 +111,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
           recurrence: editTask.recurrence,
           labelIds: editTask.labels?.map((l) => l.id) || [],
         });
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setSubtasks(
           editTask.subtasks?.map((s) => ({
             id: s.id,
@@ -146,7 +149,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
       });
 
       // Get existing subtasks from store
-      const existingTask = useStore.getState().getTaskById(editTaskId);
+      const existingTask = tasks.find((t) => t.id === editTaskId);
       const existingSubtasks = existingTask?.subtasks || [];
 
       // Delete removed subtasks in parallel
@@ -298,10 +301,10 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {PRIORITIES.map((p) => (
-                          <SelectItem key={p.value} value={p.value}>
-                            <Flag className={`mr-2 h-4 w-4 ${PRIORITY_TEXT_COLORS[p.value]}`} />
-                            {p.label}
+                        {PRIORITY_VALUES.map((p) => (
+                          <SelectItem key={p} value={p}>
+                            <Flag className={`mr-2 h-4 w-4 ${PRIORITY_TEXT_COLORS[p]}`} />
+                            {PRIORITY_LABELS[p]}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -439,7 +442,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
             <div className="space-y-2">
               <FormLabel>Labels</FormLabel>
               <div className="flex flex-wrap gap-2">
-                {form.watch('labelIds')?.map((labelId) => {
+                {selectedLabelIds.map((labelId) => {
                   const label = labels.find((l) => l.id === labelId);
                   if (!label) return null;
                   return (

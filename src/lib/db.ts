@@ -138,7 +138,7 @@ export function rowToObj(row: unknown): Record<string, unknown> | null {
   const obj = { ...(row as Record<string, unknown>) };
   Object.keys(obj).forEach((key) => {
     const val = obj[key];
-    if (typeof val === 'string' && (key.endsWith('_at') || key.includes('Date'))) {
+    if (typeof val === 'string' && (key.endsWith('_at') || key.endsWith('_date') || key.includes('Date'))) {
       const d = new Date(val);
       obj[key] = isNaN(d.getTime()) ? null : d;
     }

@@ -11,7 +11,7 @@ import { debounce } from '@/lib/utils';
 import { useStore } from '@/store';
 
 export function SearchBar() {
-  const { tasks, searchQuery, setSearchQuery } = useStore();
+  const { tasks, searchQuery, setSearchQuery, setSelectedTask } = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const [localQuery, setLocalQuery] = useState(searchQuery);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -26,14 +26,26 @@ export function SearchBar() {
     }));
   }, [tasks]);
 
-  // Fuse instance
-  const fuse = useMemo(() => {
-    return new Fuse(searchableTasks, {
-      keys: ['title', 'description', 'listName'],
-      threshold: 0.3,
-      includeScore: true,
-    });
-  }, [searchableTasks]);
+  // Fuse instance — created once; collection updated in-place via setCollection()
+  interface SearchableTask {
+    id: string;
+    title: string;
+    description: string;
+    listName: string;
+  }
+  const fuse = useMemo(
+    () =>
+      new Fuse<SearchableTask>([], {
+        keys: ['title', 'description', 'listName'],
+        threshold: 0.3,
+        includeScore: true,
+      }),
+    []
+  );
+
+  useEffect(() => {
+    fuse.setCollection(searchableTasks);
+  }, [fuse, searchableTasks]);
 
   // Filtered results
   const results = useMemo(() => {
@@ -99,14 +111,14 @@ export function SearchBar() {
           setLocalQuery(selected.title);
           setIsOpen(false);
           setFocusedIndex(-1);
-          useStore.getState().setSelectedTask(selected.id);
+          setSelectedTask(selected.id);
         }
       } else if (e.key === 'Escape') {
         setIsOpen(false);
         setFocusedIndex(-1);
       }
     },
-    [isOpen, results, focusedIndex, setSearchQuery]
+    [isOpen, results, focusedIndex, setSearchQuery, setSelectedTask]
   );
 
   const handleFocus = () => setIsOpen(true);
@@ -116,7 +128,7 @@ export function SearchBar() {
     setLocalQuery(task.title);
     setIsOpen(false);
     setFocusedIndex(-1);
-    useStore.getState().setSelectedTask(task.id);
+    setSelectedTask(task.id);
   };
 
   const resultListId = 'search-results-list';

@@ -2,7 +2,6 @@
 
 import { Link2, FileText } from 'lucide-react';
 
-import { Badge } from '@/components/ui/badge';
 import type { Task } from '@/types';
 
 export function TaskAttachmentsSection({ attachments }: { attachments: Task['attachments'] }) {

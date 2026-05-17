@@ -5,7 +5,7 @@ import { computeOverdue } from '../selectors';
 import type { StoreSetter, StoreGetter } from '../types';
 import type { AppState } from '../types';
 
-export function createListActions(set: StoreSetter, get: StoreGetter) {
+export function createListActions(set: StoreSetter, _get: StoreGetter) {
   return {
     addList: async (data: CreateListData): Promise<void> => {
       const newList = await actions.createListAction(data);

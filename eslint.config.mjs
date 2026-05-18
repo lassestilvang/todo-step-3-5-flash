@@ -3,6 +3,18 @@ import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
 import importPlugin from 'eslint-plugin-import';
 
+// fan-out the FlatCompat configs so we can safely merge all plugin registrations
+const fannedVitals = [...nextVitals];
+const fannedTs = [...nextTs];
+
+// Collect plugins from all fan-out items to avoid fragile index-based access
+const fanPlugins = {
+  ...(fannedVitals[0]?.plugins ?? {}),
+  ...(fannedVitals[1]?.plugins ?? {}),
+  ...(fannedVitals[3]?.plugins ?? {}),
+  ...(fannedTs[0]?.plugins ?? {}),
+};
+
 const rawConfig = [
   ...nextVitals,
   ...nextTs,
@@ -15,11 +27,11 @@ const rawConfig = [
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    // explicit plugins block: merge fan-out entries so all rules referenced
+    // below are resolvable even if the FlatCompat spread order changes
     plugins: {
+      ...fanPlugins,
       import: importPlugin,
-      'jsx-a11y': nextVitals[0].plugins['jsx-a11y'],
-      react: nextVitals[0].plugins.react,
-      'react-hooks': nextVitals[0].plugins['react-hooks'],
     },
     rules: {
       'import/order': [

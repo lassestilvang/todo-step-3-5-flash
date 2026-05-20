@@ -1,8 +1,8 @@
 'use client';
 
-import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Clock, Flag, Tag, ChevronRight, AlertTriangle } from 'lucide-react';
+import React from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ interface TaskCardProps {
   task: Task;
 }
 
-function TaskCheckbox({
+const TaskCheckbox = React.memo(function TaskCheckbox({
   task,
   toggleTaskComplete,
 }: {
@@ -38,9 +38,9 @@ function TaskCheckbox({
       )}
     />
   );
-}
+});
 
-function TaskTitle({ task }: { task: Task }) {
+const TaskTitle = React.memo(function TaskTitle({ task }: { task: Task }) {
   return (
     <h4
       className={cn(
@@ -51,7 +51,7 @@ function TaskTitle({ task }: { task: Task }) {
       {task.title}
     </h4>
   );
-}
+});
 
 function TaskDescription({ task }: { task: Task }) {
   if (!task.description) return null;
@@ -106,10 +106,19 @@ function LabelsList({ labels }: { labels: Task['labels'] }) {
 function SubtasksProgress({ subtasks }: { subtasks: Task['subtasks'] }) {
   if (!subtasks || subtasks.length === 0) return null;
   const completed = subtasks.filter((s) => s.completed).length;
+  const percent = Math.round((completed / subtasks.length) * 100);
   return (
-    <span className="text-muted-foreground">
-      {completed}/{subtasks.length} subtasks
-    </span>
+    <div className="flex items-center gap-2">
+      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden" aria-hidden="true">
+        <div
+          className="h-full bg-primary rounded-full transition-all duration-200"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      <span className="text-[10px] text-muted-foreground tabular-nums w-12 text-right">
+        {completed}/{subtasks.length}
+      </span>
+    </div>
   );
 }
 
@@ -142,7 +151,7 @@ function TaskMeta({
   );
 }
 
-export function TaskCard({ task }: TaskCardProps) {
+export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
   const { toggleTaskComplete, openEditTask, setSelectedTask, selectedTaskId } = useStore();
 
   const isSelected = selectedTaskId === task.id;

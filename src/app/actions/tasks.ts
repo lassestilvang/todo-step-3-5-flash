@@ -185,3 +185,16 @@ export async function deleteSubtaskAction(subtaskId: string) {
     throw error;
   }
 }
+
+export async function deleteCompletedTasksAction(): Promise<{ deleted: number }> {
+  try {
+    const stmt = db.prepare("DELETE FROM tasks WHERE status = 'completed'");
+    const result = stmt.run();
+    return { deleted: result.changes };
+  } catch (error) {
+    if (error instanceof Error && !(error instanceof AppError)) {
+      throw handleDbError(error, 'deleteCompletedTasks');
+    }
+    throw error;
+  }
+}

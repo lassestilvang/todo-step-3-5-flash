@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutList, Calendar, CalendarDays, Sparkles, Plus, Trash2 } from 'lucide-react';
+import { LayoutList, Calendar, CalendarDays, Sparkles, Plus, Trash2, Trash } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -36,6 +36,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
     deleteList,
     overdueCount,
     tasks,
+    clearCompleted,
   } = useStore();
 
   const [newListDialogOpen, setNewListDialogOpen] = useState(false);
@@ -43,7 +44,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const [newListColor, setNewListColor] = useState('#3b82f6');
   const [newListIcon, setNewListIcon] = useState('📋');
 
-  // Recompute task counts only when tasks array reference changes
+  // Memoize task counts per list to avoid recomputing on every render
   const taskCountMap = useMemo(() => {
     const map = new Map<string, number>();
     for (const t of tasks) {
@@ -51,6 +52,11 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
     }
     return map;
   }, [tasks]);
+
+  const completedCount = useMemo(
+    () => tasks.filter((t) => t.status === 'completed').length,
+    [tasks]
+  );
 
   const handleCreateList = () => {
     if (!newListName.trim()) return;
@@ -70,6 +76,11 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
     if (selectedListId === id) {
       setSelectedList(null);
     }
+  };
+
+  const handleClearCompleted = async () => {
+    if (completedCount === 0) return;
+    await clearCompleted();
   };
 
   const handleListClick = (id: string | null) => {
@@ -223,14 +234,27 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
         })}
       </div>
 
-      {/* Labels (future) */}
-      {/* Overdue indicator */}
-      {overdueCount > 0 && (
-        <div className="px-2 py-2 text-sm text-red-500 flex items-center">
-          <span className="mr-2">⚠️</span>
-          {overdueCount} overdue task{overdueCount > 1 ? 's' : ''}
-        </div>
-      )}
+      {/* Footer */}
+      <div className="space-y-1 mt-auto">
+        {overdueCount > 0 && (
+          <div className="px-2 py-2 text-sm text-red-500 flex items-center">
+            <span className="mr-2">⚠️</span>
+            {overdueCount} overdue task{overdueCount > 1 ? 's' : ''}
+          </div>
+        )}
+        {completedCount > 0 && (
+          <button
+            onClick={handleClearCompleted}
+            className={cn(
+              buttonVariants({ variant: 'ghost' }),
+              'w-full justify-start text-sm text-muted-foreground hover:text-destructive'
+            )}
+          >
+            <Trash className="mr-2 h-4 w-4" />
+            Clear {completedCount} completed
+          </button>
+        )}
+      </div>
     </nav>
   );
 }

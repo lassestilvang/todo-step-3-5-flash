@@ -89,5 +89,15 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
         ),
       }));
     },
+
+    clearCompleted: async (): Promise<void> => {
+      const { deleted } = await actions.deleteCompletedTasksAction();
+      if (deleted > 0) {
+        set((state: AppState) => ({
+          tasks: state.tasks.filter((t: Task) => t.status !== 'completed'),
+          overdueCount: computeOverdue(state.tasks.filter((t: Task) => t.status !== 'completed')),
+        }));
+      }
+    },
   };
 }

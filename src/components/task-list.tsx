@@ -112,13 +112,23 @@ function TaskGroups({ tasks }: { tasks: Task[] }) {
 
 export function TaskList() {
   const tasks = useStore((s) => s.getFilteredTasks());
+  const searchQuery = useStore((s) => s.searchQuery);
+  const selectedListId = useStore((s) => s.selectedListId);
+
+  const isFiltered = !!searchQuery.trim() || !!selectedListId;
 
   if (tasks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-        <div className="text-6xl mb-4">📋</div>
-        <p className="text-lg">{STRINGS.NO_TASKS_FOUND}</p>
-        <p className="text-sm">{STRINGS.CREATE_TASK_TO_GET_STARTED}</p>
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
+        <div className="text-6xl">{isFiltered ? '🔍' : '📋'}</div>
+        <p className="text-lg">
+          {isFiltered ? 'No tasks match your filters' : 'No tasks yet'}
+        </p>
+        <p className="text-sm">
+          {isFiltered
+            ? 'Try adjusting your search or filters'
+            : 'Create a task to get started!'}
+        </p>
       </div>
     );
   }

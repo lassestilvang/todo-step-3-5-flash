@@ -1,7 +1,7 @@
 'use client';
 
 import { LayoutList, Calendar, CalendarDays, Sparkles, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
@@ -35,12 +35,22 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
     addList,
     deleteList,
     overdueCount,
+    tasks,
   } = useStore();
 
   const [newListDialogOpen, setNewListDialogOpen] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListColor, setNewListColor] = useState('#3b82f6');
   const [newListIcon, setNewListIcon] = useState('📋');
+
+  // Recompute task counts only when tasks array reference changes
+  const taskCountMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const t of tasks) {
+      map.set(t.listId, (map.get(t.listId) ?? 0) + 1);
+    }
+    return map;
+  }, [tasks]);
 
   const handleCreateList = () => {
     if (!newListName.trim()) return;
@@ -179,8 +189,8 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
         </div>
 
         {lists.map((list) => {
-          const taskCount = useStore.getState().tasks.filter((t) => t.listId === list.id).length;
           const isActive = selectedListId === list.id;
+          const taskCount = taskCountMap.get(list.id) ?? 0;
           return (
             <div key={list.id} className="group relative">
               <button

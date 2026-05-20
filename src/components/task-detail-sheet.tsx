@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
 import {
   Clock,
@@ -217,10 +218,27 @@ export function TaskDetailSheet() {
   const selectedTask = tasks.find((t) => t.id === selectedTaskId);
   if (!selectedTask) return null;
 
-  const tasksArray = tasks.filter((t) => t.status !== 'completed' || t.id === selectedTaskId);
-  const currentIndex = tasksArray.findIndex((t) => t.id === selectedTaskId);
-  const prevTask = currentIndex > 0 ? tasksArray[currentIndex - 1] : null;
-  const nextTask = currentIndex < tasksArray.length - 1 ? tasksArray[currentIndex + 1] : null;
+  // Recompute only when tasks or selectedTaskId changes
+  const { tasksArray, currentIndex, prevTask, nextTask, dueLabel } = useMemo(() => {
+    const arr = tasks.filter((t) => t.status !== 'completed' || t.id === selectedTaskId);
+    const idx = arr.findIndex((t) => t.id === selectedTaskId);
+    const date = selectedTask.dueDate ?? selectedTask.deadline;
+    let label: string | null = null;
+    if (date) {
+      if (isToday(date)) label = STRINGS.TODAY;
+      else if (isTomorrow(date)) label = STRINGS.TOMORROW;
+      else if (isThisWeek(date)) label = format(date, DATE_FORMATS.FULL_WEEKDAY);
+      else label = format(date, DATE_FORMATS.FULL_DATE);
+    }
+    return {
+      tasksArray: arr,
+      currentIndex: idx,
+      prevTask: idx > 0 ? arr[idx - 1] : null,
+      nextTask: idx < arr.length - 1 ? arr[idx + 1] : null,
+      dueLabel: label,
+      breadcrumbDate: date,
+    };
+  }, [tasks, selectedTaskId, selectedTask]);
 
   const handlePrev = () => {
     if (prevTask) setSelectedTask(prevTask.id);
@@ -229,15 +247,6 @@ export function TaskDetailSheet() {
   const handleNext = () => {
     if (nextTask) setSelectedTask(nextTask.id);
   };
-
-  const dueLabel = (() => {
-    const date = selectedTask.dueDate ?? selectedTask.deadline;
-    if (!date) return null;
-    if (isToday(date)) return STRINGS.TODAY;
-    if (isTomorrow(date)) return STRINGS.TOMORROW;
-    if (isThisWeek(date)) return format(date, DATE_FORMATS.FULL_WEEKDAY);
-    return format(date, DATE_FORMATS.FULL_DATE);
-  })();
 
   return (
     <Sheet

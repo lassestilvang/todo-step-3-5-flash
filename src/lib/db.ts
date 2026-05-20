@@ -2,15 +2,31 @@
 import fs from 'fs';
 import path from 'path';
 
-import Database from 'better-sqlite3';
-
 import { INBOX_LIST_ID } from '@/constants';
 
-let db: ReturnType<typeof Database>;
+// Gracefully handle environments where better-sqlite3 cannot be loaded
+// (e.g. Bun's test runner which does not support this native add-on).
+// In that case, liveDatabase will remain null and the test mock
+// (registered via vi.mock in setup files) will be used instead.
+let liveDatabase: typeof import('better-sqlite3') | null = null;
+try {
+  const mod = await import('better-sqlite3');
+  liveDatabase = mod.default ?? mod;
+} catch {
+  // safe to ignore — tests supply a vi.mock('better-sqlite3') shim
+}
+
+let db: ReturnType<typeof liveDatabase>;
 
 if (process.env.NODE_ENV === 'test') {
-  db = new Database(':memory:');
+  db = (liveDatabase ?? (() => {}) as any)(':memory:');
 } else {
+  const Database = liveDatabase;
+  if (!Database) {
+    throw new Error(
+      'Database is not initialised: better-sqlite3 is not available in this environment'
+    );
+  }
   const dbDir = path.resolve(process.cwd(), process.env.DATABASE_PATH || 'data');
   const dbPath = path.join(dbDir, 'task-planner.db');
 

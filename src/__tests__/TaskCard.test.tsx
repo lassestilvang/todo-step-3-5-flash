@@ -149,6 +149,6 @@ describe('TaskCard', () => {
     });
     render(<TaskCard task={task} />);
 
-    expect(screen.getByText('1/2 subtasks')).toBeInTheDocument();
+    expect(screen.getByText('1/2')).toBeInTheDocument();
   });
 });

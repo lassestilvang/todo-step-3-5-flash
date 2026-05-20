@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
 import {
   Clock,
@@ -182,7 +181,15 @@ function TaskLabelsSection({ labels }: { labels: Task['labels'] }) {
   );
 }
 
-function TaskSubtasksSection({ subtasks, taskId, onToggle }: { subtasks: Task['subtasks']; taskId: string; onToggle: (taskId: string, subtaskId: string) => void }) {
+function TaskSubtasksSection({
+  subtasks,
+  taskId,
+  onToggle,
+}: {
+  subtasks: Task['subtasks'];
+  taskId: string;
+  onToggle: (taskId: string, subtaskId: string) => void;
+}) {
   if (!subtasks || subtasks.length === 0) return null;
   return (
     <div className="space-y-2">
@@ -192,11 +199,11 @@ function TaskSubtasksSection({ subtasks, taskId, onToggle }: { subtasks: Task['s
       <div className="space-y-2">
         {subtasks.map((subtask) => (
           <div key={subtask.id} className="flex items-center gap-2 text-sm">
-              <button
-                onClick={() => {
-                  void onToggle(taskId, subtask.id);
-                }}
-              >
+            <button
+              onClick={() => {
+                void onToggle(taskId, subtask.id);
+              }}
+            >
               {subtask.completed ? (
                 <CheckCircle className="h-4 w-4 text-green-500" />
               ) : (
@@ -218,27 +225,19 @@ export function TaskDetailSheet() {
   const selectedTask = tasks.find((t) => t.id === selectedTaskId);
   if (!selectedTask) return null;
 
-  // Recompute only when tasks or selectedTaskId changes
-  const { tasksArray, currentIndex, prevTask, nextTask, dueLabel } = useMemo(() => {
-    const arr = tasks.filter((t) => t.status !== 'completed' || t.id === selectedTaskId);
-    const idx = arr.findIndex((t) => t.id === selectedTaskId);
+  const tasksArray = tasks.filter((t) => t.status !== 'completed' || t.id === selectedTaskId);
+  const currentIndex = tasksArray.findIndex((t) => t.id === selectedTaskId);
+  const prevTask = currentIndex > 0 ? tasksArray[currentIndex - 1] : null;
+  const nextTask = currentIndex < tasksArray.length - 1 ? tasksArray[currentIndex + 1] : null;
+
+  const dueLabel = (() => {
     const date = selectedTask.dueDate ?? selectedTask.deadline;
-    let label: string | null = null;
-    if (date) {
-      if (isToday(date)) label = STRINGS.TODAY;
-      else if (isTomorrow(date)) label = STRINGS.TOMORROW;
-      else if (isThisWeek(date)) label = format(date, DATE_FORMATS.FULL_WEEKDAY);
-      else label = format(date, DATE_FORMATS.FULL_DATE);
-    }
-    return {
-      tasksArray: arr,
-      currentIndex: idx,
-      prevTask: idx > 0 ? arr[idx - 1] : null,
-      nextTask: idx < arr.length - 1 ? arr[idx + 1] : null,
-      dueLabel: label,
-      breadcrumbDate: date,
-    };
-  }, [tasks, selectedTaskId, selectedTask]);
+    if (!date) return null;
+    if (isToday(date)) return STRINGS.TODAY;
+    if (isTomorrow(date)) return STRINGS.TOMORROW;
+    if (isThisWeek(date)) return format(date, DATE_FORMATS.FULL_WEEKDAY);
+    return format(date, DATE_FORMATS.FULL_DATE);
+  })();
 
   const handlePrev = () => {
     if (prevTask) setSelectedTask(prevTask.id);
@@ -273,7 +272,13 @@ export function TaskDetailSheet() {
               <Separator />
               <TaskMetaGrid selectedTask={selectedTask} dueLabel={dueLabel} />
               <TaskLabelsSection labels={selectedTask.labels} />
-              <TaskSubtasksSection subtasks={selectedTask.subtasks} taskId={selectedTask.id} onToggle={(taskId, subtaskId) => { void toggleSubtask(taskId, subtaskId); }} />
+              <TaskSubtasksSection
+                subtasks={selectedTask.subtasks}
+                taskId={selectedTask.id}
+                onToggle={(taskId, subtaskId) => {
+                  void toggleSubtask(taskId, subtaskId);
+                }}
+              />
               <TaskAttachmentsSection attachments={selectedTask.attachments} />
               <Separator />
               <TaskHistorySection changeLogs={selectedTask.changeLogs} />

@@ -2,12 +2,10 @@
 
 import { format, isToday, isTomorrow, isThisWeek, isThisYear } from 'date-fns';
 import { Plus } from 'lucide-react';
-import { useState, useCallback, useRef, useMemo } from 'react';
-import React from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
-import { INBOX_LIST_ID, DATE_FORMATS, STRINGS } from '@/constants';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { INBOX_LIST_ID, DATE_FORMATS, STRINGS } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { Task, TaskList } from '@/types';

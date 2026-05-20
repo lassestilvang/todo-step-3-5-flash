@@ -83,6 +83,10 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
     await clearCompleted();
   };
 
+  const handleClearCompletedClick = () => {
+    void handleClearCompleted();
+  };
+
   const handleListClick = (id: string | null) => {
     setSelectedList(id);
     if (id) {
@@ -244,7 +248,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
         )}
         {completedCount > 0 && (
           <button
-            onClick={handleClearCompleted}
+            onClick={handleClearCompletedClick}
             className={cn(
               buttonVariants({ variant: 'ghost' }),
               'w-full justify-start text-sm text-muted-foreground hover:text-destructive'

@@ -29,6 +29,7 @@ function TaskCardSkeleton() {
             <div className="h-5 w-16 rounded-full bg-muted/50" />
             <div className="h-5 w-10 rounded-full bg-muted/50" />
           </div>
+          <div className="h-1.5 w-full rounded-full bg-muted/40" />
         </div>
       </div>
     </div>

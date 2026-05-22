@@ -183,12 +183,12 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
       role="button"
       tabIndex={0}
       aria-pressed={isSelected}
-      className={cn(
-        'group relative w-full rounded-lg border bg-card p-4 text-left transition-all hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        task.status === 'completed' && 'opacity-60 bg-muted/30',
-        isSelected && 'ring-2 ring-primary',
-        isOverdue && 'border-red-500'
-      )}
+    className={cn(
+      'group relative w-full rounded-lg border bg-card p-4 text-left transition-all duration-200 hover:shadow-md hover:border-border/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+      task.status === 'completed' && 'bg-muted/20 opacity-70',
+      isSelected && 'ring-2 ring-primary',
+      isOverdue && 'border-red-500'
+    )}
     >
       <div className="flex items-start gap-3">
         <TaskCheckbox task={task} toggleTaskComplete={toggleTaskComplete} />

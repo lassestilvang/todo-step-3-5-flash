@@ -104,24 +104,24 @@ function LabelsList({ labels }: { labels: Task['labels'] }) {
   );
 }
 
-function SubtasksProgress({ subtasks }: { subtasks: Task['subtasks'] }) {
+const SubtasksProgress = React.memo(function SubtasksProgress({ subtasks }: { subtasks: Task['subtasks'] }) {
   if (!subtasks || subtasks.length === 0) return null;
   const completed = subtasks.filter((s) => s.completed).length;
   const percent = Math.round((completed / subtasks.length) * 100);
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" aria-label={`Subtask progress: ${completed} of ${subtasks.length}`}>
       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden" aria-hidden="true">
         <div
           className="h-full bg-primary rounded-full transition-all duration-200"
           style={{ width: `${percent}%` }}
         />
       </div>
-      <span className="text-[10px] text-muted-foreground tabular-nums w-12 text-right">
+      <span className="text-[10px] text-muted-foreground tabular-nums w-12 text-right" aria-hidden="true">
         {completed}/{subtasks.length}
       </span>
     </div>
   );
-}
+});
 
 function TaskMeta({
   task,

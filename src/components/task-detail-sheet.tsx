@@ -221,23 +221,35 @@ function TaskSubtasksSection({
 }
 
 export function TaskDetailSheet() {
-  const { selectedTaskId, tasks, setSelectedTask, toggleTaskComplete, toggleSubtask } = useStore();
-  const selectedTask = tasks.find((t) => t.id === selectedTaskId);
+  const tasks = useStore((s) => s.tasks);
+  const selectedTaskId = useStore((s) => s.selectedTaskId);
+  const setSelectedTask = useStore((s) => s.setSelectedTask);
+  const toggleTaskComplete = useStore((s) => s.toggleTaskComplete);
+  const toggleSubtaskFromStore = useStore((s) => s.toggleSubtask);
+
+  const selectedTask = useMemo(() => tasks.find((t) => t.id === selectedTaskId) ?? null, [tasks, selectedTaskId]);
   if (!selectedTask) return null;
 
-  const tasksArray = tasks.filter((t) => t.status !== 'completed' || t.id === selectedTaskId);
-  const currentIndex = tasksArray.findIndex((t) => t.id === selectedTaskId);
+  // Derived values — only recompute when inputs change
+  const tasksArray = useMemo(
+    () => tasks.filter((t) => t.status !== 'completed' || t.id === selectedTaskId),
+    [tasks, selectedTaskId]
+  );
+  const currentIndex = useMemo(
+    () => tasksArray.findIndex((t) => t.id === selectedTaskId),
+    [tasksArray, selectedTaskId]
+  );
   const prevTask = currentIndex > 0 ? tasksArray[currentIndex - 1] : null;
   const nextTask = currentIndex < tasksArray.length - 1 ? tasksArray[currentIndex + 1] : null;
 
-  const dueLabel = (() => {
+  const dueLabel = useMemo(() => {
     const date = selectedTask.dueDate ?? selectedTask.deadline;
     if (!date) return null;
     if (isToday(date)) return STRINGS.TODAY;
     if (isTomorrow(date)) return STRINGS.TOMORROW;
     if (isThisWeek(date)) return format(date, DATE_FORMATS.FULL_WEEKDAY);
     return format(date, DATE_FORMATS.FULL_DATE);
-  })();
+  }, [selectedTask.dueDate, selectedTask.deadline]);
 
   const handlePrev = () => {
     if (prevTask) setSelectedTask(prevTask.id);
@@ -276,7 +288,7 @@ export function TaskDetailSheet() {
                 subtasks={selectedTask.subtasks}
                 taskId={selectedTask.id}
                 onToggle={(taskId, subtaskId) => {
-                  void toggleSubtask(taskId, subtaskId);
+                  void toggleSubtaskFromStore(taskId, subtaskId);
                 }}
               />
               <TaskAttachmentsSection attachments={selectedTask.attachments} />

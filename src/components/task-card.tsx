@@ -152,12 +152,17 @@ function TaskMeta({
   );
 }
 
+function computeIsOverdue(dueDate: string | Date | undefined, status: Task['status']): boolean {
+  if (!dueDate || status === 'completed') return false;
+  return new Date(dueDate) < new Date();
+}
+
 export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
   const { toggleTaskComplete, openEditTask, setSelectedTask, selectedTaskId } = useStore();
 
   const isSelected = selectedTaskId === task.id;
   const due = task.dueDate ?? task.deadline;
-  const isOverdue = due ? new Date(due) < new Date() && task.status !== 'completed' : false;
+  const isOverdue = computeIsOverdue(due, task.status);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {

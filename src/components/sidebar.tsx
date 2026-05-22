@@ -26,18 +26,16 @@ const VIEWS = [
 ];
 
 export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
-  const {
-    lists,
-    currentView,
-    setCurrentView,
-    selectedListId,
-    setSelectedList,
-    addList,
-    deleteList,
-    overdueCount,
-    tasks,
-    clearCompleted,
-  } = useStore();
+  const lists = useStore((s) => s.lists);
+  const tasks = useStore((s) => s.tasks);
+  const currentView = useStore((s) => s.currentView);
+  const selectedListId = useStore((s) => s.selectedListId);
+  const overdueCount = useStore((s) => s.overdueCount);
+  const setCurrentView = useStore((s) => s.setCurrentView);
+  const setSelectedList = useStore((s) => s.setSelectedList);
+  const addList = useStore((s) => s.addList);
+  const deleteList = useStore((s) => s.deleteList);
+  const clearCompleted = useStore((s) => s.clearCompleted);
 
   const [newListDialogOpen, setNewListDialogOpen] = useState(false);
   const [newListName, setNewListName] = useState('');

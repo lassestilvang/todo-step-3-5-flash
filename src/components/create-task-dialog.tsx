@@ -74,7 +74,11 @@ type TaskFormData = z.infer<typeof taskSchema>;
 // Form default values and UI constants are imported from @/constants
 
 export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { lists, labels, editTaskId, selectedListId, tasks } = useStore();
+  const lists = useStore((s) => s.lists);
+  const labels = useStore((s) => s.labels);
+  const editTaskId = useStore((s) => s.editTaskId);
+  const selectedListId = useStore((s) => s.selectedListId);
+  const tasks = useStore((s) => s.tasks);
   const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>(
     []
   );
@@ -83,17 +87,23 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const isEditing = !!editTaskId;
   const editTask = isEditing ? tasks.find((t) => t.id === editTaskId) : null;
 
-  const form = useForm({
-    resolver: zodResolver(taskSchema),
-    defaultValues: {
+  const listDefault = selectedListId || INBOX_LIST_ID;
+  const formDefaults = useMemo(
+    () => ({
       title: '',
       description: '',
-      listId: selectedListId || INBOX_LIST_ID,
+      listId: listDefault,
       priority: 'none',
       estimateMinutes: undefined,
       recurrence: undefined,
-      labelIds: [],
-    },
+      labelIds: [] as string[],
+    }),
+    [listDefault]
+  );
+
+  const form = useForm({
+    resolver: zodResolver(taskSchema),
+    defaultValues: formDefaults,
   });
 
   // Reset form when dialog opens/closes or task changes
@@ -123,7 +133,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
         form.reset({
           title: '',
           description: '',
-          listId: selectedListId || INBOX_LIST_ID,
+          listId: listDefault,
           priority: 'none',
           estimateMinutes: undefined,
           recurrence: undefined,
@@ -132,7 +142,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
         setSubtasks([]);
       }
     }
-  }, [open, editTask, isEditing, form, selectedListId]);
+  }, [open, editTask, isEditing, selectedListId]);
 
   const onSubmit = async (data: TaskFormData) => {
     if (isEditing && editTaskId) {

@@ -96,6 +96,45 @@ function QuickAddTask() {
 }
 
 function TaskGroups({ tasks }: { tasks: Task[] }) {
+  const setSelectedTask = useStore((s) => s.setSelectedTask);
+
+  // Keyboard navigation: J/K to walk tasks, Enter to open detail
+  const taskIds = useMemo(() => tasks.map((t) => t.id), [tasks]);
+
+  const handlePrev = useCallback(() => {
+    const current = useStore.getState().selectedTaskId;
+    if (!current || taskIds.length === 0) return;
+    const idx = taskIds.indexOf(current);
+    const nextIdx = idx > 0 ? idx - 1 : taskIds.length - 1;
+    setSelectedTask(taskIds[nextIdx]!);
+  }, [taskIds, setSelectedTask]);
+
+  const handleNext = useCallback(() => {
+    const current = useStore.getState().selectedTaskId;
+    if (!current || taskIds.length === 0) return;
+    const idx = taskIds.indexOf(current);
+    const nextIdx = idx < taskIds.length - 1 ? idx + 1 : 0;
+    setSelectedTask(taskIds[nextIdx]!);
+  }, [taskIds, setSelectedTask]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      const tag = document.activeElement?.tagName;
+      // Don't hijack shortcuts while typing in an input
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.target instanceof HTMLInputElement) return;
+      if (e.key === 'j') {
+        e.preventDefault();
+        handleNext();
+      } else if (e.key === 'k') {
+        e.preventDefault();
+        handlePrev();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleNext, handlePrev]);
+
   const grouped = useMemo(() => {
     const map: Record<string, Task[]> = {};
     tasks.forEach((task) => {
@@ -120,6 +159,7 @@ function TaskGroups({ tasks }: { tasks: Task[] }) {
         <div key={dateLabel} className="space-y-2">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-background py-2">
             {dateLabel}
+            <span className="ml-2 text-xs font-normal opacity-60 tabular-nums">({grp.length})</span>
           </h3>
           <div className="space-y-2">
             {grp.map((task) => (

@@ -43,13 +43,25 @@ function TaskDetailHeader({
   return (
     <div className="flex items-center justify-between p-4 border-b">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={onPrev} disabled={currentIndex <= 0}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onPrev}
+          disabled={currentIndex <= 0}
+          aria-label="Previous task"
+        >
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-muted-foreground" aria-current="step">
           {currentIndex + 1} of {total}
         </span>
-        <Button variant="ghost" size="icon" onClick={onNext} disabled={currentIndex >= total - 1}>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onNext}
+          disabled={currentIndex >= total - 1}
+          aria-label="Next task"
+        >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

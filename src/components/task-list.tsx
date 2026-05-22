@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { INBOX_LIST_ID, DATE_FORMATS, STRINGS } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
+import { getFilteredTasks } from '@/store/selectors';
 import type { Task, TaskList } from '@/types';
 
 import { TaskCard } from './task-card';
@@ -131,15 +132,23 @@ function TaskGroups({ tasks }: { tasks: Task[] }) {
 }
 
 export function TaskList() {
-  const tasks = useStore((s) => s.getFilteredTasks());
+  const tasks = useStore((s) => s.tasks);
   const loading = useStore((s) => s.loading);
   const searchQuery = useStore((s) => s.searchQuery);
   const selectedListId = useStore((s) => s.selectedListId);
+  const currentView = useStore((s) => s.currentView);
+  const showCompleted = useStore((s) => s.showCompleted);
+
+  // Build the filtered list only when its *actual* inputs change.
+  const filteredTasks = useMemo(
+    () => getFilteredTasks(tasks, currentView, selectedListId, showCompleted, searchQuery),
+    [tasks, currentView, selectedListId, showCompleted, searchQuery]
+  );
 
   const isFiltered = !!searchQuery.trim() || !!selectedListId;
 
   // Show skeleton while initially loading data
-  if (loading && tasks.length === 0) {
+  if (loading && filteredTasks.length === 0) {
     return (
       <div className="space-y-2 animate-pulse">
         {Array.from({ length: 4 }).map((_, i) => (
@@ -149,7 +158,7 @@ export function TaskList() {
     );
   }
 
-  if (tasks.length === 0) {
+  if (filteredTasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
         <div className="text-6xl">{isFiltered ? '🔍' : '📋'}</div>
@@ -168,7 +177,7 @@ export function TaskList() {
   return (
     <div className="space-y-4">
       <QuickAddTask />
-      <TaskGroups tasks={tasks} />
+      <TaskGroups tasks={filteredTasks} />
     </div>
   );
 }

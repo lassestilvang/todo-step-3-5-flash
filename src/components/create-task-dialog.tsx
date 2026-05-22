@@ -85,7 +85,10 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const [newSubtask, setNewSubtask] = useState('');
 
   const isEditing = !!editTaskId;
-  const editTask = isEditing ? tasks.find((t) => t.id === editTaskId) : null;
+  const editTask = useMemo(
+    () => (isEditing && editTaskId ? tasks.find((t) => t.id === editTaskId) || null : null),
+    [isEditing, editTaskId, tasks]
+  );
 
   const listDefault = selectedListId || INBOX_LIST_ID;
   const formDefaults = useMemo(

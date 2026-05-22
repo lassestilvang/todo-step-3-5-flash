@@ -2,7 +2,7 @@
 
 import { format, isToday, isTomorrow, isThisWeek, isThisYear } from 'date-fns';
 import { Plus } from 'lucide-react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { INBOX_LIST_ID, DATE_FORMATS, STRINGS } from '@/constants';

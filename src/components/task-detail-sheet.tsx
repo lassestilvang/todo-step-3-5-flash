@@ -1,6 +1,7 @@
 'use client';
 
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
+import { useMemo } from 'react';
 import {
   Clock,
   Flag,
@@ -232,11 +233,11 @@ export function TaskDetailSheet() {
 
   // Derived values — only recompute when inputs change
   const tasksArray = useMemo(
-    () => tasks.filter((t) => t.status !== 'completed' || t.id === selectedTaskId),
+    () => tasks.filter((t: Task) => t.status !== 'completed' || t.id === selectedTaskId),
     [tasks, selectedTaskId]
   );
   const currentIndex = useMemo(
-    () => tasksArray.findIndex((t) => t.id === selectedTaskId),
+    () => tasksArray.findIndex((t: Task) => t.id === selectedTaskId),
     [tasksArray, selectedTaskId]
   );
   const prevTask = currentIndex > 0 ? tasksArray[currentIndex - 1] : null;

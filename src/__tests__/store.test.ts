@@ -27,6 +27,7 @@ vi.mock('@/app/actions', () => ({
 // Import after mocks are set up
 import * as actions from '@/app/actions';
 import { useStore } from '@/store';
+import { getFilteredTasks } from '@/store/selectors';
 import type { Task, TaskList, Label } from '@/types';
 
 // Helper to create a sample task
@@ -506,7 +507,7 @@ describe('Getters', () => {
   it('getFilteredTasks should return all tasks when view is all', () => {
     const t1 = createSampleTask({ id: 't1' });
     const t2 = createSampleTask({ id: 't2' });
-    useStore.setState({ tasks: [t1, t2], currentView: 'all' });
-    expect(useStore.getState().getFilteredTasks()).toEqual([t1, t2]);
+    useStore.setState({ tasks: [t1, t2], currentView: 'all', selectedListId: null, showCompleted: true, searchQuery: '' });
+    expect(getFilteredTasks([t1, t2], 'all', null, true, '')).toEqual([t1, t2]);
   });
 });

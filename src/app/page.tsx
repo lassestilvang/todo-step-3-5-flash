@@ -18,25 +18,14 @@ import { ViewToggle } from '@/components/view-toggle';
 import { useStore } from '@/store';
 
 export default function HomePage() {
-  const {
-    showCompleted,
-    toggleShowCompleted,
-    isCreateTaskOpen,
-    closeTaskModal: closeTaskModalStore,
-    currentView,
-    overdueCount,
-    openCreateTask,
-    taskCount,
-  } = useStore((s) => ({
-    showCompleted: s.showCompleted,
-    toggleShowCompleted: s.toggleShowCompleted,
-    isCreateTaskOpen: s.isCreateTaskOpen,
-    closeTaskModal: s.closeTaskModal,
-    currentView: s.currentView,
-    overdueCount: s.overdueCount,
-    openCreateTask: s.openCreateTask,
-    taskCount: s.tasks.length,
-  }));
+  const showCompleted = useStore((s) => s.showCompleted);
+  const toggleShowCompleted = useStore((s) => s.toggleShowCompleted);
+  const isCreateTaskOpen = useStore((s) => s.isCreateTaskOpen);
+  const closeTaskModal = useStore((s) => s.closeTaskModal);
+  const currentView = useStore((s) => s.currentView);
+  const overdueCount = useStore((s) => s.overdueCount);
+  const openCreateTask = useStore((s) => s.openCreateTask);
+  const taskCount = useStore((s) => s.tasks.length);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -159,7 +148,7 @@ export default function HomePage() {
 
       {/* Modals */}
       <AnimatePresence>
-        {isCreateTaskOpen && <CreateTaskDialog open={isCreateTaskOpen} onClose={closeTaskModalStore} />}
+        {isCreateTaskOpen && <CreateTaskDialog open={isCreateTaskOpen} onClose={closeTaskModal} />}
       </AnimatePresence>
 
       <TaskDetailSheet />

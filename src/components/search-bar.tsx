@@ -47,14 +47,22 @@ export function SearchBar() {
     fuse.setCollection(searchableTasks);
   }, [fuse, searchableTasks]);
 
-  // Filtered results
+  // Fast-path: for short queries use a plain includes filter — avoids Fuse object overhead
+  function fastFilter(query: string, data: SearchableTask[]): SearchableTask[] {
+    if (query.length <= 2) {
+      const lower = query.toLowerCase();
+      return data.filter(
+        (t) => t.title.toLowerCase().includes(lower) || t.listName.toLowerCase().includes(lower)
+      );
+    }
+    return fuse.search(query).slice(0, 10).map((r) => r.item);
+  }
+
+  // Filtered results — memoized on dependents only
   const results = useMemo(() => {
     if (!localQuery.trim()) return [];
-    return fuse
-      .search(localQuery)
-      .slice(0, 10)
-      .map((r) => r.item);
-  }, [fuse, localQuery]);
+    return fastFilter(localQuery, searchableTasks);
+  }, [localQuery, searchableTasks]);
 
   // Reset focus index when results change
   useEffect(() => {

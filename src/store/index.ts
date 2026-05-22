@@ -9,7 +9,6 @@ import { seedDefaultData } from '@/lib/db';
 import { createLabelActions } from './actions/labels';
 import { createListActions } from './actions/lists';
 import { createTaskActions } from './actions/tasks';
-import { getFilteredTasks } from './selectors';
 import type { AppState, StoreSetter, StoreGetter } from './types';
 
 export const useStore = create<AppState>()(
@@ -100,17 +99,6 @@ export const useStore = create<AppState>()(
 
       getTaskById: (id) => {
         return get().tasks.find((t) => t.id === id);
-      },
-
-      getFilteredTasks: () => {
-        const state = get();
-        return getFilteredTasks(
-          state.tasks,
-          state.currentView,
-          state.selectedListId,
-          state.showCompleted,
-          state.searchQuery
-        );
       },
 
       ...createTaskActions(set as StoreSetter, get as StoreGetter),

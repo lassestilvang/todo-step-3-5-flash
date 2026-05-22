@@ -41,7 +41,6 @@ export interface AppState {
   updateLabel: (id: string, name: string, color: string, icon?: string) => Promise<void>;
   deleteLabel: (id: string) => Promise<void>;
   getTaskById: (id: string) => Task | undefined;
-  getFilteredTasks: () => Task[];
 }
 
 export type StoreSetter = (

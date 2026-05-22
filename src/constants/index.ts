@@ -73,6 +73,14 @@ export const STRINGS = {
   ADD_LABEL: '+ Add Label',
 } as const;
 
+// Human-readable view labels for the page header
+export const VIEW_LABELS: Record<string, string> = {
+  today: 'Today',
+  week: 'Next 7 Days',
+  upcoming: 'Upcoming',
+  all: 'All Tasks',
+};
+
 // Time constants (ms)
 export const TIME_MS = {
   SECOND: 1000,

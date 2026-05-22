@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ViewToggle } from '@/components/view-toggle';
+import { VIEW_LABELS } from '@/constants';
 import { useStore } from '@/store';
 
 export default function HomePage() {
@@ -111,8 +112,8 @@ export default function HomePage() {
               </Sheet>
 
               <div>
-                <h2 className="text-lg md:text-2xl font-semibold capitalize">
-                  {currentView === 'week' ? 'Next 7 Days' : currentView}
+                <h2 className="text-lg md:text-2xl font-semibold">
+                  {VIEW_LABELS[currentView] || currentView}
                 </h2>
                 <p className="text-xs md:text-sm text-muted-foreground">
                   {taskCount} tasks

@@ -2,6 +2,8 @@
 
 import { LayoutList, Calendar, CalendarDays, Sparkles } from 'lucide-react';
 
+import { useMemo } from 'react';
+
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStore } from '@/store';
 import type { ViewType } from '@/types';
@@ -9,12 +11,15 @@ import type { ViewType } from '@/types';
 export function ViewToggle() {
   const { currentView, setCurrentView } = useStore();
 
-  const views: { id: ViewType; label: string; icon: React.ElementType }[] = [
-    { id: 'today', label: 'Today', icon: Calendar },
-    { id: 'week', label: 'Week', icon: CalendarDays },
-    { id: 'upcoming', label: 'Upcoming', icon: Sparkles },
-    { id: 'all', label: 'All', icon: LayoutList },
-  ];
+  const views = useMemo(
+    () => [
+      { id: 'today' as const, label: 'Today', icon: Calendar },
+      { id: 'week' as const, label: 'Week', icon: CalendarDays },
+      { id: 'upcoming' as const, label: 'Upcoming', icon: Sparkles },
+      { id: 'all' as const, label: 'All', icon: LayoutList },
+    ],
+    []
+  );
 
   return (
     <Tabs value={currentView} onValueChange={(v) => setCurrentView(v as ViewType)}>

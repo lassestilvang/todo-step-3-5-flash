@@ -47,22 +47,25 @@ export function SearchBar() {
     fuse.setCollection(searchableTasks);
   }, [fuse, searchableTasks]);
 
-  // Fast-path: for short queries use a plain includes filter — avoids Fuse object overhead
-  function fastFilter(query: string, data: SearchableTask[]): SearchableTask[] {
-    if (query.length <= 2) {
-      const lower = query.toLowerCase();
-      return data.filter(
-        (t) => t.title.toLowerCase().includes(lower) || t.listName.toLowerCase().includes(lower)
-      );
-    }
-    return fuse.search(query).slice(0, 10).map((r) => r.item);
-  }
+  // Fast-path: stable reference so useMemo deps are exact
+  const fastFilter = useMemo(
+    () => (query: string, data: SearchableTask[]): SearchableTask[] => {
+      if (query.length <= 2) {
+        const lower = query.toLowerCase();
+        return data.filter(
+          (t) => t.title.toLowerCase().includes(lower) || t.listName.toLowerCase().includes(lower)
+        );
+      }
+      return fuse.search(query).slice(0, 10).map((r) => r.item);
+    },
+    [fuse]
+  );
 
   // Filtered results — memoized on dependents only
   const results = useMemo(() => {
     if (!localQuery.trim()) return [];
     return fastFilter(localQuery, searchableTasks);
-  }, [localQuery, searchableTasks]);
+  }, [localQuery, searchableTasks, fastFilter]);
 
   // Reset focus index when results change
   useEffect(() => {

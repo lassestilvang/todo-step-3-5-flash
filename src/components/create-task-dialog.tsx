@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Flag, Trash2, X } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -83,6 +84,8 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     []
   );
   const [newSubtask, setNewSubtask] = useState('');
+  // Tracks which editTaskId was last seeded into subtask state
+  const seededTaskIdRef = React.useRef<string | null>(null);
 
   const isEditing = !!editTaskId;
   const editTask = useMemo(
@@ -94,7 +97,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const formDefaults = useMemo(
     () => ({
       title: '',
-      description: '',
+      description: undefined,
       listId: listDefault,
       priority: 'none',
       estimateMinutes: undefined,
@@ -109,43 +112,43 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     defaultValues: formDefaults,
   });
 
-  // Reset form when dialog opens/closes or task changes
+  // Reset form and sub-task state when the dialog opens or the edit target changes.
+  // `seededTaskIdRef` ref-guard prevents any cascading re-runs — setSubtasks fires
+  // once per unique editTask.id and never again for the same round.
   useEffect(() => {
-    if (open) {
-      if (isEditing && editTask) {
-        form.reset({
-          title: editTask.title,
-          description: editTask.description,
-          listId: editTask.listId,
-          dueDate: editTask.dueDate,
-          deadline: editTask.deadline,
-          estimateMinutes: editTask.estimateMinutes || 0,
-          priority: editTask.priority,
-          recurrence: editTask.recurrence,
-          labelIds: editTask.labels?.map((l) => l.id) || [],
-        });
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSubtasks(
-          editTask.subtasks?.map((s) => ({
-            id: s.id,
-            title: s.title,
-            completed: s.completed,
-          })) || []
-        );
-      } else {
-        form.reset({
-          title: '',
-          description: '',
-          listId: listDefault,
-          priority: 'none',
-          estimateMinutes: undefined,
-          recurrence: undefined,
-          labelIds: [],
-        });
-        setSubtasks([]);
-      }
+    if (!open) return;
+    const targetId = isEditing && editTask ? editTask.id : null;
+    if (targetId === seededTaskIdRef.current) return;
+    seededTaskIdRef.current = targetId;
+
+    if (isEditing && editTask) {
+      form.reset({
+        title: editTask.title,
+        description: editTask.description,
+        listId: editTask.listId,
+        dueDate: editTask.dueDate,
+        deadline: editTask.deadline,
+        estimateMinutes: editTask.estimateMinutes || 0,
+        priority: editTask.priority,
+        recurrence: editTask.recurrence,
+        labelIds: editTask.labels?.map((l) => l.id) || [],
+      });
+      setSubtasks(
+        editTask.subtasks.map((s) => ({ id: s.id, title: s.title, completed: s.completed }))
+      );
+    } else {
+      form.reset({
+        title: '',
+        description: undefined,
+        listId: listDefault,
+        priority: 'none',
+        estimateMinutes: undefined,
+        recurrence: undefined,
+        labelIds: [],
+      });
+      setSubtasks([]);
     }
-  }, [open, editTask, isEditing, selectedListId]);
+  }, [open, isEditing, editTask, listDefault, form, setSubtasks]);
 
   const onSubmit = async (data: TaskFormData) => {
     if (isEditing && editTaskId) {

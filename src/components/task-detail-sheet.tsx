@@ -1,18 +1,26 @@
 'use client';
 
-import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
-import { useMemo } from 'react';
+/* eslint-disable max-lines */ 
+
 import {
-  Clock,
-  Flag,
+  format,
+  formatDistanceToNow,
+  isToday,
+  isTomorrow,
+  isThisWeek,
+  } from 'date-fns';
+import {
   Calendar,
-  Tag,
-  Repeat,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
-  CheckCircle,
   Circle,
+  Clock,
+  Flag,
+  Repeat,
+  Tag,
 } from 'lucide-react';
+import { useMemo } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -241,9 +249,9 @@ export function TaskDetailSheet() {
   const toggleSubtaskFromStore = useStore((s) => s.toggleSubtask);
 
   const selectedTask = useMemo(() => tasks.find((t) => t.id === selectedTaskId) ?? null, [tasks, selectedTaskId]);
-  if (!selectedTask) return null;
 
-  // Derived values — only recompute when inputs change
+  // Derived values — always called to keep hooks order stable;
+  // results only consumed when the sheet is actually open.
   const tasksArray = useMemo(
     () => tasks.filter((t: Task) => t.status !== 'completed' || t.id === selectedTaskId),
     [tasks, selectedTaskId]
@@ -256,13 +264,14 @@ export function TaskDetailSheet() {
   const nextTask = currentIndex < tasksArray.length - 1 ? tasksArray[currentIndex + 1] : null;
 
   const dueLabel = useMemo(() => {
+    if (!selectedTask) return null;
     const date = selectedTask.dueDate ?? selectedTask.deadline;
     if (!date) return null;
     if (isToday(date)) return STRINGS.TODAY;
     if (isTomorrow(date)) return STRINGS.TOMORROW;
     if (isThisWeek(date)) return format(date, DATE_FORMATS.FULL_WEEKDAY);
     return format(date, DATE_FORMATS.FULL_DATE);
-  }, [selectedTask.dueDate, selectedTask.deadline]);
+  }, [selectedTask]);
 
   const handlePrev = () => {
     if (prevTask) setSelectedTask(prevTask.id);
@@ -271,6 +280,8 @@ export function TaskDetailSheet() {
   const handleNext = () => {
     if (nextTask) setSelectedTask(nextTask.id);
   };
+
+  if (!selectedTask) return null;
 
   return (
     <Sheet

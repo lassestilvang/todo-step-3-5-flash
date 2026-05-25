@@ -1,7 +1,6 @@
 'use client';
 
 import { LayoutList, Calendar, CalendarDays, Sparkles } from 'lucide-react';
-
 import { useMemo } from 'react';
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';

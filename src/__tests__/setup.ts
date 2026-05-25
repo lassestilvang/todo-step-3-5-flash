@@ -155,28 +155,28 @@ vi.mock('better-sqlite3', () => {
       return this._all(stmt)[0] ?? null;
     }
 
-    _all(stmt: Statement) {
-      const table: string = (stmt as any).tableName() ?? '';
-      const rows = (table ? this.rows.get(table) ?? [] : []).map(
-        (r: Record<string, unknown>) =>
-          Object.fromEntries(
-            Object.entries(r).filter(([, v]) => v !== null && v !== undefined)
-          )
-      );
-      return rows;
-    }
+     _all(stmt: Statement) {
+       const table: string = (stmt as Statement).tableName() ?? '';
+       const rows = (table ? this.rows.get(table) ?? [] : []).map(
+         (r: Record<string, unknown>) =>
+           Object.fromEntries(
+             Object.entries(r).filter(([, v]) => v !== null && v !== undefined)
+           )
+       );
+       return rows;
+     }
 
-    _columns(_stmt: Statement) {
-      const table: string = (_stmt as any).tableName() ?? '';
-      const rows: Record<string, unknown>[] = this.rows.get(table) ?? [];
-      if (!rows.length) return [];
-      return Object.keys(rows[0]).map((name) => ({
-        cid: 0,
-        name,
-        type: '',
-        notnull: 0,
-        dflt_value: null,
-        pk: 0,
+     _columns(_stmt: Statement) {
+       const table: string = (_stmt as Statement).tableName() ?? '';
+       const rows: Record<string, unknown>[] = this.rows.get(table) ?? [];
+       if (!rows.length) return [];
+       return Object.keys(rows[0]).map((name) => ({
+         cid: 0,
+         name,
+         type: '',
+         notnull: 0,
+         dflt_value: null,
+         pk: 0,
       }));
     }
   }

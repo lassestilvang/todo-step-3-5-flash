@@ -8,6 +8,7 @@ import { INBOX_LIST_ID } from '@/constants';
 // (e.g. Bun's test runner which does not support this native add-on).
 // In that case, liveDatabase will remain null and the test mock
 // (registered via vi.mock in setup files) will be used instead.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- dynamic import is required for graceful fallback
 let liveDatabase: typeof import('better-sqlite3') | null = null;
 try {
   const mod = await import('better-sqlite3');
@@ -16,9 +17,11 @@ try {
   // safe to ignore — tests supply a vi.mock('better-sqlite3') shim
 }
 
-let db: ReturnType<typeof liveDatabase>;
+// Database instance - can be null in test environments before mock is set up
+let db: ReturnType<typeof liveDatabase> | null = liveDatabase ? new (liveDatabase as any)(':memory:') : null;
 
 if (process.env.NODE_ENV === 'test') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- fallback shim for environments without better-sqlite3
   db = (liveDatabase ?? (() => {}) as any)(':memory:');
 } else {
   const Database = liveDatabase;

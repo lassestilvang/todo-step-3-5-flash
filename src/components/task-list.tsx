@@ -36,7 +36,7 @@ function TaskCardSkeleton() {
   );
 }
 
-function QuickAddTask() {
+const QuickAddTask = () => {
   const addTask = useStore((s) => s.addTask);
   const selectedListId = useStore((s) => s.selectedListId);
   const lists = useStore((s) => s.lists);
@@ -48,10 +48,7 @@ function QuickAddTask() {
     [lists, selectedListId]
   );
 
-  const listId = useMemo(
-    () => selectedListId || INBOX_LIST_ID,
-    [selectedListId]
-  );
+  const listId = useMemo(() => selectedListId || INBOX_LIST_ID, [selectedListId]);
 
   const handleSubmit = useCallback(async () => {
     const trimmed = title.trim();
@@ -61,16 +58,19 @@ function QuickAddTask() {
     inputRef.current?.focus();
   }, [title, addTask, listId]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      void handleSubmit();
-    }
-    if (e.key === 'Escape') {
-      setTitle('');
-      inputRef.current?.blur();
-    }
-  };
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        void handleSubmit();
+      }
+      if (e.key === 'Escape') {
+        setTitle('');
+        inputRef.current?.blur();
+      }
+    },
+    [handleSubmit]
+  );
 
   return (
     <div className="flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/30 p-2 hover:border-primary/50 hover:bg-accent/20 transition-colors">
@@ -87,18 +87,17 @@ function QuickAddTask() {
         )}
       />
       {title.trim() && (
-        <Button size="xs" variant="default" onClick={() => { void handleSubmit(); }}>
+        <Button size="xs" variant="default" onClick={() => void handleSubmit()}>
           Add
         </Button>
       )}
     </div>
   );
-}
+};
 
 function TaskGroups({ tasks }: { tasks: Task[] }) {
   const setSelectedTask = useStore((s) => s.setSelectedTask);
 
-  // Keyboard navigation: J/K to walk tasks, Enter to open detail
   const taskIds = useMemo(() => tasks.map((t) => t.id), [tasks]);
 
   const handlePrev = useCallback(() => {
@@ -120,13 +119,14 @@ function TaskGroups({ tasks }: { tasks: Task[] }) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const tag = document.activeElement?.tagName;
-      // Don't hijack shortcuts while typing in an input
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      if (e.target instanceof HTMLInputElement) return;
-      if (e.key === 'j') {
+      const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || e.target instanceof HTMLInputElement;
+      if (isInput) return;
+      const isModifier = e.metaKey || e.ctrlKey;
+
+      if (e.key === 'j' && !isModifier) {
         e.preventDefault();
         handleNext();
-      } else if (e.key === 'k') {
+      } else if (e.key === 'k' && !isModifier) {
         e.preventDefault();
         handlePrev();
       }
@@ -154,14 +154,14 @@ function TaskGroups({ tasks }: { tasks: Task[] }) {
   }, [tasks]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" style={{ contentVisibility: 'auto', containIntrinsicHeight: '800px' }}>
       {Object.entries(grouped).map(([dateLabel, grp]) => (
         <div key={dateLabel} className="space-y-2">
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-background py-2">
             {dateLabel}
             <span className="ml-2 text-xs font-normal opacity-60 tabular-nums">({grp.length})</span>
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-2" style={{ contentVisibility: 'auto', containIntrinsicHeight: '200px' }}>
             {grp.map((task) => (
               <TaskCard key={task.id} task={task} />
             ))}
@@ -180,7 +180,6 @@ export function TaskList() {
   const currentView = useStore((s) => s.currentView);
   const showCompleted = useStore((s) => s.showCompleted);
 
-  // Build the filtered list only when its *actual* inputs change.
   const filteredTasks = useMemo(
     () => getFilteredTasks(tasks, currentView, selectedListId, showCompleted, searchQuery),
     [tasks, currentView, selectedListId, showCompleted, searchQuery]
@@ -188,7 +187,6 @@ export function TaskList() {
 
   const isFiltered = !!searchQuery.trim() || !!selectedListId;
 
-  // Show skeleton while initially loading data
   if (loading && filteredTasks.length === 0) {
     return (
       <div className="space-y-2 animate-pulse">
@@ -203,14 +201,8 @@ export function TaskList() {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
         <div className="text-6xl">{isFiltered ? '🔍' : '📋'}</div>
-        <p className="text-lg">
-          {isFiltered ? 'No tasks match your filters' : 'No tasks yet'}
-        </p>
-        <p className="text-sm">
-          {isFiltered
-            ? 'Try adjusting your search or filters'
-            : 'Create a task to get started!'}
-        </p>
+        <p className="text-lg">{isFiltered ? 'No tasks match your filters' : 'No tasks yet'}</p>
+        <p className="text-sm">{isFiltered ? 'Try adjusting your search or filters' : 'Create a task to get started!'}</p>
       </div>
     );
   }

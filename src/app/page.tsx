@@ -12,7 +12,7 @@ import { TaskDetailSheet } from '@/components/task-detail-sheet';
 import { TaskList } from '@/components/task-list';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ViewToggle } from '@/components/view-toggle';
 import { VIEW_LABELS } from '@/constants';
@@ -42,13 +42,14 @@ export default function HomePage() {
           <div className="flex flex-col h-full">
             <div className="p-4 border-b border-border">
               <div className="flex items-center justify-between mb-4">
-                <h1 className="text-xl font-bold">TaskPlanner</h1>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">TaskPlanner</h1>
                 <ThemeToggle />
               </div>
               <SearchBar />
             </div>
-            <ScrollArea className="flex-1 p-2">
+            <ScrollArea className="flex-1 scrollbar-thin">
               <Sidebar onItemClick={() => setSidebarOpen(false)} />
+              <ScrollBar />
             </ScrollArea>
             <div className="p-4 border-t border-border">
               <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -68,18 +69,19 @@ export default function HomePage() {
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col border-r border-border">
-        <div className="p-4 border-b border-border">
+      <aside className="hidden md:flex w-64 flex-col border-r border-border bg-sidebar">
+        <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold">TaskPlanner</h1>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">TaskPlanner</h1>
             <ThemeToggle />
           </div>
           <SearchBar />
         </div>
-        <ScrollArea className="flex-1 p-2">
+        <ScrollArea className="flex-1 scrollbar-thin">
           <Sidebar />
+          <ScrollBar />
         </ScrollArea>
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-sidebar-border">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>Show completed</span>
             <Button
@@ -97,7 +99,7 @@ export default function HomePage() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
         {/* Header */}
-        <header className="flex-shrink-0 border-b border-border p-2 md:p-4">
+        <header className="flex-shrink-0 border-b border-border p-2 md:p-4 backdrop-blur-sm bg-background/80 supports-backdrop-blur:bg-background/60">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-3">
               {/* Mobile menu button */}
@@ -139,8 +141,9 @@ export default function HomePage() {
         </header>
 
         {/* Task List */}
-        <ScrollArea className="flex-1 p-2 md:p-4">
+        <ScrollArea className="flex-1 scrollbar-thin">
           <TaskList />
+          <ScrollBar />
         </ScrollArea>
       </main>
 

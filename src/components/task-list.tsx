@@ -100,6 +100,17 @@ function EmptyState({ isFiltered }: { isFiltered: boolean }) {
   const openCreateTask = useStore((s) => s.openCreateTask);
   const setSearchQuery = useStore((s) => s.setSearchQuery);
 
+  const quote = useMemo(() => {
+    const quotes = [
+      "The way to get started is to quit talking and begin doing.",
+      "Don't let yesterday take up too much of today.",
+      "Action is the foundational key to all success.",
+      "Your mind is for having ideas, not holding them.",
+      "Focus on being productive instead of busy.",
+    ];
+    return quotes[Math.floor(Math.random() * quotes.length)];
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -135,6 +146,17 @@ function EmptyState({ isFiltered }: { isFiltered: boolean }) {
           ? "We couldn't find any tasks matching your current filters."
           : "You've completed all your tasks or haven't added any yet."}
       </p>
+
+      {!isFiltered && (
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-xs italic text-muted-foreground/60 mb-8 max-w-[240px]"
+        >
+          &ldquo;{quote}&rdquo;
+        </motion.p>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3">
         {isFiltered ? (

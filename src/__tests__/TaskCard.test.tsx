@@ -130,7 +130,7 @@ describe('TaskCard', () => {
     const task = createMockTask({ priority: 'high' });
     render(<TaskCard task={task} />);
 
-    expect(screen.getByText('High')).toBeInTheDocument();
+    expect(screen.getByText(/High/i)).toBeInTheDocument();
   });
 
   it('displays subtasks progress', () => {

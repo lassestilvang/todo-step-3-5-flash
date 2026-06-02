@@ -18,11 +18,16 @@ try {
 }
 
 // Database instance - can be null in test environments before mock is set up
-let db: ReturnType<typeof liveDatabase> | null = liveDatabase ? new (liveDatabase as any)(':memory:') : null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let db: any = null;
+if (liveDatabase) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  db = new (liveDatabase as any)(':memory:');
+}
 
 if (process.env.NODE_ENV === 'test') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- fallback shim for environments without better-sqlite3
-  db = (liveDatabase ?? (() => {}) as any)(':memory:');
+  db = new (liveDatabase ?? (() => {}) as any)(':memory:');
 } else {
   const Database = liveDatabase;
   if (!Database) {
@@ -157,7 +162,7 @@ export function rowToObj(row: unknown): Record<string, unknown> | null {
   const obj = { ...(row as Record<string, unknown>) };
   Object.keys(obj).forEach((key) => {
     const val = obj[key];
-    if (typeof val === 'string' && (key.endsWith('_at') || key.endsWith('_date') || key.includes('Date'))) {
+    if (typeof val === 'string' && (key.endsWith('_at') || key.includes('Date'))) {
       const d = new Date(val);
       obj[key] = isNaN(d.getTime()) ? null : d;
     }
@@ -888,7 +893,7 @@ export function deleteReminder(id: string): boolean {
 let __hasSeeded = false;
 
 export function seedDefaultData() {
-  if (__hasSeeded) return;
+  if (__hasSeeded && process.env.NODE_ENV !== 'test') return;
   __hasSeeded = true;
 
   ensureInboxExists();

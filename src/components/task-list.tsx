@@ -1,7 +1,8 @@
 'use client';
 
+import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isTomorrow, isThisWeek, isThisYear } from 'date-fns';
-import { Plus } from 'lucide-react';
+import { Plus, Search, ClipboardList, Sparkles } from 'lucide-react';
 import { useEffect, useCallback, useMemo, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -73,12 +74,12 @@ const QuickAddTask = () => {
   );
 
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/30 p-2 hover:border-primary/50 hover:bg-accent/20 transition-colors">
-      <Plus className="h-4 w-4 text-muted-foreground shrink-0" />
+    <div className="flex items-center gap-2 rounded-lg border border-dashed border-muted-foreground/30 p-2 hover:border-primary/50 hover:bg-accent/20 transition-colors group">
+      <Plus className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0 transition-colors" />
       <input
         ref={inputRef}
         type="text"
-        placeholder={`Add task to ${currentList?.name ?? 'Inbox'}…`}
+        placeholder={`Quick add task to ${currentList?.name ?? 'Inbox'}…`}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={handleKeyDown}
@@ -94,6 +95,61 @@ const QuickAddTask = () => {
     </div>
   );
 };
+
+function EmptyState({ isFiltered }: { isFiltered: boolean }) {
+  const openCreateTask = useStore((s) => s.openCreateTask);
+  const setSearchQuery = useStore((s) => s.setSearchQuery);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-8"
+    >
+      <div className="relative mb-6">
+        <div className="absolute -inset-4 bg-primary/10 rounded-full blur-2xl animate-pulse" />
+        <div className="relative bg-background border rounded-2xl p-6 shadow-xl">
+          {isFiltered ? (
+            <Search className="h-12 w-12 text-primary mx-auto" />
+          ) : (
+            <ClipboardList className="h-12 w-12 text-primary mx-auto" />
+          )}
+        </div>
+        {!isFiltered && (
+          <motion.div
+            animate={{ rotate: [0, 10, -10, 0] }}
+            transition={{ repeat: Infinity, duration: 4 }}
+            className="absolute -top-2 -right-2 bg-yellow-400 rounded-full p-1.5 shadow-lg border-2 border-background"
+          >
+            <Sparkles className="h-4 w-4 text-yellow-900" />
+          </motion.div>
+        )}
+      </div>
+
+      <h3 className="text-xl font-bold mb-2">
+        {isFiltered ? 'No matches found' : 'All clear!'}
+      </h3>
+      <p className="text-muted-foreground max-w-[280px] mb-8">
+        {isFiltered
+          ? "We couldn't find any tasks matching your current filters."
+          : "You've completed all your tasks or haven't added any yet."}
+      </p>
+
+      <div className="flex flex-col sm:flex-row gap-3">
+        {isFiltered ? (
+          <Button variant="outline" onClick={() => setSearchQuery('')}>
+            Clear search
+          </Button>
+        ) : (
+          <Button onClick={() => openCreateTask()}>
+            <Plus className="mr-2 h-4 w-4" /> Create task
+          </Button>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
 function TaskGroups({ tasks }: { tasks: Task[] }) {
   const setSelectedTask = useStore((s) => s.setSelectedTask);
@@ -162,9 +218,20 @@ function TaskGroups({ tasks }: { tasks: Task[] }) {
             <span className="ml-2 text-xs font-normal opacity-60 tabular-nums">({grp.length})</span>
           </h3>
           <div className="space-y-2" style={{ contentVisibility: 'auto', containIntrinsicHeight: '200px' }}>
-            {grp.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
+            <AnimatePresence mode="popLayout">
+              {grp.map((task) => (
+                <motion.div
+                  key={task.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <TaskCard task={task} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
       ))}
@@ -198,17 +265,11 @@ export function TaskList() {
   }
 
   if (filteredTasks.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
-        <div className="text-6xl">{isFiltered ? '🔍' : '📋'}</div>
-        <p className="text-lg">{isFiltered ? 'No tasks match your filters' : 'No tasks yet'}</p>
-        <p className="text-sm">{isFiltered ? 'Try adjusting your search or filters' : 'Create a task to get started!'}</p>
-      </div>
-    );
+    return <EmptyState isFiltered={isFiltered} />;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 md:p-0">
       <QuickAddTask />
       <TaskGroups tasks={filteredTasks} />
     </div>

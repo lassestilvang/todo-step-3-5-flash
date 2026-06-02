@@ -33,6 +33,7 @@ export interface AppState {
   addSubtask: (taskId: string, title: string) => Promise<void>;
   toggleSubtask: (taskId: string, subtaskId: string) => Promise<void>;
   deleteSubtask: (taskId: string, subtaskId: string) => Promise<void>;
+  magicSortTasks: () => void;
   clearCompleted: () => Promise<void>;
   addList: (data: CreateListData) => Promise<void>;
   updateList: (id: string, data: Partial<CreateListData>) => Promise<void>;

@@ -101,6 +101,45 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
       }));
     },
 
+    magicSortTasks: () => {
+      const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2, none: 3 };
+      
+      set((state: AppState) => {
+        const sortedTasks = [...state.tasks].sort((a, b) => {
+          // 1. Status (incomplete first)
+          if (a.status !== b.status) {
+            return a.status === 'completed' ? 1 : -1;
+          }
+          
+          // 2. Priority
+          if (a.priority !== b.priority) {
+            return priorityOrder[a.priority]! - priorityOrder[b.priority]!;
+          }
+          
+          // 3. Due Date
+          const dateA = a.dueDate || a.deadline;
+          const dateB = b.dueDate || b.deadline;
+          if (dateA && dateB) {
+            return new Date(dateA).getTime() - new Date(dateB).getTime();
+          }
+          if (dateA) return -1;
+          if (dateB) return 1;
+          
+          // 4. Creation Date (newest first)
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
+        
+        return { tasks: sortedTasks };
+      });
+      
+      void confetti({
+        particleCount: 100,
+        spread: 100,
+        origin: { y: 0.8 },
+        colors: ['#3b82f6', '#8b5cf6'],
+      });
+    },
+
     clearCompleted: async (): Promise<void> => {
       const { deleted } = await actions.deleteCompletedTasksAction();
       if (deleted > 0) {

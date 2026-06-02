@@ -27,6 +27,7 @@ export default function HomePage() {
   const currentView = useStore((s) => s.currentView);
   const overdueCount = useStore((s) => s.overdueCount);
   const openCreateTask = useStore((s) => s.openCreateTask);
+  const magicSortTasks = useStore((s) => s.magicSortTasks);
   const tasks = useStore((s) => s.tasks);
   const taskCount = tasks.length;
 
@@ -163,6 +164,15 @@ export default function HomePage() {
             </div>
 
             <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => magicSortTasks()}
+                className="rounded-xl h-10 w-10 hover:text-primary hover:border-primary/50 transition-all"
+                title="Magic Sort (Priority & Date)"
+              >
+                <Sparkles className="h-4 w-4" />
+              </Button>
               <ViewToggle />
               <Button 
                 size="lg" 

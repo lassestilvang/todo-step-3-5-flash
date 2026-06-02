@@ -13,6 +13,7 @@ export interface AppState {
   isCreateTaskOpen: boolean;
   editTaskId: string | null;
   theme: string;
+  brandColor: string;
   loading: boolean;
   error: string | null;
   loadData: () => Promise<void>;
@@ -22,6 +23,7 @@ export interface AppState {
   toggleShowCompleted: () => void;
   setShowCompleted: (show: boolean) => void;
   setSelectedTask: (taskId: string | null) => void;
+  setBrandColor: (color: string) => void;
   openCreateTask: (listId?: string) => void;
   openEditTask: (taskId: string) => void;
   closeTaskModal: () => void;

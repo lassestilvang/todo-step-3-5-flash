@@ -26,6 +26,7 @@ export const useStore = create<AppState>()(
       isCreateTaskOpen: false,
       editTaskId: null,
       theme: 'system',
+      brandColor: 'oklch(0.55 0.25 260)',
       loading: false,
       error: null,
 
@@ -77,6 +78,10 @@ export const useStore = create<AppState>()(
         set({ selectedTaskId: taskId });
       },
 
+      setBrandColor: (color) => {
+        set({ brandColor: color });
+      },
+
       openCreateTask: (listId) => {
         set({
           isCreateTaskOpen: true,
@@ -109,6 +114,7 @@ export const useStore = create<AppState>()(
       name: 'task-planner-storage',
       partialize: (state) => ({
         theme: state.theme,
+        brandColor: state.brandColor,
       }),
     }
   )

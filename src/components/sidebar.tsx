@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutList, Calendar, CalendarDays, Sparkles, Plus, Trash2, Trash, CheckCircle2 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -37,11 +37,22 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const addList = useStore((s) => s.addList);
   const deleteList = useStore((s) => s.deleteList);
   const clearCompleted = useStore((s) => s.clearCompleted);
+  const brandColor = useStore((s) => s.brandColor);
+  const setBrandColor = useStore((s) => s.setBrandColor);
 
   const [newListDialogOpen, setNewListDialogOpen] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListColor, setNewListColor] = useState('#3b82f6');
   const [newListIcon, setNewListIcon] = useState('📋');
+
+  const brandColors = [
+    { name: 'Default', value: 'oklch(0.55 0.25 260)' },
+    { name: 'Emerald', value: 'oklch(0.6 0.18 160)' },
+    { name: 'Rose', value: 'oklch(0.6 0.2 15)' },
+    { name: 'Amber', value: 'oklch(0.7 0.2 70)' },
+    { name: 'Cyan', value: 'oklch(0.6 0.16 220)' },
+    { name: 'Violet', value: 'oklch(0.5 0.2 300)' },
+  ];
 
   const taskCountMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -111,7 +122,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const emojis = ['📋', '📅', '📆', '💼', '🏠', '🛒', '🎯', '🚀', '💡', '❤️', '⭐', '🔥'];
 
   return (
-    <nav className="space-y-6 p-2">
+    <nav className="space-y-6 p-2 flex flex-col h-full">
       <div className="space-y-1">
         <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
           Smart Views
@@ -234,7 +245,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
           </Dialog>
         </div>
 
-        <div className="space-y-0.5">
+        <div className="space-y-0.5 max-h-[30vh] overflow-y-auto scrollbar-thin">
           {lists.map((list) => {
             const isActive = selectedListId === list.id;
             const count = taskCountMap.get(list.id) ?? 0;
@@ -281,7 +292,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
         </div>
       </div>
 
-      <div className="pt-4 border-t border-border/50">
+      <div className="mt-auto pt-4 border-t border-border/50">
         <AnimatePresence>
           {completedCount > 0 && (
             <motion.div
@@ -311,8 +322,27 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
             {overdueCount} OVERDUE TASKS
           </div>
         )}
+
+        <div className="mt-4 px-3 py-2 space-y-3">
+          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+            Brand Accent
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            {brandColors.map((color) => (
+              <button
+                key={color.value}
+                onClick={() => setBrandColor(color.value)}
+                className={cn(
+                  'w-5 h-5 rounded-full transition-all hover:scale-125 active:scale-90 shadow-sm',
+                  brandColor === color.value ? 'ring-2 ring-foreground ring-offset-2 scale-110' : 'opacity-60 hover:opacity-100'
+                )}
+                style={{ backgroundColor: color.value }}
+                title={color.name}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </nav>
   );
 }
-

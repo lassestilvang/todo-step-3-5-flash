@@ -5,6 +5,7 @@ import { persist } from 'zustand/middleware';
 
 import * as actions from '@/app/actions';
 import { seedDefaultData } from '@/lib/db';
+import { playSound } from '@/lib/sounds';
 
 import { createLabelActions } from './actions/labels';
 import { createListActions } from './actions/lists';
@@ -120,6 +121,7 @@ export const useStore = create<AppState>()(
         if (!isActive) return;
 
         if (timeLeft <= 0) {
+          playSound('timer_end');
           const nextMode = mode === 'work' ? 'break' : 'work';
           set((state) => ({
             focusTimer: {

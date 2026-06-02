@@ -1,6 +1,7 @@
 import confetti from 'canvas-confetti';
 
 import * as actions from '@/app/actions';
+import { playSound } from '@/lib/sounds';
 import type { Task, CreateTaskData, Subtask } from '@/types';
 
 import { computeOverdue } from '../selectors';
@@ -42,6 +43,10 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
       const updated = await actions.toggleTaskCompleteAction(id);
       if (updated) {
         if (updated.status === 'completed') {
+          playSound('complete');
+          if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate(100);
+          }
           void confetti({
             particleCount: 150,
             spread: 70,

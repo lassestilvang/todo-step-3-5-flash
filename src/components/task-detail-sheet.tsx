@@ -24,6 +24,7 @@ import {
   Paperclip,
   CheckCircle2,
   Trash2,
+  Sparkles,
 } from 'lucide-react';
 import { useMemo } from 'react';
 
@@ -223,22 +224,35 @@ function TaskLabelsSection({ labels }: { labels: Task['labels'] }) {
     </div>
   );
 }
-
 function TaskSubtasksSection({
   subtasks,
   taskId,
   onToggle,
+  onMagic,
 }: {
   subtasks: Task['subtasks'];
   taskId: string;
   onToggle: (taskId: string, subtaskId: string) => void;
+  onMagic: () => void;
 }) {
-  if (!subtasks || subtasks.length === 0) return null;
+  if (!subtasks) return null;
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-        <CheckCircle2 className="h-3.5 w-3.5" /> Subtasks
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+          <CheckCircle2 className="h-3.5 w-3.5" /> Subtasks
+        </div>
+        <Button 
+          variant="ghost" 
+          size="xs" 
+          onClick={onMagic}
+          className="h-7 px-3 rounded-lg text-primary hover:bg-primary/10 font-bold flex items-center gap-2"
+        >
+          <Sparkles className="h-3 w-3" />
+          Magic Breakdown
+        </Button>
       </div>
+...
       <div className="space-y-2">
         {subtasks.map((subtask) => (
           <div key={subtask.id} className="flex items-center gap-4 p-4 rounded-2xl bg-muted/10 hover:bg-muted/20 transition-colors group">
@@ -276,8 +290,35 @@ export function TaskDetailSheet() {
   const toggleTaskComplete = useStore((s) => s.toggleTaskComplete);
   const toggleSubtaskFromStore = useStore((s) => s.toggleSubtask);
   const deleteTask = useStore((s) => s.deleteTask);
+  const addSubtask = useStore((s) => s.addSubtask);
 
   const selectedTask = useMemo(() => tasks.find((t) => t.id === selectedTaskId) ?? null, [tasks, selectedTaskId]);
+
+  const handleMagicBreakdown = async () => {
+    if (!selectedTask) return;
+    const title = selectedTask.title.toLowerCase();
+    const suggestions: string[] = [];
+
+    if (title.includes('meeting')) {
+      suggestions.push('Prepare agenda', 'Take notes', 'Send follow-up email');
+    } else if (title.includes('project')) {
+      suggestions.push('Define objectives', 'Draft roadmap', 'Review with stakeholders');
+    } else if (title.includes('learn') || title.includes('study')) {
+      suggestions.push('Find resources', 'Take notes', 'Practice exercise');
+    } else if (title.includes('clean') || title.includes('house')) {
+      suggestions.push('Gather supplies', 'Focus on one room', 'Organize belongings');
+    } else if (title.includes('buy') || title.includes('shop')) {
+      suggestions.push('Check inventory', 'Compare prices', 'Make a list');
+    } else {
+      suggestions.push('Analyze requirements', 'Break into steps', 'Set initial milestone');
+    }
+
+    for (const sub of suggestions) {
+      if (!selectedTask.subtasks.some(s => s.title === sub)) {
+        await addSubtask(selectedTask.id, sub);
+      }
+    }
+  };
 
   const tasksArray = useMemo(
     () => tasks.filter((t: Task) => t.status !== 'completed' || t.id === selectedTaskId),
@@ -352,6 +393,7 @@ export function TaskDetailSheet() {
                 onToggle={(taskId, subtaskId) => {
                   void toggleSubtaskFromStore(taskId, subtaskId);
                 }}
+                onMagic={handleMagicBreakdown}
               />
               
               <div className="space-y-4">

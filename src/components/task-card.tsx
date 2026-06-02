@@ -2,7 +2,7 @@
 
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, Flag, Tag, ChevronRight, AlertTriangle, ListFilter, GripVertical } from 'lucide-react';
+import { Clock, Flag, Tag, ChevronRight, AlertTriangle, ListFilter, GripVertical, Brain } from 'lucide-react';
 import React from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -192,7 +192,7 @@ function computeIsOverdue(dueDate: string | Date | undefined, status: Task['stat
 }
 
 export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
-  const { toggleTaskComplete, openEditTask, setSelectedTask, selectedTaskId } = useStore();
+  const { toggleTaskComplete, openEditTask, setSelectedTask, selectedTaskId, startFocusTimer } = useStore();
 
   const isSelected = selectedTaskId === task.id;
   const due = task.dueDate ?? task.deadline;
@@ -237,18 +237,33 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
               <TaskDescription task={task} />
             </div>
             
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-primary/10 hover:text-primary"
-              onClick={(e) => {
-                e.stopPropagation();
-                openEditTask(task.id);
-              }}
-              aria-label="Edit task"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-primary/10 hover:text-primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  startFocusTimer(task.id);
+                }}
+                title="Start Focus Session"
+              >
+                <Brain className="h-4 w-4" />
+              </Button>
+              
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-primary/10 hover:text-primary"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEditTask(task.id);
+                }}
+                aria-label="Edit task"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
 
           <TaskMeta task={task} due={due} isOverdue={isOverdue} />

@@ -5,6 +5,7 @@ import { PanelLeft, Sparkles, CheckCircle2, Trophy } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 
 import { CreateTaskDialog } from '@/components/create-task-dialog';
+import { FocusTimer } from '@/components/focus-timer';
 import { KeyboardShortcuts } from '@/components/keyboard-shortcuts';
 import { MobileNav } from '@/components/mobile-nav';
 import { SearchBar } from '@/components/search-bar';
@@ -243,6 +244,7 @@ export default function HomePage() {
 
       <TaskDetailSheet />
       <KeyboardShortcuts />
+      <FocusTimer />
     </div>
   );
 }

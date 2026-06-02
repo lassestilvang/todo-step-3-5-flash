@@ -27,6 +27,12 @@ export const useStore = create<AppState>()(
       editTaskId: null,
       theme: 'system',
       brandColor: 'oklch(0.55 0.25 260)',
+      focusTimer: {
+        timeLeft: 25 * 60,
+        isActive: false,
+        mode: 'work',
+        taskId: null,
+      },
       loading: false,
       error: null,
 
@@ -80,6 +86,66 @@ export const useStore = create<AppState>()(
 
       setBrandColor: (color) => {
         set({ brandColor: color });
+      },
+
+      startFocusTimer: (taskId) => {
+        set((state) => ({
+          focusTimer: {
+            ...state.focusTimer,
+            isActive: true,
+            taskId: taskId ?? state.focusTimer.taskId ?? state.selectedTaskId,
+          },
+        }));
+      },
+
+      pauseFocusTimer: () => {
+        set((state) => ({
+          focusTimer: { ...state.focusTimer, isActive: false },
+        }));
+      },
+
+      resetFocusTimer: () => {
+        const { mode } = get().focusTimer;
+        set((state) => ({
+          focusTimer: {
+            ...state.focusTimer,
+            isActive: false,
+            timeLeft: mode === 'work' ? 25 * 60 : 5 * 60,
+          },
+        }));
+      },
+
+      tickFocusTimer: () => {
+        const { timeLeft, mode, isActive } = get().focusTimer;
+        if (!isActive) return;
+
+        if (timeLeft <= 0) {
+          const nextMode = mode === 'work' ? 'break' : 'work';
+          set((state) => ({
+            focusTimer: {
+              ...state.focusTimer,
+              isActive: false,
+              mode: nextMode,
+              timeLeft: nextMode === 'work' ? 25 * 60 : 5 * 60,
+            },
+          }));
+          return;
+        }
+
+        set((state) => ({
+          focusTimer: { ...state.focusTimer, timeLeft: timeLeft - 1 },
+        }));
+      },
+
+      setFocusMode: (mode) => {
+        set((state) => ({
+          focusTimer: {
+            ...state.focusTimer,
+            mode,
+            timeLeft: mode === 'work' ? 25 * 60 : 5 * 60,
+            isActive: false,
+          },
+        }));
       },
 
       openCreateTask: (listId) => {

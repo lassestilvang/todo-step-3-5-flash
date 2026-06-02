@@ -14,6 +14,12 @@ export interface AppState {
   editTaskId: string | null;
   theme: string;
   brandColor: string;
+  focusTimer: {
+    timeLeft: number;
+    isActive: boolean;
+    mode: 'work' | 'break';
+    taskId: string | null;
+  };
   loading: boolean;
   error: string | null;
   loadData: () => Promise<void>;
@@ -24,6 +30,11 @@ export interface AppState {
   setShowCompleted: (show: boolean) => void;
   setSelectedTask: (taskId: string | null) => void;
   setBrandColor: (color: string) => void;
+  startFocusTimer: (taskId?: string) => void;
+  pauseFocusTimer: () => void;
+  resetFocusTimer: () => void;
+  tickFocusTimer: () => void;
+  setFocusMode: (mode: 'work' | 'break') => void;
   openCreateTask: (listId?: string) => void;
   openEditTask: (taskId: string) => void;
   closeTaskModal: () => void;

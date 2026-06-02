@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutList, Calendar, CalendarDays, Sparkles, Plus, Trash2, Trash, CheckCircle2 } from 'lucide-react';
+import { LayoutList, Calendar, CalendarDays, Sparkles, Plus, Trash2, Trash, CheckCircle2, LayoutGrid } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import type { ViewType } from '@/types';
 
 const VIEWS = [
   { id: 'all', label: 'All Tasks', icon: LayoutList, color: 'text-blue-500' },
+  { id: 'board', label: 'Kanban Board', icon: LayoutGrid, color: 'text-pink-500' },
   { id: 'today', label: 'Today', icon: Calendar, color: 'text-green-500' },
   { id: 'week', label: 'Next 7 Days', icon: CalendarDays, color: 'text-purple-500' },
   { id: 'upcoming', label: 'Upcoming', icon: Sparkles, color: 'text-amber-500' },

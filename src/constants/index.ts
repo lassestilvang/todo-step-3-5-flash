@@ -79,6 +79,7 @@ export const VIEW_LABELS: Record<string, string> = {
   week: 'Next 7 Days',
   upcoming: 'Upcoming',
   all: 'All Tasks',
+  board: 'Project Board',
 };
 
 // Time constants (ms)

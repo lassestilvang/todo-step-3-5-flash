@@ -1,8 +1,8 @@
 'use client';
 
-import { AnimatePresence } from 'framer-motion';
-import { PanelLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { PanelLeft, Sparkles, CheckCircle2, Trophy } from 'lucide-react';
+import { useEffect, useState, useMemo } from 'react';
 
 import { CreateTaskDialog } from '@/components/create-task-dialog';
 import { MobileNav } from '@/components/mobile-nav';
@@ -26,7 +26,8 @@ export default function HomePage() {
   const currentView = useStore((s) => s.currentView);
   const overdueCount = useStore((s) => s.overdueCount);
   const openCreateTask = useStore((s) => s.openCreateTask);
-  const taskCount = useStore((s) => s.tasks.length);
+  const tasks = useStore((s) => s.tasks);
+  const taskCount = tasks.length;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -34,115 +35,180 @@ export default function HomePage() {
     useStore.getState().loadData();
   }, []);
 
+  const productivityStats = useMemo(() => {
+    const completed = tasks.filter(t => t.status === 'completed').length;
+    const total = tasks.length;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { completed, total, percent };
+  }, [tasks]);
+
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-[#fafafa] dark:bg-[#050505]">
       {/* Mobile Sidebar Sheet */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-72 p-0">
-          <div className="flex flex-col h-full">
-            <div className="p-4 border-b border-border">
-              <div className="flex items-center justify-between mb-4">
-                <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">TaskPlanner</h1>
+        <SheetContent side="left" className="w-80 p-0 border-r-0 shadow-2xl">
+          <div className="flex flex-col h-full bg-background/50 backdrop-blur-xl">
+            <div className="p-6 border-b border-border/50">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                    <CheckCircle2 className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <h1 className="text-xl font-black tracking-tighter">TaskPlanner</h1>
+                </div>
                 <ThemeToggle />
               </div>
               <SearchBar />
             </div>
-            <ScrollArea className="flex-1 scrollbar-thin">
+            <ScrollArea className="flex-1">
               <Sidebar onItemClick={() => setSidebarOpen(false)} />
               <ScrollBar />
             </ScrollArea>
-            <div className="p-4 border-t border-border">
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>Show completed</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleShowCompleted}
-                  className={showCompleted ? 'text-primary' : ''}
-                >
-                  {showCompleted ? '✓' : '○'}
-                </Button>
-              </div>
-            </div>
           </div>
         </SheetContent>
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col border-r border-border bg-sidebar">
-        <div className="p-4 border-b border-sidebar-border">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">TaskPlanner</h1>
+      <aside className="hidden lg:flex w-72 flex-col border-r border-border/50 bg-background/50 backdrop-blur-xl">
+        <div className="p-6 border-b border-border/50">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2 group cursor-default">
+              <motion.div 
+                whileHover={{ rotate: 12, scale: 1.1 }}
+                className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 transition-transform"
+              >
+                <CheckCircle2 className="w-5 h-5 text-primary-foreground" />
+              </motion.div>
+              <h1 className="text-xl font-black tracking-tighter group-hover:text-primary transition-colors">TaskPlanner</h1>
+            </div>
             <ThemeToggle />
           </div>
           <SearchBar />
         </div>
-        <ScrollArea className="flex-1 scrollbar-thin">
+        <ScrollArea className="flex-1">
           <Sidebar />
           <ScrollBar />
         </ScrollArea>
-        <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Show completed</span>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleShowCompleted}
-              className={showCompleted ? 'text-primary' : ''}
-            >
-              {showCompleted ? '✓' : '○'}
-            </Button>
+        <div className="p-6 border-t border-border/50">
+          <div className="bg-muted/30 rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+              <span>Overall Progress</span>
+              <span>{productivityStats.percent}%</span>
+            </div>
+            <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${productivityStats.percent}%` }}
+                className="h-full bg-primary"
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground text-center">
+              {productivityStats.completed} of {productivityStats.total} tasks completed
+            </p>
           </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden pb-16 md:pb-0">
+      <main className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Background gradient for main content */}
+        <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+        
         {/* Header */}
-        <header className="flex-shrink-0 border-b border-border p-2 md:p-4 backdrop-blur-sm bg-background/80 supports-backdrop-blur:bg-background/60">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 md:gap-3">
-              {/* Mobile menu button */}
-              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                <SheetTrigger
-                  render={
-                    <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
-                      <PanelLeft className="h-5 w-5" />
-                    </Button>
-                  }
-                />
-              </Sheet>
+        <header className="flex-shrink-0 z-10 p-4 md:p-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="lg:hidden h-10 w-10 rounded-xl"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <PanelLeft className="h-5 w-5" />
+              </Button>
 
               <div>
-                <h2 className="text-lg md:text-2xl font-semibold">
+                <motion.div 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="flex items-center gap-2 mb-1"
+                >
+                  <Sparkles className="h-4 w-4 text-amber-500" />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Personal Workspace</span>
+                </motion.div>
+                <h2 className="text-3xl md:text-5xl font-black tracking-tight">
                   {VIEW_LABELS[currentView] || currentView}
                 </h2>
-                <p className="text-xs md:text-sm text-muted-foreground">
-                  {taskCount} tasks
+                <div className="flex items-center gap-3 mt-2">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {productivityStats.total} tasks active
+                  </p>
                   {overdueCount > 0 && (
-                    <span className="ml-2 text-red-500">
-                      ({overdueCount} overdue)
-                    </span>
+                    <Badge variant="destructive" className="rounded-full px-2 py-0 h-5 text-[10px] font-bold">
+                      {overdueCount} OVERDUE
+                    </Badge>
                   )}
-                </p>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <div className="hidden md:block">
-                <ViewToggle />
-              </div>
-              <Button size="sm" onClick={() => openCreateTask()}>
-                <span className="hidden sm:inline">+ New Task</span>
+            <div className="flex items-center gap-3">
+              <ViewToggle />
+              <Button 
+                size="lg" 
+                onClick={() => openCreateTask()}
+                className="rounded-2xl h-12 px-6 font-bold shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+              >
+                <span className="hidden sm:inline">+ Create Task</span>
                 <span className="sm:hidden">+</span>
               </Button>
             </div>
           </div>
         </header>
 
+        {/* Productivity Summary Bar */}
+        <div className="px-4 md:px-8 mb-4">
+          <div className="bg-background border border-border/50 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-600">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Productivity Score</div>
+                <div className="text-lg font-black tracking-tight">{productivityStats.percent} <span className="text-sm font-medium text-muted-foreground">/ 100</span></div>
+              </div>
+            </div>
+            
+            <div className="hidden md:flex gap-8">
+              <div className="text-center">
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Completed</div>
+                <div className="text-lg font-black">{productivityStats.completed}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Outstanding</div>
+                <div className="text-lg font-black">{productivityStats.total - productivityStats.completed}</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+               <span className="text-xs font-medium text-muted-foreground">Show Completed</span>
+               <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleShowCompleted}
+                  className={cn('rounded-lg', showCompleted ? 'text-primary bg-primary/10' : '')}
+                >
+                  {showCompleted ? '✓' : '○'}
+                </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Task List */}
-        <ScrollArea className="flex-1 scrollbar-thin">
-          <TaskList />
+        <ScrollArea className="flex-1 px-4 md:px-8">
+          <div className="max-w-5xl mx-auto pb-24">
+            <TaskList />
+          </div>
           <ScrollBar />
         </ScrollArea>
       </main>

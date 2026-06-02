@@ -2,7 +2,7 @@
 
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, Flag, Tag, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Clock, Flag, Tag, ChevronRight, AlertTriangle, ListFilter, GripVertical } from 'lucide-react';
 import React from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -25,19 +25,21 @@ const TaskCheckbox = React.memo(function TaskCheckbox({
   toggleTaskComplete: (id: string) => Promise<void> | void;
 }) {
   return (
-    <Checkbox
-      checked={task.status === 'completed'}
-      onCheckedChange={() => {
-        void toggleTaskComplete(task.id);
-      }}
-      aria-label={task.status === 'completed' ? 'Mark as incomplete' : 'Mark as complete'}
-      className={cn(
-        'mt-0.5 h-5 w-5 shrink-0',
-        task.status === 'completed'
-          ? 'bg-primary border-primary text-primary-foreground'
-          : 'border-muted-foreground/30 hover:border-primary'
-      )}
-    />
+    <div className="relative flex items-center justify-center">
+      <Checkbox
+        checked={task.status === 'completed'}
+        onCheckedChange={(e) => {
+          void toggleTaskComplete(task.id);
+        }}
+        aria-label={task.status === 'completed' ? 'Mark as incomplete' : 'Mark as complete'}
+        className={cn(
+          'h-6 w-6 rounded-full transition-all duration-300 border-2',
+          task.status === 'completed'
+            ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/20'
+            : 'border-muted-foreground/30 hover:border-primary bg-background'
+        )}
+      />
+    </div>
   );
 });
 
@@ -45,8 +47,8 @@ const TaskTitle = React.memo(function TaskTitle({ task }: { task: Task }) {
   return (
     <h4
       className={cn(
-        'text-sm font-medium leading-tight mb-1',
-        task.status === 'completed' && 'line-through text-muted-foreground'
+        'text-base font-semibold leading-tight transition-all duration-300',
+        task.status === 'completed' ? 'line-through text-muted-foreground/60' : 'text-foreground'
       )}
     >
       {task.title}
@@ -56,7 +58,14 @@ const TaskTitle = React.memo(function TaskTitle({ task }: { task: Task }) {
 
 function TaskDescription({ task }: { task: Task }) {
   if (!task.description) return null;
-  return <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{task.description}</p>;
+  return (
+    <p className={cn(
+      "text-sm line-clamp-2 mt-1 transition-colors duration-300",
+      task.status === 'completed' ? "text-muted-foreground/40" : "text-muted-foreground"
+    )}>
+      {task.description}
+    </p>
+  );
 }
 
 function DueDateBadge({ due, isOverdue }: { due: Date | undefined; isOverdue: boolean }) {
@@ -67,56 +76,77 @@ function DueDateBadge({ due, isOverdue }: { due: Date | undefined; isOverdue: bo
   else label = format(due, DATE_FORMATS.SHORT_DATE);
 
   return (
-    <Badge variant={isOverdue ? 'destructive' : 'secondary'} className="text-xs">
-      <Clock className="mr-1 h-3 w-3" />
+    <div className={cn(
+      "flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase",
+      isOverdue ? "bg-red-500/10 text-red-600 ring-1 ring-red-500/20" : "bg-primary/10 text-primary ring-1 ring-primary/20"
+    )}>
+      <Clock className="h-3 w-3" />
       {label}
-      {isOverdue && <AlertTriangle className="ml-1 h-3 w-3" />}
-    </Badge>
+      {isOverdue && <AlertTriangle className="h-3 w-3 animate-pulse" />}
+    </div>
   );
 }
 
 function PriorityBadge({ priority }: { priority: Priority }) {
   if (priority === 'none') return null;
+  const labels: Record<Priority, string> = {
+    none: '',
+    low: '!',
+    medium: '!!',
+    high: '!!!',
+  };
+  
   return (
-    <Badge variant="outline" className={cn('text-xs', PRIORITY_COLORS[priority])}>
-      <Flag className="mr-1 h-3 w-3" />
-      {PRIORITY_LABELS[priority]}
-    </Badge>
+    <div className={cn(
+      "px-2 py-0.5 rounded-full text-[10px] font-black",
+      priority === 'high' && "bg-red-500 text-white shadow-lg shadow-red-500/20",
+      priority === 'medium' && "bg-amber-500 text-white shadow-lg shadow-amber-500/20",
+      priority === 'low' && "bg-blue-500 text-white shadow-lg shadow-blue-500/20"
+    )}>
+      {labels[priority]} {PRIORITY_LABELS[priority]}
+    </div>
   );
 }
 
 function LabelsList({ labels }: { labels: Task['labels'] }) {
   if (!labels || labels.length === 0) return null;
   return (
-    <>
+    <div className="flex flex-wrap gap-1">
       {labels.map((label) => (
-        <Badge
+        <div
           key={label.id}
-          variant="outline"
-          className="text-xs"
-          style={{ borderColor: label.color, color: label.color }}
+          className="flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border"
+          style={{ 
+            borderColor: `${label.color}40`, 
+            backgroundColor: `${label.color}10`,
+            color: label.color 
+          }}
         >
-          <Tag className="mr-1 h-3 w-3" />
           {label.name}
-        </Badge>
+        </div>
       ))}
-    </>
+    </div>
   );
 }
 
-const SubtasksProgress = React.memo(function SubtasksProgress({ subtasks }: { subtasks: Task['subtasks'] }) {
+const SubtasksProgress = React.memo(function SubtasksProgress({ subtasks, status }: { subtasks: Task['subtasks'], status: Task['status'] }) {
   if (!subtasks || subtasks.length === 0) return null;
   const completed = subtasks.filter((s) => s.completed).length;
   const percent = Math.round((completed / subtasks.length) * 100);
+  
   return (
-    <div className="flex items-center gap-2" aria-label={`Subtask progress: ${completed} of ${subtasks.length}`}>
+    <div className="flex items-center gap-2 flex-1 max-w-[120px]" aria-label={`Subtask progress: ${completed} of ${subtasks.length}`}>
       <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden" aria-hidden="true">
-        <div
-          className="h-full bg-primary rounded-full transition-all duration-200"
-          style={{ width: `${percent}%` }}
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${percent}%` }}
+          className={cn(
+            "h-full rounded-full transition-all duration-500",
+            status === 'completed' ? "bg-muted-foreground/30" : "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"
+          )}
         />
       </div>
-      <span className="text-[10px] text-muted-foreground tabular-nums w-12 text-right" aria-hidden="true">
+      <span className="text-[10px] font-bold text-muted-foreground tabular-nums">
         {completed}/{subtasks.length}
       </span>
     </div>
@@ -133,21 +163,25 @@ function TaskMeta({
   isOverdue: boolean;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs">
-      <div className="flex items-center gap-1.5">
-        <span className="text-lg">{task.list?.icon}</span>
-        <span className="text-muted-foreground">{task.list?.name}</span>
+    <div className="mt-4 flex flex-wrap items-center gap-3">
+      <div className="flex items-center gap-2 py-1 px-2 rounded-lg bg-muted/50 text-[10px] font-bold text-muted-foreground uppercase tracking-tight">
+        <span className="text-sm leading-none">{task.list?.icon}</span>
+        {task.list?.name}
       </div>
+      
       <DueDateBadge due={due} isOverdue={isOverdue} />
       <PriorityBadge priority={task.priority} />
+      
       {(task.estimateMinutes ?? 0) > 0 && (
-        <span className="text-muted-foreground">
-          <Clock className="inline mr-1 h-3 w-3" />
+        <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase">
+          <Clock className="h-3 w-3" />
           {formatDuration(task.estimateMinutes!)}
-        </span>
+        </div>
       )}
+      
       <LabelsList labels={task.labels} />
-      <SubtasksProgress subtasks={task.subtasks} />
+      <div className="flex-1" />
+      <SubtasksProgress subtasks={task.subtasks} status={task.status} />
     </div>
   );
 }
@@ -174,46 +208,60 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.2 }}
+      whileHover={{ y: -2 }}
       onClick={() => setSelectedTask(task.id)}
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
       aria-pressed={isSelected}
-    className={cn(
-      'group relative w-full rounded-lg border bg-card p-4 text-left transition-all duration-200 hover:shadow-md hover:border-border/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-      task.status === 'completed' && 'bg-muted/20 opacity-70',
-      isSelected && 'ring-2 ring-primary',
-      isOverdue && 'border-red-500'
-    )}
+      className={cn(
+        'group relative w-full rounded-2xl border bg-card p-5 text-left transition-all duration-300',
+        'hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-primary/20',
+        'dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]',
+        task.status === 'completed' && 'bg-muted/30 opacity-60 grayscale-[0.5]',
+        isSelected && 'ring-2 ring-primary ring-offset-4 ring-offset-background z-10',
+        isOverdue && 'border-red-500/50 bg-red-500/[0.02]'
+      )}
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-4">
+        <div className="opacity-0 -ml-2 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
+          <GripVertical className="h-5 w-5 text-muted-foreground/30" />
+        </div>
+        
         <TaskCheckbox task={task} toggleTaskComplete={toggleTaskComplete} />
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <TaskTitle task={task} />
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <TaskTitle task={task} />
+              <TaskDescription task={task} />
+            </div>
+            
             <Button
               variant="ghost"
-              size="icon"
-              className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+              size="icon-sm"
+              className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-primary/10 hover:text-primary"
               onClick={(e) => {
                 e.stopPropagation();
                 openEditTask(task.id);
               }}
               aria-label="Edit task"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
 
-          <TaskDescription task={task} />
           <TaskMeta task={task} due={due} isOverdue={isOverdue} />
         </div>
       </div>
+      
+      {isSelected && (
+        <motion.div 
+          layoutId="focus-ring"
+          className="absolute -inset-[2px] rounded-[18px] border-2 border-primary pointer-events-none"
+        />
+      )}
     </motion.div>
   );
 });
+

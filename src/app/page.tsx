@@ -5,6 +5,7 @@ import { PanelLeft, Sparkles, CheckCircle2, Trophy } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 
 import { CreateTaskDialog } from '@/components/create-task-dialog';
+import { KeyboardShortcuts } from '@/components/keyboard-shortcuts';
 import { MobileNav } from '@/components/mobile-nav';
 import { SearchBar } from '@/components/search-bar';
 import { Sidebar } from '@/components/sidebar';
@@ -33,6 +34,15 @@ export default function HomePage() {
 
   useEffect(() => {
     useStore.getState().loadData();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'n' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        useStore.getState().openCreateTask();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
   const productivityStats = useMemo(() => {
@@ -222,6 +232,7 @@ export default function HomePage() {
       </AnimatePresence>
 
       <TaskDetailSheet />
+      <KeyboardShortcuts />
     </div>
   );
 }

@@ -47,7 +47,7 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
 
       set((state: AppState) => {
         const tasks = state.tasks.map((t: Task) =>
-          t.id === id ? { ...t, status: optimisticStatus } : t
+          t.id === id ? ({ ...t, status: optimisticStatus } as Task) : t
         );
         return { tasks, overdueCount: computeOverdue(tasks) };
       });

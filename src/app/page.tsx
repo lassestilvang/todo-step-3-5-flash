@@ -122,7 +122,7 @@ export default function HomePage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden relative">
+      <main id="main-content" role="main" className="flex-1 flex flex-col overflow-hidden relative">
         {/* Background gradient for main content */}
         <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
         

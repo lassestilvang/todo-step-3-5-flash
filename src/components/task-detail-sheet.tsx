@@ -14,10 +14,8 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
-  Circle,
   Clock,
   Flag,
-  Repeat,
   Tag,
   AlignLeft,
   History,
@@ -25,7 +23,7 @@ import {
   CheckCircle2,
   Trash2,
   Sparkles,
-} from 'lucide-react';
+  } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -367,7 +365,7 @@ export function TaskDetailSheet() {
       }}
     >
       <SheetContent side="right" className="w-full max-w-2xl p-0 border-l-0 shadow-2xl rounded-l-[40px] overflow-hidden">
-        <div className="flex flex-col h-full bg-background/50 backdrop-blur-3xl">
+        <div role="dialog" aria-modal="true" aria-label="Task details" className="flex flex-col h-full bg-background/50 backdrop-blur-3xl">
           <TaskDetailHeader
             currentIndex={currentIndex}
             total={tasksArray.length}

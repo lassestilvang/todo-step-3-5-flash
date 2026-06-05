@@ -208,6 +208,13 @@ function TaskGroups({ tasks }: { tasks: Task[] }) {
       } else if (e.key === 'k' && !isModifier) {
         e.preventDefault();
         handlePrev();
+      } else if (e.key === 'x' && !isModifier) {
+        e.preventDefault();
+        const current = useStore.getState().selectedTaskId;
+        if (current) {
+          void useStore.getState().deleteTask(current);
+          useStore.getState().setSelectedTask(null);
+        }
       }
     };
     window.addEventListener('keydown', onKeyDown);

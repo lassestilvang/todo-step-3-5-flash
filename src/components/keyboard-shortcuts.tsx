@@ -11,6 +11,7 @@ const SHORTCUTS = [
   { keys: ['N'], label: 'Create new task' },
   { keys: ['J'], label: 'Next task in list' },
   { keys: ['K'], label: 'Previous task in list' },
+  { keys: ['X'], label: 'Delete selected task' },
   { keys: ['Esc'], label: 'Close modal / Clear search' },
   { keys: ['?'], label: 'Show / hide shortcuts' },
 ];

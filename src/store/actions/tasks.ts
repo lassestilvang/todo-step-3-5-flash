@@ -40,23 +40,44 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
     },
 
     toggleTaskComplete: async (id: string): Promise<void> => {
-      const updated = await actions.toggleTaskCompleteAction(id);
-      if (updated) {
-        if (updated.status === 'completed') {
-          playSound('complete');
-          if (typeof navigator !== 'undefined' && navigator.vibrate) {
-            navigator.vibrate(100);
+      const prevTask = get().tasks.find((t: Task) => t.id === id);
+      if (!prevTask) return;
+
+      const optimisticStatus = prevTask.status === 'completed' ? 'pending' : 'completed';
+
+      set((state: AppState) => {
+        const tasks = state.tasks.map((t: Task) =>
+          t.id === id ? { ...t, status: optimisticStatus } : t
+        );
+        return { tasks, overdueCount: computeOverdue(tasks) };
+      });
+
+      try {
+        const updated = await actions.toggleTaskCompleteAction(id);
+        if (updated) {
+          if (updated.status === 'completed') {
+            playSound('complete');
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+              navigator.vibrate(100);
+            }
+            void confetti({
+              particleCount: 150,
+              spread: 70,
+              origin: { y: 0.6 },
+              colors: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'],
+              zIndex: 9999,
+            });
           }
-          void confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'],
-            zIndex: 9999,
+          set((state: AppState) => {
+            const tasks = state.tasks.map((t: Task) => (t.id === id ? updated : t));
+            return { tasks, overdueCount: computeOverdue(tasks) };
           });
         }
+      } catch {
         set((state: AppState) => {
-          const tasks = state.tasks.map((t: Task) => (t.id === id ? updated : t));
+          const tasks = state.tasks.map((t: Task) =>
+            t.id === id ? { ...t, status: prevTask.status } : t
+          );
           return { tasks, overdueCount: computeOverdue(tasks) };
         });
       }

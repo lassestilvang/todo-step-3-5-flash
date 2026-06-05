@@ -5,6 +5,7 @@ import './globals.css';
 import { BrandThemeProvider } from '@/components/brand-theme-provider';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { ThemeProvider } from '@/components/theme-provider';
+import { ToastProvider } from '@/components/toast-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const geistSans = Geist({
@@ -43,13 +44,15 @@ export default function RootLayout({
           <BrandThemeProvider>
             <ErrorBoundary>
               <TooltipProvider>
-                <a
-                  href="#main-content"
-                  className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:rounded-xl focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-xl"
-                >
-                  Skip to main content
-                </a>
-                {children}
+                <ToastProvider>
+                  <a
+                    href="#main-content"
+                    className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[999] focus:rounded-xl focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-xl"
+                  >
+                    Skip to main content
+                  </a>
+                  {children}
+                </ToastProvider>
               </TooltipProvider>
             </ErrorBoundary>
           </BrandThemeProvider>

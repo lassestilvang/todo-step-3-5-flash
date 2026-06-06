@@ -1,8 +1,10 @@
-import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import React, { useMemo } from 'react';
+
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 import type { Task, TaskStatus } from '@/types';
+
 import { TaskCard } from './task-card';
 
 export function TaskBoard({ tasks }: { tasks: Task[] }) {

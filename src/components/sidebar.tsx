@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutList, Calendar, CalendarDays, Sparkles, Plus, Trash2, Trash, CheckCircle2, LayoutGrid } from 'lucide-react';
+import { Plus, Trash2, Trash, CheckCircle2 } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -14,16 +14,14 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { INBOX_LIST_ID, VIEWS } from '@/constants';
+import { INBOX_LIST_ID } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
-import type { ViewType } from '@/types';
 import { SidebarSmartViews } from './sidebar-smart-views';
 
 export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const lists = useStore((s) => s.lists);
   const tasks = useStore((s) => s.tasks);
-  const currentView = useStore((s) => s.currentView);
   const selectedListId = useStore((s) => s.selectedListId);
   const overdueCount = useStore((s) => s.overdueCount);
   const setCurrentView = useStore((s) => s.setCurrentView);

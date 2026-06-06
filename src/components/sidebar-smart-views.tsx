@@ -1,7 +1,9 @@
 'use client';
+
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+
 import { VIEWS } from '@/constants';
+import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { ViewType } from '@/types';
 

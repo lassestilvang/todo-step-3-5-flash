@@ -13,9 +13,10 @@ import { Sidebar } from '@/components/sidebar';
 import { TaskDetailSheet } from '@/components/task-detail-sheet';
 import { TaskList } from '@/components/task-list';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { ViewToggle } from '@/components/view-toggle';
 import { VIEW_LABELS } from '@/constants';
 import { useStore } from '@/store';
@@ -30,7 +31,6 @@ export default function HomePage() {
   const openCreateTask = useStore((s) => s.openCreateTask);
   const magicSortTasks = useStore((s) => s.magicSortTasks);
   const tasks = useStore((s) => s.tasks);
-  const taskCount = tasks.length;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

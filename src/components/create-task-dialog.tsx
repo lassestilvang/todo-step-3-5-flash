@@ -111,18 +111,6 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     resolver: zodResolver(taskSchema),
     defaultValues: formDefaults,
   });
-      deadline: undefined,
-      estimateMinutes: undefined,
-      recurrence: undefined,
-      labelIds: [] as string[],
-    }),
-    [listDefault]
-  );
-
-  const form = useForm({
-    resolver: zodResolver(taskSchema),
-    defaultValues: formDefaults,
-  });
 
   const onSubmit = async (data: TaskFormData) => {
     if (isEditing && editTaskId) {

@@ -1,5 +1,15 @@
+import { LayoutList, Calendar, CalendarDays, Sparkles, LayoutGrid } from 'lucide-react';
+
 // Default list identifiers
 export const INBOX_LIST_ID = 'inbox';
+
+export const VIEWS = [
+  { id: 'all', label: 'All Tasks', icon: LayoutList, color: 'text-blue-500' },
+  { id: 'board', label: 'Kanban Board', icon: LayoutGrid, color: 'text-pink-500' },
+  { id: 'today', label: 'Today', icon: Calendar, color: 'text-green-500' },
+  { id: 'week', label: 'Next 7 Days', icon: CalendarDays, color: 'text-purple-500' },
+  { id: 'upcoming', label: 'Upcoming', icon: Sparkles, color: 'text-amber-500' },
+] as const;
 
 // UI timing
 export const DEBOUNCE_DELAY_MS = 300;

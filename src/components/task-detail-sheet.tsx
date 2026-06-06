@@ -243,7 +243,7 @@ function TaskSubtasksSection({
         <Button 
           variant="ghost" 
           size="xs" 
-          onClick={onMagic}
+          onClick={() => void onMagic()}
           className="h-7 px-3 rounded-lg text-primary hover:bg-primary/10 font-bold flex items-center gap-2"
         >
           <Sparkles className="h-3 w-3" />
@@ -372,7 +372,7 @@ export function TaskDetailSheet() {
             onPrev={handlePrev}
             onNext={handleNext}
             onClose={() => setSelectedTask(null)}
-            onDelete={handleDelete}
+            onDelete={() => void handleDelete()}
           />
           <ScrollArea className="flex-1">
             <div className="p-8 space-y-10 pb-24">

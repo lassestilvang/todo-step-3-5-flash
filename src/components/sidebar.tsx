@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Trash, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Trash, CheckCircle2, Sparkles } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -14,9 +14,11 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
 import { INBOX_LIST_ID } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
+
 import { SidebarSmartViews } from './sidebar-smart-views';
 
 export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {

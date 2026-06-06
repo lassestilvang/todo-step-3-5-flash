@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import Fuse from 'fuse.js';
-import { Search, Command as CommandIcon, List, Clock, Sparkles } from 'lucide-react';
+import { Search, Sparkles } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 import { Input } from '@/components/ui/input';
@@ -67,10 +67,6 @@ export function SearchBar() {
     return fastFilter(localQuery, searchableTasks);
   }, [localQuery, searchableTasks, fastFilter]);
 
-  useEffect(() => {
-    setFocusedIndex(-1);
-  }, [localQuery]);
-
   const debouncedSetSearch = useMemo(
     () =>
       debounce((value: string) => {
@@ -102,6 +98,14 @@ export function SearchBar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const handleResultClick = (task: (typeof results)[0]) => {
+    setSearchQuery(task.title);
+    setLocalQuery(task.title);
+    setIsOpen(false);
+    setFocusedIndex(-1);
+    setSelectedTask(task.id);
+  };
+
   const handleResultsKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (!isOpen) return;
@@ -122,16 +126,8 @@ export function SearchBar() {
         setFocusedIndex(-1);
       }
     },
-    [isOpen, results, focusedIndex]
+    [isOpen, results, focusedIndex, handleResultClick]
   );
-
-  const handleResultClick = (task: (typeof results)[0]) => {
-    setSearchQuery(task.title);
-    setLocalQuery(task.title);
-    setIsOpen(false);
-    setFocusedIndex(-1);
-    setSelectedTask(task.id);
-  };
 
   const resultListId = 'search-results-list';
 
@@ -149,6 +145,7 @@ export function SearchBar() {
           value={localQuery}
           onChange={(e) => {
             setLocalQuery(e.target.value);
+            setFocusedIndex(-1);
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}

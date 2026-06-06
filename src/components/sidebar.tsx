@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
 import { INBOX_LIST_ID } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';

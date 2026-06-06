@@ -1,9 +1,11 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { format, isToday, isTomorrow, isThisWeek, isThisYear } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
+import React, { useCallback, useEffect, useMemo } from 'react';
+
 import { DATE_FORMATS, STRINGS } from '@/constants';
 import { useStore } from '@/store';
 import type { Task } from '@/types';
+
 import { TaskCard } from './task-card';
 
 export function TaskGroups({ tasks }: { tasks: Task[] }) {

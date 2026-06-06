@@ -2,13 +2,12 @@
 
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, Flag, Tag, ChevronRight, AlertTriangle, ListFilter, GripVertical, Brain } from 'lucide-react';
+import { Clock, ChevronRight, AlertTriangle, GripVertical, Brain } from 'lucide-react';
 import React from 'react';
 
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { PRIORITY_COLORS, PRIORITY_LABELS, DATE_FORMATS, STRINGS } from '@/constants';
+import { PRIORITY_LABELS, DATE_FORMATS, STRINGS } from '@/constants';
 import { cn, formatDuration } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { Task, Priority } from '@/types';
@@ -28,7 +27,7 @@ const TaskCheckbox = React.memo(function TaskCheckbox({
     <div className="relative flex items-center justify-center">
       <Checkbox
         checked={task.status === 'completed'}
-        onCheckedChange={(e) => {
+        onCheckedChange={() => {
           void toggleTaskComplete(task.id);
         }}
         aria-label={task.status === 'completed' ? 'Mark as incomplete' : 'Mark as complete'}

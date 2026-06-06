@@ -1,12 +1,14 @@
 'use client';
 import { useMemo } from 'react';
+
 import { useStore } from '@/store';
 import { getFilteredTasks } from '@/store/selectors';
+
 import { EmptyState } from './empty-state';
-import { TaskCardSkeleton } from './task-card-skeleton';
 import { QuickAddTask } from './quick-add-task';
-import { TaskGroups } from './task-groups';
 import { TaskBoard } from './task-board';
+import { TaskCardSkeleton } from './task-card-skeleton';
+import { TaskGroups } from './task-groups';
 
 export function TaskList() {
   const tasks = useStore((s) => s.tasks);

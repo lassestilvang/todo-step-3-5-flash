@@ -229,7 +229,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-3xl rounded-[32px] p-0 overflow-hidden border-0 shadow-2xl">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col max-h-[90vh]">
+          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="flex flex-col max-h-[90vh]">
             <div className="p-8 space-y-8 overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-3xl font-black tracking-tight flex items-center gap-3">

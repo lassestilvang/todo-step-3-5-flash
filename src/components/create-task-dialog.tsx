@@ -78,9 +78,10 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const editTaskId = useStore((s) => s.editTaskId);
   const selectedListId = useStore((s) => s.selectedListId);
   const tasks = useStore((s) => s.tasks);
-  const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>(
-    []
-  );
+  const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>(() => {
+    if (isEditing && editTask) return editTask.subtasks.map((s) => ({ id: s.id, title: s.title, completed: s.completed }));
+    return [];
+  });
   const [newSubtask, setNewSubtask] = useState('');
   const seededTaskIdRef = React.useRef<string | null>(null);
 
@@ -93,11 +94,23 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const listDefault = selectedListId || INBOX_LIST_ID;
   const formDefaults = useMemo(
     (): TaskFormData => ({
-      title: '',
-      description: undefined,
-      listId: listDefault,
-      priority: 'none',
-      dueDate: undefined,
+      title: isEditing && editTask ? editTask.title : '',
+      description: isEditing && editTask ? editTask.description : undefined,
+      listId: isEditing && editTask ? editTask.listId : listDefault,
+      dueDate: isEditing && editTask ? editTask.dueDate : undefined,
+      deadline: isEditing && editTask ? editTask.deadline : undefined,
+      estimateMinutes: isEditing && editTask ? editTask.estimateMinutes : undefined,
+      priority: isEditing && editTask ? editTask.priority : 'none',
+      recurrence: isEditing && editTask ? editTask.recurrence : undefined,
+      labelIds: isEditing && editTask ? editTask.labels?.map((l) => l.id) || [] : [],
+    }),
+    [isEditing, editTask, listDefault]
+  );
+
+  const form = useForm({
+    resolver: zodResolver(taskSchema),
+    defaultValues: formDefaults,
+  });
       deadline: undefined,
       estimateMinutes: undefined,
       recurrence: undefined,
@@ -110,41 +123,6 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     resolver: zodResolver(taskSchema),
     defaultValues: formDefaults,
   });
-
-  useEffect(() => {
-    if (!open) return;
-    const targetId = isEditing && editTask ? editTask.id : null;
-    if (targetId === seededTaskIdRef.current) return;
-    seededTaskIdRef.current = targetId;
-
-    if (isEditing && editTask) {
-      form.reset({
-        title: editTask.title,
-        description: editTask.description,
-        listId: editTask.listId,
-        dueDate: editTask.dueDate,
-        deadline: editTask.deadline,
-        estimateMinutes: editTask.estimateMinutes || 0,
-        priority: editTask.priority,
-        recurrence: editTask.recurrence,
-        labelIds: editTask.labels?.map((l) => l.id) || [],
-      });
-      setSubtasks(
-        editTask.subtasks.map((s) => ({ id: s.id, title: s.title, completed: s.completed }))
-      );
-    } else {
-      form.reset({
-        title: '',
-        description: undefined,
-        listId: listDefault,
-        priority: 'none',
-        estimateMinutes: undefined,
-        recurrence: undefined,
-        labelIds: [],
-      });
-      setSubtasks([]);
-    }
-  }, [open, isEditing, editTask, listDefault, form]);
 
   const onSubmit = async (data: TaskFormData) => {
     if (isEditing && editTaskId) {
@@ -227,7 +205,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-3xl rounded-[32px] p-0 overflow-hidden border-0 shadow-2xl">
+      <DialogContent key={editTaskId || 'new'} className="max-w-3xl rounded-[32px] p-0 overflow-hidden border-0 shadow-2xl">
         <Form {...form}>
           <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="flex flex-col max-h-[90vh]">
             <div className="p-8 space-y-8 overflow-y-auto">

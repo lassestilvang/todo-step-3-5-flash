@@ -78,18 +78,18 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const editTaskId = useStore((s) => s.editTaskId);
   const selectedListId = useStore((s) => s.selectedListId);
   const tasks = useStore((s) => s.tasks);
-  const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>(() => {
-    if (isEditing && editTask) return editTask.subtasks.map((s) => ({ id: s.id, title: s.title, completed: s.completed }));
-    return [];
-  });
-  const [newSubtask, setNewSubtask] = useState('');
-  const seededTaskIdRef = React.useRef<string | null>(null);
 
   const isEditing = !!editTaskId;
   const editTask = useMemo(
     () => (isEditing && editTaskId ? tasks.find((t) => t.id === editTaskId) || null : null),
     [isEditing, editTaskId, tasks]
   );
+
+  const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>(() => {
+    if (isEditing && editTask) return editTask.subtasks.map((s) => ({ id: s.id, title: s.title, completed: s.completed }));
+    return [];
+  });
+  const [newSubtask, setNewSubtask] = useState('');
 
   const listDefault = selectedListId || INBOX_LIST_ID;
   const formDefaults = useMemo(

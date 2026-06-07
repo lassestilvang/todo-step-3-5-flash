@@ -7,6 +7,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
+import { FocusTimerMinimized } from './focus-timer-minimized';
 
 export function FocusTimer() {
   const { focusTimer, startFocusTimer, pauseFocusTimer, resetFocusTimer, tickFocusTimer, setFocusMode, tasks } = useStore();
@@ -39,15 +40,7 @@ export function FocusTimer() {
   }, [focusTimer.timeLeft, focusTimer.mode]);
 
   if (!focusTimer.isActive && isMinimized && !focusTimer.taskId) {
-     return (
-       <Button 
-         onClick={() => setIsMinimized(false)}
-         className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 rounded-full h-12 px-6 shadow-2xl bg-primary text-primary-foreground font-bold flex items-center gap-2 group hover:scale-105 active:scale-95 transition-all"
-       >
-         <Brain className="w-5 h-5 group-hover:rotate-12 transition-transform" />
-         Start Focus Session
-       </Button>
-     );
+     return <FocusTimerMinimized onStart={() => setIsMinimized(false)} />;
   }
 
   return (

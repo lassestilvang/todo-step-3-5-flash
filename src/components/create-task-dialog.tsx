@@ -50,12 +50,12 @@ import {
   PRIORITY_LABELS,
   PRIORITY_TEXT_COLORS,
 } from '@/constants';
+import { cn } from '@/lib/utils';
+import { useStore } from '@/store';
 import {
   PRIORITY_VALUES,
   RECURRENCE_VALUES,
 } from '@/types';
-import { useStore } from '@/store';
-import { cn } from '@/lib/utils';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),

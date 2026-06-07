@@ -11,7 +11,6 @@ import {
   } from 'date-fns';
 import {
   Calendar,
-  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Clock,

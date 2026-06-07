@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Keyboard, X, Command, Shift, ArrowDown, ArrowUp } from 'lucide-react';
+import { Keyboard, X, Command, Shift } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';

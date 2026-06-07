@@ -5,8 +5,9 @@ import { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
-import { FocusTimerMinimized } from './focus-timer-minimized';
+
 import { FocusTimerExpanded } from './focus-timer-expanded';
+import { FocusTimerMinimized } from './focus-timer-minimized';
 
 export function FocusTimer() {
   const { focusTimer, startFocusTimer, pauseFocusTimer, resetFocusTimer, tickFocusTimer, setFocusMode, tasks } = useStore();

@@ -1,4 +1,5 @@
 import { Brain } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 
 export function FocusTimerMinimized({ onStart }: { onStart: () => void }) {

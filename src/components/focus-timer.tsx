@@ -7,6 +7,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
+
 import { FocusTimerMinimized } from './focus-timer-minimized';
 
 export function FocusTimer() {

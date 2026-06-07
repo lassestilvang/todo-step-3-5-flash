@@ -8,6 +8,16 @@ import type { Task } from '@/types';
 
 import { TaskCard } from './task-card';
 
+function getDateLabel(due: Date | string | undefined): string {
+  if (!due) return STRINGS.NO_DATE;
+  const date = new Date(due);
+  if (isToday(date)) return STRINGS.TODAY;
+  if (isTomorrow(date)) return STRINGS.TOMORROW;
+  if (isThisWeek(date)) return format(date, DATE_FORMATS.FULL_WEEKDAY);
+  if (isThisYear(date)) return format(date, DATE_FORMATS.SHORT_DATE);
+  return format(date, DATE_FORMATS.FULL_DATE);
+}
+
 export function TaskGroups({ tasks }: { tasks: Task[] }) {
   const setSelectedTask = useStore((s) => s.setSelectedTask);
 
@@ -58,15 +68,7 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
   const grouped = useMemo(() => {
     const map: Record<string, Task[]> = {};
     tasks.forEach((task) => {
-      let dateLabel: string = STRINGS.NO_DATE;
-      const due = task.dueDate || task.deadline;
-      if (due) {
-        if (isToday(due)) dateLabel = STRINGS.TODAY;
-        else if (isTomorrow(due)) dateLabel = STRINGS.TOMORROW;
-        else if (isThisWeek(due)) dateLabel = format(due, DATE_FORMATS.FULL_WEEKDAY);
-        else if (isThisYear(due)) dateLabel = format(due, DATE_FORMATS.SHORT_DATE);
-        else dateLabel = format(due, DATE_FORMATS.FULL_DATE);
-      }
+      const dateLabel = getDateLabel(task.dueDate || task.deadline);
       if (!map[dateLabel]) map[dateLabel] = [];
       map[dateLabel]!.push(task);
     });

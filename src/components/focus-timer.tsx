@@ -1,7 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Coffee, Brain, X, Maximize2, Minimize2 } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';

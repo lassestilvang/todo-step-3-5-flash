@@ -39,31 +39,33 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
     setSelectedTask(taskIds[nextIdx]!);
   }, [taskIds, setSelectedTask]);
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      const tag = document.activeElement?.tagName;
-      const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || e.target instanceof HTMLInputElement;
-      if (isInput) return;
-      const isModifier = e.metaKey || e.ctrlKey;
+  const handleKeyDown = useCallback((e: KeyboardEvent, handleNext: () => void, handlePrev: () => void) => {
+    const tag = document.activeElement?.tagName;
+    const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || e.target instanceof HTMLInputElement;
+    if (isInput) return;
+    const isModifier = e.metaKey || e.ctrlKey;
 
-      if (e.key === 'j' && !isModifier) {
-        e.preventDefault();
-        handleNext();
-      } else if (e.key === 'k' && !isModifier) {
-        e.preventDefault();
-        handlePrev();
-      } else if (e.key === 'x' && !isModifier) {
-        e.preventDefault();
-        const current = useStore.getState().selectedTaskId;
-        if (current) {
-          void useStore.getState().deleteTask(current);
-          useStore.getState().setSelectedTask(null);
-        }
+    if (e.key === 'j' && !isModifier) {
+      e.preventDefault();
+      handleNext();
+    } else if (e.key === 'k' && !isModifier) {
+      e.preventDefault();
+      handlePrev();
+    } else if (e.key === 'x' && !isModifier) {
+      e.preventDefault();
+      const current = useStore.getState().selectedTaskId;
+      if (current) {
+        void useStore.getState().deleteTask(current);
+        useStore.getState().setSelectedTask(null);
       }
-    };
+    }
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => handleKeyDown(e, handleNext, handlePrev);
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [handleNext, handlePrev]);
+  }, [handleNext, handlePrev, handleKeyDown]);
 
   const grouped = useMemo(() => {
     const map: Record<string, Task[]> = {};

@@ -3,8 +3,8 @@
 /* eslint-disable max-lines */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
-import { CalendarIcon, Flag, Trash2, X, Plus, Paperclip, Repeat, Type, AlignLeft, Hash, Clock } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { CalendarIcon, Trash2, X, Plus, Paperclip, Repeat, AlignLeft, Hash, Clock } from 'lucide-react';
+import { useState, useMemo } from 'react';
 import React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
@@ -47,7 +47,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import {
   INBOX_LIST_ID,
-  DATE_FORMATS,
+} from '@/constants';
   PRIORITY_VALUES,
   PRIORITY_LABELS,
   PRIORITY_TEXT_COLORS,

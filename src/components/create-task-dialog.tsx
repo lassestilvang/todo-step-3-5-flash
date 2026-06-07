@@ -48,15 +48,12 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   INBOX_LIST_ID,
 } from '@/constants';
+import {
   PRIORITY_VALUES,
-  PRIORITY_LABELS,
-  PRIORITY_TEXT_COLORS,
   RECURRENCE_VALUES,
-  RECURRENCE_OPTIONS,
-  STRINGS,
-} from '@/constants';
-import { cn } from '@/lib/utils';
+} from '@/types';
 import { useStore } from '@/store';
+import { cn } from '@/lib/utils';
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),

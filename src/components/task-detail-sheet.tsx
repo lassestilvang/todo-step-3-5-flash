@@ -391,7 +391,7 @@ export function TaskDetailSheet() {
                 onToggle={(taskId, subtaskId) => {
                   void toggleSubtaskFromStore(taskId, subtaskId);
                 }}
-                onMagic={handleMagicBreakdown}
+                onMagic={() => void handleMagicBreakdown()}
               />
               
               <div className="space-y-4">

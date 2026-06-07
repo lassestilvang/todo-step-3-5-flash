@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-
 import { Play, Pause, RotateCcw, Coffee, Brain, X, Minimize2 } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 

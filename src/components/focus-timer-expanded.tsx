@@ -3,6 +3,8 @@ import { Play, Pause, RotateCcw, Coffee, Brain, X, Minimize2 } from 'lucide-reac
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import type { Task } from '@/types';
+import type { FocusTimerState } from '@/store/types';
 
 export function FocusTimerExpanded({
   focusTimer,
@@ -15,9 +17,9 @@ export function FocusTimerExpanded({
   onToggle,
   onToggleMode,
 }: {
-  focusTimer: any; // Using any for simplicity here as it's extracted from the existing component
+  focusTimer: FocusTimerState;
   progress: number;
-  activeTask: any;
+  activeTask: Task | undefined;
   formatTime: (s: number) => string;
   onMinimize: () => void;
   onClose: () => void;

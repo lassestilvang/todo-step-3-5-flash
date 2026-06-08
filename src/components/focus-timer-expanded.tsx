@@ -3,8 +3,8 @@ import { Play, Pause, RotateCcw, Coffee, Brain, X, Minimize2 } from 'lucide-reac
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { Task } from '@/types';
 import type { FocusTimerState } from '@/store/types';
+import type { Task } from '@/types';
 
 export function FocusTimerExpanded({
   focusTimer,

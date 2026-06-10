@@ -98,13 +98,13 @@ export function SearchBar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleResultClick = (task: (typeof results)[0]) => {
+  const handleResultClick = useCallback((task: SearchableTask) => {
     setSearchQuery(task.title);
     setLocalQuery(task.title);
     setIsOpen(false);
     setFocusedIndex(-1);
     setSelectedTask(task.id);
-  };
+  }, [setSearchQuery, setSelectedTask]);
 
   const handleResultsKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

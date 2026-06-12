@@ -1,5 +1,12 @@
 import type { Task, TaskList, Label, ViewType, CreateTaskData, CreateListData } from '@/types';
 
+export interface FocusTimerState {
+  timeLeft: number;
+  isActive: boolean;
+  mode: 'work' | 'break';
+  taskId: string | null;
+}
+
 export interface AppState {
   tasks: Task[];
   lists: TaskList[];

@@ -9,8 +9,17 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/__tests__/setup.ts'],
+    env: {
+      NODE_ENV: 'test',
+    },
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     exclude: ['**/node_modules/**', '**/.next/**', '**/dist/**'],
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        isolate: false,
+      },
+    },
     coverage: {
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [

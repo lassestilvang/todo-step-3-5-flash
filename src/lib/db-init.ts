@@ -16,7 +16,7 @@ export function getDb(): any {
     // In test environment, use the mock from mocks/better-sqlite3.ts
     // Using require to avoid ESM issues with the mock
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mockDb = require('@/__tests__/mocks/better-sqlite3.ts').default;
+    const mockDb = require('../../src/__tests__/mocks/better-sqlite3.ts').default;
     dbInstance = mockDb;
     return dbInstance;
   }

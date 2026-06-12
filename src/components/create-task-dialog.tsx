@@ -49,13 +49,13 @@ import {
   INBOX_LIST_ID,
   PRIORITY_LABELS,
   PRIORITY_TEXT_COLORS,
+  PRIORITY_VALUES,
+  RECURRENCE_OPTIONS,
 } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
-import {
-  PRIORITY_VALUES,
-  RECURRENCE_VALUES,
-} from '@/types';
+
+const RECURRENCE_VALUES = RECURRENCE_OPTIONS.map((o) => o.value);
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),

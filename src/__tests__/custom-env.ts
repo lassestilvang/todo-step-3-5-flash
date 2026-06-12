@@ -7,12 +7,12 @@ vi.mock('better-sqlite3', () => ({
     prepare(sql: string) {
       return {
         sql,
-        binds: [] as any[],
-        bind(...params: any[]) {
+        binds: [] as never[],
+        bind(...params: never[]) {
           this.binds = params;
           return this;
         },
-        run(...params: any[]) {
+        run(...params: never[]) {
           if (params.length > 0) this.binds = params;
           return { changes: 1, lastInsertRowid: 'mock-id' };
         },

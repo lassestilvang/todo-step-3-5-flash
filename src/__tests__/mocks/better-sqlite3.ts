@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable max-lines */
+/* eslint-disable complexity */
 // Mock for better-sqlite3
 // This is used in test environments where native bindings are not available
 
@@ -42,8 +45,7 @@ class MockStatement {
     return this;
   }
 
-  run() {
-    const params = Array.prototype.slice.call(arguments);
+  run(...params: never[]) {
     if (params.length > 0) {
       this.binds = params;
       globalBinds.length = 0;
@@ -343,7 +345,7 @@ class MockStatement {
       let firstGroupSql = groups[0].slice(1); // Remove one opening parenthesis
       if (firstGroupSql.startsWith('(')) firstGroupSql = firstGroupSql.slice(1); // Remove second if present
       firstGroupSql = firstGroupSql.slice(0, -1); // Remove closing paren
-      let secondGroupSql = groups[1].slice(1, -1); // Remove parentheses
+      const secondGroupSql = groups[1].slice(1, -1); // Remove parentheses
 
       if (firstGroupSql.includes('BETWEEN')) {
         const firstOk = this.evaluateBetweenGroup(row, firstGroupSql, 0, 2);
@@ -517,3 +519,4 @@ const mockDbInstance = {
 };
 
 export default mockDbInstance;
+/* eslint-enable @typescript-eslint/no-explicit-any */

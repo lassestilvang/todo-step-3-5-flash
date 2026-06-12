@@ -3,7 +3,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Mock zustand persist middleware to avoid localStorage issues in tests
 vi.mock('zustand/middleware', () => ({
-  persist: (config: any, options: any) => (set: any, get: any) => {
+  persist: (config: any, _options: any) => (set: any, get: any) => {
     // Return the config directly without storage wrapper
     const store = config(set, get);
     return store;

@@ -20,6 +20,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { ViewToggle } from '@/components/view-toggle';
 import { VIEW_LABELS } from '@/constants';
 import { useStore } from '@/store';
+import { cn } from '@/lib/utils';
 
 export default function HomePage() {
   const showCompleted = useStore((s) => s.showCompleted);

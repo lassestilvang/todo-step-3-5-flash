@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Keyboard, X, Command, Shift } from 'lucide-react';
+import { Keyboard, X, Command } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -98,7 +98,7 @@ export function KeyboardShortcuts() {
                      <Command className="w-3 h-3" /> System Wide
                    </div>
                    <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                     <Shift className="w-3 h-3" /> Shortcuts
+                     <kbd className="min-w-[20px] h-4 px-1 rounded text-xs font-bold">⇧</kbd> Shortcuts
                    </div>
                 </div>
               </div>

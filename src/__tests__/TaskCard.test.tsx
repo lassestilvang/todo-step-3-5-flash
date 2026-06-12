@@ -1,17 +1,35 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { JSDOM } from 'jsdom';
 
 import { TaskCard } from '@/components/task-card';
 import { useStore } from '@/store';
 import type { Task } from '@/types';
 
-// Mock framer-motion to avoid animation issues in jsdom
+// Set up jsdom environment
+const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+(global as any).document = dom.window.document;
+(global as any).window = dom.window;
+
+// Mock framer-motion to avoid animation issues
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+    div: ({ children, ...props }: any) => {
+      return <div {...props}>{children}</div>;
+    },
+    button: ({ children, ...props }: any) => {
+      return <button {...props}>{children}</button>;
+    },
+    span: ({ children, ...props }: any) => {
+      return <span {...props}>{children}</span>;
+    },
+    p: ({ children, ...props }: any) => {
+      return <p {...props}>{children}</p>;
+    },
   },
+  AnimatePresence: ({ children }: any) => children,
+  useAnimation: () => ({}),
 }));
 
 // Mock the useStore hook

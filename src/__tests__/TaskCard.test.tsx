@@ -1,16 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, max-lines */
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { JSDOM } from 'jsdom';
 
 import { TaskCard } from '@/components/task-card';
-import { useStore } from '@/store';
 import type { Task } from '@/types';
-
-// Set up jsdom environment
-const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>');
-(global as any).document = dom.window.document;
-(global as any).window = dom.window;
 
 // Mock framer-motion to avoid animation issues
 vi.mock('framer-motion', () => ({
@@ -32,14 +25,20 @@ vi.mock('framer-motion', () => ({
   useAnimation: () => ({}),
 }));
 
-// Mock the useStore hook
-vi.mock('@/store', () => ({
-  useStore: vi.fn(),
-}));
-
 const mockToggleTaskComplete = vi.fn();
 const mockOpenEditTask = vi.fn();
 const mockSetSelectedTask = vi.fn();
+
+const mockStore = {
+  toggleTaskComplete: mockToggleTaskComplete,
+  openEditTask: mockOpenEditTask,
+  setSelectedTask: mockSetSelectedTask,
+  selectedTaskId: null,
+};
+
+vi.mock('@/store', () => ({
+  useStore: vi.fn(() => mockStore),
+}));
 
 function createMockTask(overrides: Partial<Task> = {}): Task {
   return {
@@ -64,19 +63,13 @@ function createMockTask(overrides: Partial<Task> = {}): Task {
     attachments: [],
     reminders: [],
     changeLogs: [],
-    list: { name: 'Inbox', icon: '📥', color: '#3b82f6' },
+    list: { name: 'Inbox', icon: '📥', color: '#3b80f6' },
     ...overrides,
   } as Task;
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
-  (useStore as any).mockReturnValue({
-    toggleTaskComplete: mockToggleTaskComplete,
-    openEditTask: mockOpenEditTask,
-    setSelectedTask: mockSetSelectedTask,
-    selectedTaskId: null,
-  });
 });
 
 describe('TaskCard', () => {
@@ -84,7 +77,7 @@ describe('TaskCard', () => {
     const task = createMockTask();
     render(<TaskCard task={task} />);
 
-    expect(screen.getByText('Test Task').toHaveLength(1).toBeTruthy()).toBeInTheDocument();
+    expect(screen.getByText('Test Task')).toBeInTheDocument();
     expect(screen.getByText('A test description')).toBeInTheDocument();
   });
 

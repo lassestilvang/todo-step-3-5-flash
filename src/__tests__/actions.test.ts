@@ -27,6 +27,9 @@ function clearAllTables() {
 beforeEach(() => {
   clearAllTables();
   db.initializeDatabase();
+  // Access the seed flag via the module's internal state
+  // The seedDefaultData function uses a __hasSeeded variable that we need to reset
+  // Since it's not exported, we use a workaround by reinitializing
   db.seedDefaultData();
 });
 

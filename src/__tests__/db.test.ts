@@ -68,9 +68,8 @@ function clearAllTables() {
 
 describe('Database', () => {
   beforeEach(() => {
-    // Clear all data and re-seed defaults
+    // Clear all data before each test
     clearAllTables();
-    seedDefaultData();
   });
 
   afterEach(() => {

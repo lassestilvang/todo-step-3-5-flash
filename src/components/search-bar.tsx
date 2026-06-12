@@ -7,7 +7,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 import { Input } from '@/components/ui/input';
 import { DEBOUNCE_DELAY_MS } from '@/constants';
-import { debounce } from '@/lib/utils';
+import { cn, debounce } from '@/lib/utils';
 import { useStore } from '@/store';
 
 export function SearchBar() {

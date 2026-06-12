@@ -295,6 +295,9 @@ describe('Task Actions', () => {
 
   describe('toggleTaskComplete', () => {
     it('should call toggleTaskCompleteAction and loadData', async () => {
+      const task = createSampleTask({ id: 'task-1' });
+      useStore.setState({ tasks: [task] });
+
       (actions.toggleTaskCompleteAction as any).mockResolvedValue({});
       (actions.loadAppData as any).mockResolvedValue({
         tasks: [],

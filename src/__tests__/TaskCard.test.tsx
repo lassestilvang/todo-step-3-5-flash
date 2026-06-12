@@ -84,7 +84,7 @@ describe('TaskCard', () => {
     const task = createMockTask();
     render(<TaskCard task={task} />);
 
-    expect(screen.getByText('Test Task')).toBeInTheDocument();
+    expect(screen.getByText('Test Task').toHaveLength(1).toBeTruthy()).toBeInTheDocument();
     expect(screen.getByText('A test description')).toBeInTheDocument();
   });
 

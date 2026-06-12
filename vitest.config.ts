@@ -15,11 +15,6 @@ export default defineConfig({
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     exclude: ['**/node_modules/**', '**/.next/**', '**/dist/**'],
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        isolate: false,
-      },
-    },
     coverage: {
       reporter: ['text', 'json', 'html', 'lcov'],
       exclude: [

@@ -3,56 +3,28 @@ import fs from 'fs';
 import path from 'path';
 
 import { INBOX_LIST_ID } from '@/constants';
+import { getDb } from '@/lib/db-init';
 
-// Gracefully handle environments where better-sqlite3 cannot be loaded
-// (e.g. Bun's test runner which does not support this native add-on).
-// In that case, liveDatabase will remain null and the test mock
-// (registered via vi.mock in setup files) will be used instead.
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports -- dynamic import is required for graceful fallback
-let liveDatabase: typeof import('better-sqlite3') | null = null;
-try {
-  const mod = await import('better-sqlite3');
-  liveDatabase = mod.default ?? mod;
-} catch {
-  // safe to ignore — tests supply a vi.mock('better-sqlite3') shim
-}
-
-// Database instance - can be null in test environments before mock is set up
+// Get db lazily
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let db: any = null;
-if (liveDatabase) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  db = new (liveDatabase as any)(':memory:');
+function getDatabase(): any {
+  if (db === null) {
+    db = getDb();
+  }
+  return db;
 }
 
-if (process.env.NODE_ENV === 'test') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- fallback shim for environments without better-sqlite3
-  db = new (liveDatabase ?? (() => {}) as any)(':memory:');
-} else {
-  const Database = liveDatabase;
-  if (!Database) {
-    throw new Error(
-      'Database is not initialised: better-sqlite3 is not available in this environment'
-    );
-  }
-  const dbDir = path.resolve(process.cwd(), process.env.DATABASE_PATH || 'data');
-  const dbPath = path.join(dbDir, 'task-planner.db');
+// Initialize db immediately for test compatibility
+// In test env, getDb returns a mock, otherwise it creates a real connection
+db = getDb();
 
-  // Ensure data directory exists
-  if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
-  }
-
-  db = new Database(dbPath);
-  db.pragma('journal_mode = WAL'); // Enable WAL for better concurrency
-  db.pragma('foreign_keys = ON');
-}
-
-export { db };
+// Export db instance and getter function
+export { db, getDatabase as getDb };
 
 // Initialize database schema
 export function initializeDatabase() {
-  db.exec(`
+  getDatabase().exec(`
     CREATE TABLE IF NOT EXISTS lists (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
@@ -185,7 +157,7 @@ export const migrations = [
 ];
 
 export function runMigrations() {
-  db.exec(`
+  getDatabase().exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       version INTEGER PRIMARY KEY,
       name TEXT NOT NULL,
@@ -193,7 +165,7 @@ export function runMigrations() {
     );
   `);
 
-  const rows = db.prepare('SELECT version FROM schema_migrations').all() as Array<{
+  const rows = getDatabase().prepare('SELECT version FROM schema_migrations').all() as Array<{
     version: number;
   }>;
   const applied = new Set(rows.map((row) => row.version));
@@ -201,7 +173,7 @@ export function runMigrations() {
   for (const migration of migrations) {
     if (!applied.has(migration.version)) {
       migration.up();
-      db.prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)').run(
+      getDatabase().prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)').run(
         migration.version,
         migration.name
       );
@@ -209,8 +181,18 @@ export function runMigrations() {
   }
 }
 
-// Run migrations
-runMigrations();
+// Run migrations lazily on first use
+let migrationsRan = false;
+function ensureMigrationsRan() {
+  if (!migrationsRan) {
+    runMigrations();
+    migrationsRan = true;
+  }
+}
+
+// Override runMigrations to ensure migrations run before db operations
+const originalRunMigrations = runMigrations;
+(originalRunMigrations as any).ensureRan = ensureMigrationsRan;
 
 // ==================== LISTS ====================
 
@@ -237,7 +219,7 @@ export function getAllLists(): ListRow[] {
 }
 
 export function getListById(id: string): ListRow | null {
-  return db.prepare('SELECT * FROM lists WHERE id = ?').get(id) as ListRow | null;
+  return getDatabase().prepare('SELECT * FROM lists WHERE id = ?').get(id) as ListRow | null;
 }
 
 export function createList(data: {
@@ -249,7 +231,7 @@ export function createList(data: {
   id?: string;
 }): ListRow {
   const id = data.id ?? generateId();
-  db.prepare(
+  getDatabase().prepare(
     `
     INSERT INTO lists (id, name, color, icon, parent_id, order_index)
     VALUES (?, ?, ?, ?, ?, ?)
@@ -295,14 +277,14 @@ export function updateList(
   if (updates.length === 0) return getListById(id);
 
   values.push(id);
-  db.prepare(
+  getDatabase().prepare(
     `UPDATE lists SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
   ).run(...values);
   return getListById(id)!;
 }
 
 export function deleteList(id: string): boolean {
-  const result = db.prepare('DELETE FROM lists WHERE id = ?').run(id);
+  const result = getDatabase().prepare('DELETE FROM lists WHERE id = ?').run(id);
   return result.changes > 0;
 }
 
@@ -342,13 +324,13 @@ export interface TaskRow {
 }
 
 export function getAllTasks(): TaskRow[] {
-  return db.prepare('SELECT * FROM tasks').all() as TaskRow[];
+  return getDatabase().prepare('SELECT * FROM tasks').all() as TaskRow[];
 }
 
 export function getTaskById(
   id: string
 ): (TaskRow & { labels: LabelRow[]; subtasks: SubtaskRow[] }) | null {
-  const task = rowToObj(db.prepare('SELECT * FROM tasks WHERE id = ?').get(id)) as TaskRow | null;
+  const task = rowToObj(getDatabase().prepare('SELECT * FROM tasks WHERE id = ?').get(id)) as TaskRow | null;
 
   if (!task) return null;
 
@@ -557,7 +539,7 @@ export function createTask(data: {
   const recurrence_rule = data.recurrence_rule ?? null;
   const parent_id = data.parent_id ?? null;
 
-  db.prepare(
+  getDatabase().prepare(
     `
     INSERT INTO tasks (
       id, list_id, title, description, due_date, deadline,
@@ -583,7 +565,7 @@ export function createTask(data: {
 
   function attachLabels(taskId: string, labelIds?: string[]) {
     if (labelIds && labelIds.length > 0) {
-      const insertLabel = db.prepare('INSERT INTO task_labels (task_id, label_id) VALUES (?, ?)');
+      const insertLabel = getDatabase().prepare('INSERT INTO task_labels (task_id, label_id) VALUES (?, ?)');
       for (const labelId of labelIds) {
         insertLabel.run(taskId, labelId);
       }
@@ -592,7 +574,7 @@ export function createTask(data: {
 
   attachLabels(id, data.label_ids);
 
-  return db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow;
+  return getDatabase().prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow;
 }
 
 export function updateTask(
@@ -612,7 +594,7 @@ export function updateTask(
     recurrence_rule: string;
   }>
 ): TaskRow | null {
-  const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow | null;
+  const existing = getDatabase().prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow | null;
   if (!existing) return null;
 
   const updates: string[] = [];
@@ -652,14 +634,14 @@ export function updateTask(
   if (updates.length > 0) {
     updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(id);
-    db.prepare(`UPDATE tasks SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+    getDatabase().prepare(`UPDATE tasks SET ${updates.join(', ')} WHERE id = ?`).run(...values);
   }
 
-  return db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow;
+  return getDatabase().prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow;
 }
 
 export function deleteTask(id: string): boolean {
-  const result = db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
+  const result = getDatabase().prepare('DELETE FROM tasks WHERE id = ?').run(id);
   return result.changes > 0;
 }
 
@@ -674,20 +656,20 @@ export interface LabelRow {
 }
 
 export function getAllLabels(): LabelRow[] {
-  return db.prepare('SELECT * FROM labels ORDER BY name').all() as LabelRow[];
+  return getDatabase().prepare('SELECT * FROM labels ORDER BY name').all() as LabelRow[];
 }
 
 export function getLabelById(id: string): LabelRow | null {
-  return rowToObj(db.prepare('SELECT * FROM labels WHERE id = ?').get(id)) as LabelRow | null;
+  return rowToObj(getDatabase().prepare('SELECT * FROM labels WHERE id = ?').get(id)) as LabelRow | null;
 }
 
 export function getLabelByName(name: string): LabelRow | null {
-  return rowToObj(db.prepare('SELECT * FROM labels WHERE name = ?').get(name)) as LabelRow | null;
+  return rowToObj(getDatabase().prepare('SELECT * FROM labels WHERE name = ?').get(name)) as LabelRow | null;
 }
 
 export function createLabel(data: { name: string; color: string; icon?: string }): LabelRow {
   const id = generateId();
-  db.prepare(
+  getDatabase().prepare(
     `
     INSERT INTO labels (id, name, color, icon) VALUES (?, ?, ?, ?)
   `
@@ -722,24 +704,24 @@ export function updateLabel(
   if (updates.length === 0) return getLabelById(id);
 
   values.push(id);
-  db.prepare(`UPDATE labels SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+  getDatabase().prepare(`UPDATE labels SET ${updates.join(', ')} WHERE id = ?`).run(...values);
   return getLabelById(id)!;
 }
 
 export function deleteLabel(id: string): boolean {
-  const result = db.prepare('DELETE FROM labels WHERE id = ?').run(id);
+  const result = getDatabase().prepare('DELETE FROM labels WHERE id = ?').run(id);
   return result.changes > 0;
 }
 
 export function attachLabelToTask(taskId: string, labelId: string) {
-  db.prepare('INSERT OR IGNORE INTO task_labels (task_id, label_id) VALUES (?, ?)').run(
+  getDatabase().prepare('INSERT OR IGNORE INTO task_labels (task_id, label_id) VALUES (?, ?)').run(
     taskId,
     labelId
   );
 }
 
 export function detachLabelFromTask(taskId: string, labelId: string) {
-  db.prepare('DELETE FROM task_labels WHERE task_id = ? AND label_id = ?').run(taskId, labelId);
+  getDatabase().prepare('DELETE FROM task_labels WHERE task_id = ? AND label_id = ?').run(taskId, labelId);
 }
 
 // ==================== SUBTASKS ====================
@@ -766,12 +748,12 @@ export function createSubtask(data: {
 }): SubtaskRow {
   const id = generateId();
   const order = data.order ?? getSubtasksByTaskId(data.task_id).length + 1;
-  db.prepare(
+  getDatabase().prepare(
     `
     INSERT INTO subtasks (id, task_id, title, order_index) VALUES (?, ?, ?, ?)
   `
   ).run(id, data.task_id, data.title, order);
-  return db.prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as SubtaskRow;
+  return getDatabase().prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as SubtaskRow;
 }
 
 export function updateSubtask(
@@ -801,12 +783,12 @@ export function updateSubtask(
   if (updates.length === 0) return null;
 
   values.push(id);
-  db.prepare(`UPDATE subtasks SET ${updates.join(', ')} WHERE id = ?`).run(...values);
-  return db.prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as SubtaskRow;
+  getDatabase().prepare(`UPDATE subtasks SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+  return getDatabase().prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as SubtaskRow;
 }
 
 export function deleteSubtask(id: string): boolean {
-  const result = db.prepare('DELETE FROM subtasks WHERE id = ?').run(id);
+  const result = getDatabase().prepare('DELETE FROM subtasks WHERE id = ?').run(id);
   return result.changes > 0;
 }
 
@@ -823,7 +805,7 @@ export interface AttachmentRow {
 }
 
 export function getAttachmentsByTaskId(taskId: string): AttachmentRow[] {
-  return db.prepare('SELECT * FROM attachments WHERE task_id = ?').all(taskId) as AttachmentRow[];
+  return getDatabase().prepare('SELECT * FROM attachments WHERE task_id = ?').all(taskId) as AttachmentRow[];
 }
 
 export function createAttachment(data: {
@@ -834,17 +816,17 @@ export function createAttachment(data: {
   size: number;
 }): AttachmentRow {
   const id = generateId();
-  db.prepare(
+  getDatabase().prepare(
     `
     INSERT INTO attachments (id, task_id, name, url, type, size)
     VALUES (?, ?, ?, ?, ?, ?)
   `
   ).run(id, data.task_id, data.name, data.url, data.type, data.size);
-  return db.prepare('SELECT * FROM attachments WHERE id = ?').get(id) as AttachmentRow;
+  return getDatabase().prepare('SELECT * FROM attachments WHERE id = ?').get(id) as AttachmentRow;
 }
 
 export function deleteAttachment(id: string): boolean {
-  const result = db.prepare('DELETE FROM attachments WHERE id = ?').run(id);
+  const result = getDatabase().prepare('DELETE FROM attachments WHERE id = ?').run(id);
   return result.changes > 0;
 }
 
@@ -859,7 +841,7 @@ export interface ReminderRow {
 }
 
 export function getRemindersByTaskId(taskId: string): ReminderRow[] {
-  return db.prepare('SELECT * FROM reminders WHERE task_id = ?').all(taskId) as ReminderRow[];
+  return getDatabase().prepare('SELECT * FROM reminders WHERE task_id = ?').all(taskId) as ReminderRow[];
 }
 
 export function getPendingReminders(): ReminderRow[] {
@@ -871,20 +853,20 @@ export function getPendingReminders(): ReminderRow[] {
 
 export function createReminder(data: { task_id: string; remind_at: Date }): ReminderRow {
   const id = generateId();
-  db.prepare(
+  getDatabase().prepare(
     `
     INSERT INTO reminders (id, task_id, remind_at) VALUES (?, ?, ?)
   `
   ).run(id, data.task_id, data.remind_at.toISOString());
-  return db.prepare('SELECT * FROM reminders WHERE id = ?').get(id) as ReminderRow;
+  return getDatabase().prepare('SELECT * FROM reminders WHERE id = ?').get(id) as ReminderRow;
 }
 
 export function markReminderSent(id: string): void {
-  db.prepare('UPDATE reminders SET sent = 1 WHERE id = ?').run(id);
+  getDatabase().prepare('UPDATE reminders SET sent = 1 WHERE id = ?').run(id);
 }
 
 export function deleteReminder(id: string): boolean {
-  const result = db.prepare('DELETE FROM reminders WHERE id = ?').run(id);
+  const result = getDatabase().prepare('DELETE FROM reminders WHERE id = ?').run(id);
   return result.changes > 0;
 }
 

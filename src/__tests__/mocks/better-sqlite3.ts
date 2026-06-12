@@ -294,9 +294,25 @@ class MockStatement {
   handleJoin(): any[] { return []; }
 
   evaluateWhere(row: any, whereSql: string): boolean {
-    // Check for OR first since it may contain AND conditions within groups
-    if (whereSql.includes(' OR ') || /\sOR\s/.test(whereSql)) return this.evaluateOrCondition(row, whereSql);
-    if (whereSql.includes(' AND ')) return this.evaluateAndCondition(row, whereSql);
+    // Check for both OR and AND - need to handle combined conditions
+    const hasOr = whereSql.includes(' OR ') || /\sOR\s/.test(whereSql);
+    const hasAnd = whereSql.includes(' AND ');
+
+    // If there's both OR and AND, the AND is typically after the OR groups
+    // Pattern: ((group1) OR (group2)) AND status != 'completed'
+    if (hasOr && hasAnd) {
+      // Try to match the full pattern with outer AND
+      const outerMatch = whereSql.match(/\(([\s\S]+?)\)\s+OR\s+\(([\s\S]+?)\)\)\s*\n*\s*AND\s+([\s\S]+)/);
+      if (outerMatch) {
+        const orSql = `(${outerMatch[1]}) OR (${outerMatch[2]})`;
+        const orResult = this.evaluateOrCondition(row, orSql);
+        const statusMatch = outerMatch[3].match(/status\s*!=\s*'([^']+)'/);
+        return orResult && (!statusMatch || row.status !== statusMatch[1]);
+      }
+    }
+
+    if (hasOr) return this.evaluateOrCondition(row, whereSql);
+    if (hasAnd) return this.evaluateAndCondition(row, whereSql);
 
     const statusMatch = whereSql.match(/status\s*!=\s*'([^']+)'/);
     if (statusMatch && row.status === statusMatch[1]) return false;
@@ -344,8 +360,8 @@ class MockStatement {
   evaluateAndCondition(row: any, whereSql: string): boolean {
     const trimmedWhere = whereSql.trim();
     // Use [\s\S] to match any character including newlines
-    // Pattern: ((group1)\nOR (group2))\nAND rest
-    // The SQL structure is: ((group1) OR (group2)) followed by newline and AND rest
+    // Pattern: ((group1) OR (group2)) AND rest
+    // The SQL structure is: ((group1) OR (group2)) followed by AND rest
     const outerMatch = trimmedWhere.match(/\(\(([\s\S]+?)\)\s+OR\s+\(([\s\S]+?)\)\)\s*\n*\s*AND\s+([\s\S]+)/);
     if (outerMatch) {
       const orSql = `(${outerMatch[1]}) OR (${outerMatch[2]})`;

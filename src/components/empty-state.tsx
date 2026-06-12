@@ -10,6 +10,8 @@ export function EmptyState({ isFiltered }: { isFiltered: boolean }) {
   const openCreateTask = useStore((s) => s.openCreateTask);
   const setSearchQuery = useStore((s) => s.setSearchQuery);
 
+  const handleCreateClick = () => openCreateTask();
+
   const quote = useMemo(() => getRandomQuote(), []);
 
   return (
@@ -33,7 +35,7 @@ export function EmptyState({ isFiltered }: { isFiltered: boolean }) {
         </button>
       ) : (
         <button
-          onClick={openCreateTask}
+          onClick={handleCreateClick}
           className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
         >
           Create New Task

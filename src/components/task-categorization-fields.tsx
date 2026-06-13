@@ -110,6 +110,7 @@ export function TaskCategorizationFields({ form, lists, labels, selectedLabelIds
                 className="pl-2 pr-1 py-1 rounded-lg border-2"
                 style={{ borderColor: `${label.color}40`, color: label.color, backgroundColor: `${label.color}10` }}
               >
+                {label.icon && <span className="mr-1">{label.icon}</span>}
                 {label.name}
                 <button
                   type="button"

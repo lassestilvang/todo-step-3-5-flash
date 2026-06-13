@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PRIORITY_VALUES, PRIORITY_LABELS, PRIORITY_TEXT_COLORS } from '@/constants';
 import { cn } from '@/lib/utils';
 import type { Label as LabelType } from '@/types';
-import type { Path, PathValueImpl } from 'react-hook-form';
 
 interface TaskCategorizationFieldsProps<T extends FieldValues> {
   form: UseFormReturn<T>;
@@ -102,7 +101,9 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                   type="button"
                   onClick={() => {
                     const current = form.getValues('labelIds' as Path<T>) as string[];
-                    form.setValue('labelIds' as Path<T>, current.filter((id) => id !== labelId) as unknown as PathValueImpl<T, Path<T>>);
+                    const updated = current.filter((id) => id !== labelId);
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (form as any).setValue('labelIds', updated);
                   }}
                   className="ml-1 p-0.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
                 >
@@ -127,7 +128,9 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                     className="rounded-lg"
                     onClick={() => {
                       const current = form.getValues('labelIds' as Path<T>) as string[];
-                      form.setValue('labelIds' as Path<T>, [...current, label.id] as unknown as PathValueImpl<T, Path<T>>);
+                      const updated = [...current, label.id];
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      (form as any).setValue('labelIds', updated);
                     }}
                   >
                     <span className="mr-2">{label.icon}</span>

@@ -1,11 +1,14 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coffee, Brain, Minimize2, Play, Pause, RotateCcw, X } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { QUOTES } from '@/constants/quotes';
 import { cn } from '@/lib/utils';
 import type { FocusTimerState } from '@/store/types';
 import type { Task } from '@/types';
+
+const getRandomQuote = () => QUOTES[Math.floor(Math.random() * QUOTES.length)];
 
 interface FocusTimerExpandedProps {
   focusTimer: FocusTimerState;
@@ -153,6 +156,7 @@ export function FocusTimerExpanded({
 }: FocusTimerExpandedProps) {
   const isWorkMode = focusTimer.mode === 'work';
   const isNearEnd = focusTimer.timeLeft <= 60 && focusTimer.timeLeft > 0;
+  const quote = useMemo(() => getRandomQuote(), [focusTimer.mode]);
 
   return (
     <motion.div
@@ -178,6 +182,13 @@ export function FocusTimerExpanded({
           isActive={focusTimer.isActive}
           onToggleMode={onToggleMode}
         />
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-4 text-[10px] text-center text-muted-foreground/60 italic tracking-wide leading-relaxed"
+        >
+          "{quote}"
+        </motion.p>
       </div>
     </motion.div>
   );

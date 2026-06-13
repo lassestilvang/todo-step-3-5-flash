@@ -1,7 +1,7 @@
 'use client';
 
 import { Hash, Flag, Plus, X } from 'lucide-react';
-import type { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+import type { UseFormReturn } from 'react-hook-form';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,17 +12,29 @@ import { PRIORITY_VALUES, PRIORITY_LABELS, PRIORITY_TEXT_COLORS } from '@/consta
 import { cn } from '@/lib/utils';
 import type { Label as LabelType } from '@/types';
 
-type LabelIdsFieldValues = { labelIds: string[] };
+// The form type is intentionally broad to match the task schema
+type TaskFormValues = {
+  title: string;
+  listId: string;
+  description?: string;
+  dueDate?: Date;
+  deadline?: Date;
+  estimateMinutes?: number;
+  priority?: 'none' | 'low' | 'medium' | 'high';
+  recurrence?: 'daily' | 'weekly' | 'weekday' | 'monthly' | 'yearly' | 'custom';
+  labelIds?: string[];
+};
 
-interface TaskCategorizationFieldsProps<T extends FieldValues> {
-  form: UseFormReturn<T>;
+interface TaskCategorizationFieldsProps {
+  form: UseFormReturn<TaskFormValues>;
   lists: { id: string; name: string; icon: string }[];
   labels: LabelType[];
   selectedLabelIds: string[];
 }
 
-export function TaskCategorizationFields<T extends FieldValues>({ form, lists, labels, selectedLabelIds }: TaskCategorizationFieldsProps<T>) {
+export function TaskCategorizationFields({ form, lists, labels, selectedLabelIds }: TaskCategorizationFieldsProps) {
   const availableLabels = labels.filter((l) => !selectedLabelIds.includes(l.id));
+  const labelIdsPath = 'labelIds' as const;
 
   return (
     <div className="space-y-6">
@@ -34,7 +46,7 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
       <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name={'listId' as Path<T>}
+          name="listId"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">List</FormLabel>
@@ -60,7 +72,7 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
 
         <FormField
           control={form.control}
-          name={'priority' as Path<T>}
+          name="priority"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">Priority</FormLabel>
@@ -102,9 +114,9 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                 <button
                   type="button"
                   onClick={() => {
-                    const current = form.getValues('labelIds' as Path<LabelIdsFieldValues>) as string[];
+                    const current = form.getValues(labelIdsPath) ?? [];
                     const updated = current.filter((id) => id !== labelId);
-                    form.setValue('labelIds', updated);
+                    form.setValue(labelIdsPath, updated);
                   }}
                   className="ml-1 p-0.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
                 >
@@ -128,9 +140,9 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                     key={label.id}
                     className="rounded-lg"
                     onClick={() => {
-                      const current = form.getValues('labelIds' as Path<LabelIdsFieldValues>) as string[];
+                      const current = form.getValues(labelIdsPath) ?? [];
                       const updated = [...current, label.id];
-                      form.setValue('labelIds', updated);
+                      form.setValue(labelIdsPath, updated);
                     }}
                   >
                     <span className="mr-2">{label.icon}</span>

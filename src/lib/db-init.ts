@@ -20,7 +20,6 @@ export function getDb(): any {
     return dbInstance;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const Database = require('better-sqlite3').default;
   dbInstance = new Database(':memory:');
   dbInstance.pragma('foreign_keys = ON');

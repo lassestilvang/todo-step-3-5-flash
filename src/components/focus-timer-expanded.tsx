@@ -156,7 +156,7 @@ export function FocusTimerExpanded({
 }: FocusTimerExpandedProps) {
   const isWorkMode = focusTimer.mode === 'work';
   const isNearEnd = focusTimer.timeLeft <= 60 && focusTimer.timeLeft > 0;
-  const quote = useMemo(() => getRandomQuote(), [focusTimer.mode]);
+  const quote = useMemo(() => getRandomQuote(), []);
 
   return (
     <motion.div
@@ -187,7 +187,7 @@ export function FocusTimerExpanded({
           animate={{ opacity: 1 }}
           className="mt-4 text-[10px] text-center text-muted-foreground/60 italic tracking-wide leading-relaxed"
         >
-          "{quote}"
+          &ldquo;{quote}&rdquo;
         </motion.p>
       </div>
     </motion.div>

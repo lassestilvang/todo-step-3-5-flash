@@ -471,7 +471,7 @@ describe('Label error handling', () => {
 
 describe('List error handling', () => {
   it('createListAction should throw for invalid color', async () => {
-    await expect(actions.createListAction({ name: 'Test', color: 'invalid' })).rejects.toThrow();
+    await expect(actions.createListAction({ name: 'Test', color: 'invalid', icon: '📋' })).rejects.toThrow();
   });
 });
 
@@ -483,7 +483,7 @@ describe('Task error handling', () => {
 
 describe('List error handling', () => {
   it('createListAction should throw for invalid name', async () => {
-    await expect(actions.createListAction({ name: '', color: '#ff0000' })).rejects.toThrow();
+    await expect(actions.createListAction({ name: '', color: '#ff0000', icon: '📋' })).rejects.toThrow();
   });
 });
 

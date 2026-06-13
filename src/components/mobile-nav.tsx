@@ -4,7 +4,9 @@ import { Plus } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
+import type { ViewType } from '@/types';
 
 export function MobileNav() {
   const currentView = useStore((s) => s.currentView);
@@ -15,14 +17,14 @@ export function MobileNav() {
     () => [
       { id: 'all', label: 'All', icon: '📋' },
       { id: 'today', label: 'Today', icon: '📅' },
-      { id: 'week', label: 'Week', icon: '📆' },
-      { id: 'upcoming', label: 'Upcoming', icon: '✨' },
-    ] as const,
+      { id: 'in_progress', label: 'Active', icon: '⚡' },
+      { id: 'statistics', label: 'Stats', icon: '📊' },
+    ],
     []
   );
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-background z-40" aria-label="View navigation">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-background/80 backdrop-blur-xl z-40" aria-label="View navigation">
       <div className="flex items-stretch h-16">
         {/* View tabs */}
         <div className="flex-1 flex">
@@ -31,16 +33,24 @@ export function MobileNav() {
             return (
               <button
                 key={view.id}
-                onClick={() => setCurrentView(view.id)}
+                onClick={() => setCurrentView(view.id as ViewType)}
                 aria-current={isActive ? 'page' : undefined}
                 className={`
                   flex-1 flex flex-col items-center justify-center gap-1
-                  text-xs transition-colors
+                  text-xs transition-colors relative
                   ${isActive ? 'text-primary' : 'text-muted-foreground'}
                 `}
               >
-                <span className="text-lg" aria-hidden="true">{view.icon}</span>
+                <div className={cn(
+                  "p-1.5 rounded-lg transition-colors",
+                  isActive ? "bg-primary/10" : "bg-transparent"
+                )}>
+                  {view.icon}
+                </div>
                 <span>{view.label}</span>
+                {isActive && (
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-primary rounded-full" />
+                )}
               </button>
             );
           })}
@@ -51,7 +61,7 @@ export function MobileNav() {
           <Button
             size="icon"
             onClick={() => openCreateTask()}
-            className="h-10 w-10 rounded-full"
+            className="h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20"
             aria-label="Create new task"
           >
             <Plus className="h-5 w-5" />

@@ -18,7 +18,6 @@ function createTask(overrides: Partial<Task> = {}): Task {
     status: 'pending',
     priority: 'none',
     createdAt: new Date(),
-    updatedAt: new Date(),
     labels: [],
     subtasks: [],
     attachments: [],

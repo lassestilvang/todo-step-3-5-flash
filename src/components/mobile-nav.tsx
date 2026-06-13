@@ -37,7 +37,7 @@ export function MobileNav() {
                 aria-current={isActive ? 'page' : undefined}
                 className={`
                   flex-1 flex flex-col items-center justify-center gap-1
-                  text-xs transition-colors relative
+                  text-xs transition-colors relative touch-manipulation
                   ${isActive ? 'text-primary' : 'text-muted-foreground'}
                 `}
               >
@@ -61,7 +61,7 @@ export function MobileNav() {
           <Button
             size="icon"
             onClick={() => openCreateTask()}
-            className="h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+            className="h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/20 touch-manipulation"
             aria-label="Create new task"
           >
             <Plus className="h-5 w-5" />

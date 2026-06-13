@@ -16,21 +16,24 @@ function matchesDateRange(due: Date, start: Date, end: Date): boolean {
 function getTodayRange(): { start: Date; end: Date } {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
-  return { start, end: new Date(start.getTime() + 86400000) };
+  const end = new Date(start.getTime() + 86400000);
+  return { start, end };
 }
 
 function getWeekRange(): { start: Date; end: Date } {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
-  return { start, end: new Date(start.getTime() + 604800000) };
+  const end = new Date(start.getTime() + 604800000);
+  return { start, end };
 }
 
 export function taskMatchesView(task: Task, view: ViewType): boolean {
   if (view === 'all') return true;
   if (view === 'in_progress') return task.status === 'in_progress';
-  if (!task.dueDate && !task.deadline) return false;
 
-  const due = new Date(task.dueDate || task.deadline!);
+  const dueDate = task.dueDate ?? task.deadline;
+  if (!dueDate) return false;
+  const due = dueDate instanceof Date ? dueDate : new Date(dueDate);
   const now = new Date();
 
   if (view === 'today') {

@@ -1,14 +1,13 @@
 'use client';
 
-/* eslint-disable max-lines */ 
-
+/* eslint-disable max-lines, complexity */
 import {
   format,
   formatDistanceToNow,
   isToday,
   isTomorrow,
   isThisWeek,
-  } from 'date-fns';
+} from 'date-fns';
 import {
   Calendar,
   ChevronLeft,

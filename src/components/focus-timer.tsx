@@ -32,9 +32,9 @@ export function FocusTimer() {
   }, []);
 
   const progress = useMemo(() => {
-    const total = focusTimer.mode === 'work' ? 25 * 60 : 5 * 60;
+    const total = focusTimer.mode === 'work' ? focusTimer.workDuration : focusTimer.breakDuration;
     return ((total - focusTimer.timeLeft) / total) * 100;
-  }, [focusTimer.timeLeft, focusTimer.mode]);
+  }, [focusTimer.timeLeft, focusTimer.mode, focusTimer.workDuration, focusTimer.breakDuration]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

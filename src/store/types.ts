@@ -28,6 +28,7 @@ export interface AppState {
   selectedTaskId: string | null;
   isCreateTaskOpen: boolean;
   editTaskId: string | null;
+  lastAddedTask: string | null;
   theme: string;
   brandColor: string;
   focusTimer: FocusTimerState;
@@ -71,6 +72,7 @@ export interface AppState {
   updateLabel: (id: string, name: string, color: string, icon?: string) => Promise<void>;
   deleteLabel: (id: string) => Promise<void>;
   getTaskById: (id: string) => Task | undefined;
+  clearLastAddedTask: () => void;
 }
 
 export type StoreSetter = (

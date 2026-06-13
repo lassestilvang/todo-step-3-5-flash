@@ -15,7 +15,7 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
       if (newTask) {
         set((state: AppState) => {
           const tasks = [newTask, ...state.tasks];
-          return { tasks, overdueCount: computeOverdue(tasks) };
+          return { tasks, overdueCount: computeOverdue(tasks), lastAddedTask: newTask.id };
         });
       }
       return newTask;

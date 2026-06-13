@@ -21,8 +21,20 @@ function getDateLabel(due: Date | string | undefined): string {
 
 export function TaskGroups({ tasks }: { tasks: Task[] }) {
   const setSelectedTask = useStore((s) => s.setSelectedTask);
+  const lastAddedTask = useStore((s) => s.lastAddedTask);
+  const clearLastAddedTask = useStore((s) => s.clearLastAddedTask);
 
   const taskIds = useMemo(() => tasks.map((t) => t.id), [tasks]);
+
+  // Clear the highlight after animation completes
+  useEffect(() => {
+    if (lastAddedTask) {
+      const timer = setTimeout(() => {
+        clearLastAddedTask();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [lastAddedTask, clearLastAddedTask]);
 
   const handlePrev = useCallback(() => {
     const current = useStore.getState().selectedTaskId;
@@ -88,18 +100,27 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
           </h3>
           <div className="space-y-2" style={{ contentVisibility: 'auto', containIntrinsicHeight: '200px' }}>
             <AnimatePresence mode="popLayout">
-              {grp.map((task) => (
-                <motion.div
-                  key={task.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <TaskCard task={task} />
-                </motion.div>
-              ))}
+              {grp.map((task) => {
+                const isNew = task.id === lastAddedTask;
+                return (
+                  <motion.div
+                    key={task.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    transition={{ duration: 0.2, delay: isNew ? 0.3 : 0 }}
+                  >
+                    <motion.div
+                      initial={isNew ? { boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.4)' } : undefined}
+                      animate={isNew ? { boxShadow: ['0 0 0 0px rgba(59, 130, 246, 0.4)', '0 0 0 4px rgba(59, 130, 246, 0)', '0 0 0 0px rgba(59, 130, 246, 0)'] } : undefined}
+                      transition={isNew ? { duration: 1.5, repeat: Infinity } : undefined}
+                    >
+                      <TaskCard task={task} />
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         </div>

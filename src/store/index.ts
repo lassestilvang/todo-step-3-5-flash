@@ -26,6 +26,7 @@ export const useStore = create<AppState>()(
       selectedTaskId: null,
       isCreateTaskOpen: false,
       editTaskId: null,
+      lastAddedTask: null,
       theme: 'system',
       brandColor: 'oklch(0.55 0.25 260)',
       focusTimer: {
@@ -225,6 +226,10 @@ export const useStore = create<AppState>()(
           tasks: [deletedEntry.task, ...state.tasks],
           deletedTasks: state.deletedTasks?.filter((d) => d.task.id !== id) || [],
         }));
+      },
+
+      clearLastAddedTask: () => {
+        set({ lastAddedTask: null });
       },
 
       ...createTaskActions(set as StoreSetter, get as StoreGetter),

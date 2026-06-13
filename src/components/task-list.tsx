@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { useStore } from '@/store';
 import { getFilteredTasks } from '@/store/selectors';

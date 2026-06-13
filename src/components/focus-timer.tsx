@@ -2,9 +2,8 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 
-import { Button } from '@/components/ui/button';
-import { useStore } from '@/store';
 import { playSound } from '@/lib/sounds';
+import { useStore } from '@/store';
 
 import { FocusTimerExpanded } from './focus-timer-expanded';
 import { FocusTimerMinimized } from './focus-timer-minimized';

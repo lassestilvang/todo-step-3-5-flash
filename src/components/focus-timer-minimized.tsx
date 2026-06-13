@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Brain, Plus } from 'lucide-react';
+import { Brain } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 

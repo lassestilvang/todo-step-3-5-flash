@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, RotateCcw, Coffee, Brain, X, Minimize2, Bell, BellOff } from 'lucide-react';
+import { Play, Pause, RotateCcw, Coffee, Brain, X, Minimize2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -29,7 +29,6 @@ export function FocusTimerExpanded({
 }) {
   const isWorkMode = focusTimer.mode === 'work';
   const isNearEnd = focusTimer.timeLeft <= 60 && focusTimer.timeLeft > 0;
-  const isComplete = focusTimer.timeLeft === 0;
 
   return (
     <motion.div

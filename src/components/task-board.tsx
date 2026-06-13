@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
-import type { Task, TaskStatus, CreateTaskData } from '@/types';
+import type { Task, TaskStatus } from '@/types';
 
 import { TaskCard } from './task-card';
 
@@ -103,7 +103,10 @@ function SortableTaskCard({ task }: { task: Task }) {
     <div
       ref={setNodeRef}
       style={style}
-      className="cursor-grab active:cursor-grabbing"
+      className={cn(
+        'cursor-grab active:cursor-grabbing transition-all',
+        isDragging && 'rotate-2 scale-105 shadow-2xl'
+      )}
       {...attributes}
       {...listeners}
     >
@@ -114,6 +117,8 @@ function SortableTaskCard({ task }: { task: Task }) {
 
 export function TaskBoard({ tasks }: { tasks: Task[] }) {
   const updateTask = useStore((s) => s.updateTask);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  void updateTask; // Used in handleDragEnd
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -154,7 +159,7 @@ export function TaskBoard({ tasks }: { tasks: Task[] }) {
     }
 
     if (newStatus !== activeTask.status) {
-      void updateTask(activeTaskId, { status } as Partial<CreateTaskData> & { status: Task['status'] });
+      void updateTask(activeTaskId, { status: newStatus } as { status: TaskStatus });
     }
   }
 

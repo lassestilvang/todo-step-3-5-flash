@@ -1,22 +1,43 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Keyboard, X, Command } from 'lucide-react';
+import { Keyboard, X, Command, Search, Plus, SortAsc, CheckSquare } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/store';
 
-const SHORTCUTS = [
-  { keys: ['⌘', 'K'], label: 'Open search' },
-  { keys: ['N'], label: 'Create new task' },
-  { keys: ['⌘', 'S'], label: 'Magic sort tasks' },
-  { keys: ['T'], label: 'Toggle show completed' },
-  { keys: ['B'], label: 'Toggle sidebar' },
-  { keys: ['S'], label: 'Cycle task status (when task focused)' },
-  { keys: ['/'], label: 'Focus search' },
-  { keys: ['Esc'], label: 'Close modal / Clear search' },
-  { keys: ['?'], label: 'Show / hide shortcuts' },
+interface ShortcutCategory {
+  title: string;
+  shortcuts: { keys: string[]; label: string; description?: string; icon?: React.ReactNode }[];
+}
+
+const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
+  {
+    title: 'Navigation',
+    shortcuts: [
+      { keys: ['⌘', 'K'], label: 'Open search', icon: <Search className="w-3 h-3" /> },
+      { keys: ['N'], label: 'Create new task', icon: <Plus className="w-3 h-3" /> },
+      { keys: ['G', 'B'], label: 'Toggle sidebar' },
+      { keys: ['G', 'T'], label: 'Jump to today' },
+    ],
+  },
+  {
+    title: 'Task Management',
+    shortcuts: [
+      { keys: ['S'], label: 'Cycle task status', description: 'When task is focused' },
+      { keys: ['⌘', 'S'], label: 'Magic sort tasks', icon: <SortAsc className="w-3 h-3" /> },
+      { keys: ['T'], label: 'Toggle show completed', icon: <CheckSquare className="w-3 h-3" /> },
+    ],
+  },
+  {
+    title: 'System',
+    shortcuts: [
+      { keys: ['/'], label: 'Focus search' },
+      { keys: ['Esc'], label: 'Close modal / Clear search' },
+      { keys: ['?'], label: 'Show / hide shortcuts' },
+    ],
+  },
 ];
 
 function isInputTarget(target: HTMLElement): boolean {
@@ -141,23 +162,42 @@ export function KeyboardShortcuts() {
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 max-h-[60vh] overflow-y-auto scrollbar-thin pr-1">
-                  {SHORTCUTS.map((shortcut) => (
-                    <div
-                      key={shortcut.label}
-                      className="flex items-center justify-between p-3 rounded-xl bg-muted/30 group hover:bg-muted/50 transition-colors"
-                    >
-                      <span className="text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors">
-                        {shortcut.label}
-                      </span>
-                      <div className="flex gap-1.5">
-                        {shortcut.keys.map((key) => (
-                          <kbd
-                            key={key}
-                            className="min-w-[28px] h-7 flex items-center justify-center px-2 rounded-lg bg-background border-2 border-border/50 font-mono text-xs font-black shadow-sm"
+                <div className="space-y-6 max-h-[60vh] overflow-y-auto scrollbar-thin pr-1">
+                  {SHORTCUT_CATEGORIES.map((category) => (
+                    <div key={category.title} className="space-y-3">
+                      <h3 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-wider">
+                        {category.title}
+                      </h3>
+                      <div className="space-y-2">
+                        {category.shortcuts.map((shortcut) => (
+                          <div
+                            key={shortcut.label}
+                            className="flex items-center justify-between p-3 rounded-xl bg-muted/30 group hover:bg-muted/50 transition-colors"
                           >
-                            {key}
-                          </kbd>
+                            <div className="flex items-center gap-2.5">
+                              {shortcut.icon}
+                              <div>
+                                <div className="text-sm font-bold text-muted-foreground group-hover:text-foreground transition-colors">
+                                  {shortcut.label}
+                                </div>
+                                {shortcut.description && (
+                                  <div className="text-xs text-muted-foreground/60 mt-0.5">
+                                    {shortcut.description}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-1.5">
+                              {shortcut.keys.map((key) => (
+                                <kbd
+                                  key={key}
+                                  className="min-w-[28px] h-7 flex items-center justify-center px-2 rounded-lg bg-background border-2 border-border/50 font-mono text-xs font-black shadow-sm"
+                                >
+                                  {key}
+                                </kbd>
+                              ))}
+                            </div>
+                          </div>
                         ))}
                       </div>
                     </div>

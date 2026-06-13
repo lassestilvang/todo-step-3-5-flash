@@ -2,7 +2,7 @@
 
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, ChevronRight, AlertTriangle, GripVertical, Brain, Play, PauseCircle, Zap } from 'lucide-react';
+import { Clock, ChevronRight, AlertTriangle, GripVertical, Play, PauseCircle, Zap } from 'lucide-react';
 import React from 'react';
 
 import { Button } from '@/components/ui/button';

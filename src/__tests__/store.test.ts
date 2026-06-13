@@ -103,7 +103,7 @@ const initialState = {
   focusTimer: {
     timeLeft: 25 * 60,
     isActive: false,
-    mode: 'work',
+    mode: 'work' as const,
     taskId: null,
     workDuration: 25 * 60,
     breakDuration: 5 * 60,

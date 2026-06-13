@@ -16,6 +16,12 @@ import { useStore } from '@/store';
 import type { Task } from '@/types';
 
 import { TaskBasicFields } from './task-basic-fields';
+
+interface SubtaskType {
+  id?: string;
+  title: string;
+  completed?: boolean;
+}
 import { TaskCategorizationFields } from './task-categorization-fields';
 import { TaskScheduleFields } from './task-schedule-fields';
 import { TaskSubtasksEditor } from './task-subtasks-editor';
@@ -149,7 +155,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
 
                 <TaskSubtasksEditor
                   subtasks={subtasks}
-                  onSubtasksChange={setSubtasks}
+                  onSubtasksChange={(subs) => setSubtasks(subs as SubtaskType[])}
                 />
 
                 <div className="pt-4">

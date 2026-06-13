@@ -59,7 +59,9 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = { pending: 0, in_progress: 0, completed: 0 };
     for (const t of tasks) {
-      if (t.status && t.status in counts) counts[t.status]++;
+      if (t.status && t.status in counts) {
+        counts[t.status]++;
+      }
     }
     return counts;
   }, [tasks]);

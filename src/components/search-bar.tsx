@@ -246,8 +246,11 @@ export function SearchBar() {
 
       {isOpen && (
         <div
+          role="button"
+          tabIndex={0}
           className="fixed inset-0 z-40 bg-black/5 backdrop-blur-[2px]"
           onClick={() => setIsOpen(false)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsOpen(false); }}
         />
       )}
     </div>

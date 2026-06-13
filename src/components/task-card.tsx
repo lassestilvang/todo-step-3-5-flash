@@ -214,6 +214,7 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
       ref={cardRef}
       layout
       whileHover={{ y: -2 }}
+      whileFocus={{ scale: 1.01 }}
       onClick={() => setSelectedTask(task.id)}
       onKeyDown={handleKeyDown}
       role="button"
@@ -225,7 +226,7 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
         'dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]',
         task.status === 'completed' && 'bg-muted/30 opacity-60 grayscale-[0.5]',
         task.status === 'in_progress' && 'border-amber-500/50 bg-amber-500/[0.03]',
-        isSelected && 'ring-2 ring-primary ring-offset-4 ring-offset-background z-10',
+        isSelected && 'ring-2 ring-primary ring-offset-4 ring-offset-background z-10 shadow-lg',
         isOverdue && 'border-red-500/50 bg-red-500/[0.02]'
       )}
     >

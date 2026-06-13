@@ -13,7 +13,7 @@ const SHORTCUTS = [
   { keys: ['⌘', 'S'], label: 'Magic sort tasks' },
   { keys: ['T'], label: 'Toggle show completed' },
   { keys: ['B'], label: 'Toggle sidebar' },
-  { keys: ['S'], label: 'Cycle task status' },
+  { keys: ['S'], label: 'Cycle task status (when task focused)' },
   { keys: ['/'], label: 'Focus search' },
   { keys: ['Esc'], label: 'Close modal / Clear search' },
   { keys: ['?'], label: 'Show / hide shortcuts' },

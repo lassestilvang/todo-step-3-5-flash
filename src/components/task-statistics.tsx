@@ -25,9 +25,7 @@ function StatCard({ title, value, subtitle, icon, color }: StatCardProps) {
         <div className={color}>{icon}</div>
       </div>
       <div className="text-2xl font-black tracking-tight">{value}</div>
-      {subtitle && (
-        <div className="text-xs text-muted-foreground/60">{subtitle}</div>
-      )}
+      {subtitle && <div className="text-xs text-muted-foreground/60">{subtitle}</div>}
     </motion.div>
   );
 }

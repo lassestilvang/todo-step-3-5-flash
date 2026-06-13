@@ -1,12 +1,9 @@
 /* eslint-disable max-lines */
-import fs from 'fs';
-import path from 'path';
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { INBOX_LIST_ID } from '@/constants';
 import { getDb } from '@/lib/db-init';
 
 // Get db lazily
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let db: any = null;
 function getDatabase(): any {
   if (db === null) {

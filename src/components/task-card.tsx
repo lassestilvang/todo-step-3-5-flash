@@ -2,8 +2,8 @@
 
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, ChevronRight, AlertTriangle, GripVertical, Play, PauseCircle, Zap, Trash2 } from 'lucide-react';
-import React, { useEffect, useRef, useCallback } from 'react';
+import { Clock, ChevronRight, AlertTriangle, GripVertical, Play, PauseCircle, Zap, Trash2, ExternalLink } from 'lucide-react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 
 import { useToast } from '@/components/toast-provider';
 import { Button } from '@/components/ui/button';
@@ -188,6 +188,13 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
     }
   }, [isSelected]);
 
+  // Memoize status text for screen readers
+  const statusText = useMemo(() => {
+    if (task.status === 'completed') return 'completed';
+    if (task.status === 'in_progress') return 'in progress';
+    return 'pending';
+  }, [task.status]);
+
   const handleDelete = useCallback((id: string) => {
     void deleteTask(id);
     showToast('success', 'Task deleted', {
@@ -236,6 +243,7 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
       role="button"
       tabIndex={0}
       aria-pressed={isSelected}
+      aria-label={`${task.title}, ${statusText} task`}
       className={cn(
         'group relative w-full rounded-2xl border bg-card text-left transition-all duration-300',
         'hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-primary/20',

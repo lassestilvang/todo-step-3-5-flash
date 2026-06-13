@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 
 import { useStore } from '@/store';
 
@@ -18,6 +18,7 @@ export function FocusTimer() {
     tasks,
   } = useStore();
   const [isMinimized, setIsMinimized] = useState(true);
+  const animationRef = useRef<number | null>(null);
 
   const activeTask = useMemo(
     () => tasks.find((t) => t.id === focusTimer.taskId),
@@ -36,13 +37,31 @@ export function FocusTimer() {
   }, [focusTimer.timeLeft, focusTimer.mode, focusTimer.workDuration, focusTimer.breakDuration]);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (focusTimer.isActive && focusTimer.timeLeft > 0) {
-      interval = setInterval(() => {
-        tickFocusTimer();
-      }, 1000);
+    if (!focusTimer.isActive || focusTimer.timeLeft <= 0) {
+      return;
     }
-    return () => clearInterval(interval);
+
+    let lastTick = Date.now();
+
+    const tick = () => {
+      const now = Date.now();
+      const elapsed = now - lastTick;
+
+      if (elapsed >= 1000) {
+        tickFocusTimer();
+        lastTick = now;
+      }
+
+      animationRef.current = requestAnimationFrame(tick);
+    };
+
+    animationRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
   }, [focusTimer.isActive, focusTimer.timeLeft, tickFocusTimer]);
 
   const handleStart = useCallback(() => {
@@ -53,6 +72,9 @@ export function FocusTimer() {
   }, [focusTimer.isActive, startFocusTimer]);
 
   const handleClose = useCallback(() => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
     pauseFocusTimer();
     setIsMinimized(true);
   }, [pauseFocusTimer]);

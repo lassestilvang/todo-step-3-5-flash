@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 import { format, isToday, isTomorrow, isThisWeek, isThisYear } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useCallback, useEffect, useMemo } from 'react';

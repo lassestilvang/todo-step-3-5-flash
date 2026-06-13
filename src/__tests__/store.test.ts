@@ -305,7 +305,7 @@ describe('Task Actions', () => {
   describe('deleteTask', () => {
     it('should call deleteTaskAction and update state with deleted task', async () => {
       const task = createSampleTask({ id: 'task-1' });
-      useStore.setState({ tasks: [task] });
+      useStore.setState({ tasks: [task], deletedTasks: [] });
 
       (actions.deleteTaskAction as any).mockResolvedValue(undefined);
 
@@ -315,7 +315,7 @@ describe('Task Actions', () => {
       const state = useStore.getState();
       expect(state.tasks).toHaveLength(0);
       expect(state.deletedTasks).toHaveLength(1);
-      expect(state.deletedTasks[0].task.id).toBe('task-1');
+      expect(state.deletedTasks[0]?.task.id).toBe('task-1');
     });
   });
 
@@ -550,7 +550,7 @@ describe('undoDeleteTask', () => {
 
     const state = useStore.getState();
     expect(state.tasks).toHaveLength(1);
-    expect(state.tasks[0].id).toBe('task-1');
+    expect(state.tasks[0]?.id).toBe('task-1');
     expect(state.deletedTasks).toHaveLength(0);
   });
 

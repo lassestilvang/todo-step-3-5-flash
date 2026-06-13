@@ -8,11 +8,6 @@ import { computeOverdue } from '../selectors';
 import type { StoreSetter, StoreGetter } from '../types';
 import type { AppState } from '../types';
 
-interface DeletedTask {
-  task: Task;
-  timestamp: number;
-}
-
 export function createTaskActions(set: StoreSetter, get: StoreGetter) {
   return {
     addTask: async (data: CreateTaskData): Promise<Task | null> => {

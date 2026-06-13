@@ -33,8 +33,8 @@ export function useToast() {
   return context;
 }
 
-export const showToast = (type: ToastType, message: string, action?: { label: string; onClick: () => void }) => {
-  console.warn('showToast called outside of ToastProvider context');
+export const showToast = (_type: ToastType, _message: string, _action?: { label: string; onClick: () => void }) => {
+  // Standalone function for type compatibility - actual implementation is in ToastProvider
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {

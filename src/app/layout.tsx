@@ -51,6 +51,12 @@ export default function RootLayout({
                   >
                     Skip to main content
                   </a>
+                  {/* Screen reader announcements */}
+                  <div
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="sr-only"
+                  />
                   {children}
                 </ToastProvider>
               </TooltipProvider>

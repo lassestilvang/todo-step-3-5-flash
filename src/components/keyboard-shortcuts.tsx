@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Keyboard, X, Command, Search, Plus, SortAsc, CheckSquare } from 'lucide-react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/store';
@@ -16,26 +16,32 @@ const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
   {
     title: 'Navigation',
     shortcuts: [
-      { keys: ['⌘', 'K'], label: 'Open search', icon: <Search className="w-3 h-3" /> },
+      { keys: ['K'], label: 'Focus search', icon: <Search className="w-3 h-3" /> },
       { keys: ['N'], label: 'Create new task', icon: <Plus className="w-3 h-3" /> },
-      { keys: ['G', 'B'], label: 'Toggle sidebar' },
-      { keys: ['G', 'T'], label: 'Jump to today' },
+      { keys: ['B'], label: 'Toggle sidebar', description: 'Show/hide sidebar' },
+      { keys: ['T'], label: 'Toggle show completed', icon: <CheckSquare className="w-3 h-3" /> },
     ],
   },
   {
     title: 'Task Management',
     shortcuts: [
       { keys: ['S'], label: 'Cycle task status', description: 'When task is focused' },
-      { keys: ['⌘', 'S'], label: 'Magic sort tasks', icon: <SortAsc className="w-3 h-3" /> },
-      { keys: ['T'], label: 'Toggle show completed', icon: <CheckSquare className="w-3 h-3" /> },
+      { keys: ['⇧', 'S'], label: 'Magic sort tasks', icon: <SortAsc className="w-3 h-3" /> },
+      { keys: ['⌘', 'N'], label: 'Open quick add' },
+    ],
+  },
+  {
+    title: 'Focus Timer',
+    shortcuts: [
+      { keys: ['Space'], label: 'Play/Pause timer', description: 'When timer is open' },
+      { keys: ['R'], label: 'Reset timer', description: 'When timer is open' },
     ],
   },
   {
     title: 'System',
     shortcuts: [
-      { keys: ['/'], label: 'Focus search' },
-      { keys: ['Esc'], label: 'Close modal / Clear search' },
       { keys: ['?'], label: 'Show / hide shortcuts' },
+      { keys: ['Esc'], label: 'Close modal / Clear search' },
     ],
   },
 ];
@@ -57,7 +63,6 @@ const handleShortcut = (
     onCreateTask: () => void;
     onFocusSearch: () => void;
     onToggleCompleted: () => void;
-    onToggleSidebar: () => void;
     onMagicSort: () => void;
   }
 ): boolean => {
@@ -67,17 +72,15 @@ const handleShortcut = (
     onCreateTask,
     onFocusSearch,
     onToggleCompleted,
-    onToggleSidebar,
     onMagicSort,
   } = callbacks;
 
   const handlers = [
     { condition: () => e.key === '?' && !isInput, action: () => { e.preventDefault(); onToggleShortcuts(); } },
     { condition: () => e.key === 'Escape' && !isInput, action: () => onClose() },
-    { condition: () => e.key === 'n' && !isInput, action: () => { e.preventDefault(); onCreateTask(); } },
-    { condition: () => !isInput && !isModdedEvent(e) && e.key === 'k', action: () => { e.preventDefault(); onFocusSearch(); } },
+    { condition: () => e.key === 'n' && !isInput && !isModdedEvent(e), action: () => { e.preventDefault(); onCreateTask(); } },
+    { condition: () => e.key === 'k' && !isInput && !isModdedEvent(e), action: () => { e.preventDefault(); onFocusSearch(); } },
     { condition: () => e.key === 't' && !isInput && !isModdedEvent(e), action: () => { e.preventDefault(); onToggleCompleted(); } },
-    { condition: () => e.key === 'b' && !isInput && !isModdedEvent(e), action: () => { e.preventDefault(); onToggleSidebar(); } },
     { condition: () => isModdedEvent(e) && e.key === 's', action: () => { e.preventDefault(); onMagicSort(); } },
   ];
 
@@ -92,6 +95,7 @@ const handleShortcut = (
 
 export function KeyboardShortcuts() {
   const [isOpen, setIsOpen] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
   const magicSortTasks = useStore((s) => s.magicSortTasks);
   const toggleShowCompleted = useStore((s) => s.toggleShowCompleted);
   const openCreateTask = useStore((s) => s.openCreateTask);
@@ -108,7 +112,6 @@ export function KeyboardShortcuts() {
           el?.focus();
         },
         onToggleCompleted: toggleShowCompleted,
-        onToggleSidebar: () => setIsOpen((prev) => !prev),
         onMagicSort: magicSortTasks,
       });
     },
@@ -119,6 +122,28 @@ export function KeyboardShortcuts() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
+
+  // Focus management for modal
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      modalRef.current?.focus();
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    // Return focus to the shortcuts button
+    setTimeout(() => {
+      const triggerButton = document.querySelector('[aria-label="Keyboard shortcuts"]') as HTMLElement | null;
+      triggerButton?.focus();
+    }, 100);
+  }, []);
 
   return (
     <>
@@ -134,20 +159,27 @@ export function KeyboardShortcuts() {
 
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="shortcuts-title"
+          >
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               className="absolute inset-0 bg-background/60 backdrop-blur-md"
             />
 
             <motion.div
+              ref={modalRef}
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-background rounded-[32px] border border-border/50 shadow-2xl overflow-hidden"
+              tabIndex={-1}
+              className="relative w-full max-w-lg bg-background rounded-[32px] border border-border/50 shadow-2xl overflow-hidden focus:outline-none"
             >
               <div className="p-8">
                 <div className="flex items-center justify-between mb-8">
@@ -155,9 +187,11 @@ export function KeyboardShortcuts() {
                     <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
                       <Keyboard className="h-6 w-6" />
                     </div>
-                    <h2 className="text-2xl font-black tracking-tight">Keyboard Shortcuts</h2>
+                    <h2 id="shortcuts-title" className="text-2xl font-black tracking-tight">
+                      Keyboard Shortcuts
+                    </h2>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="rounded-xl">
+                  <Button variant="ghost" size="icon" onClick={handleClose} className="rounded-xl">
                     <X className="h-5 w-5" />
                   </Button>
                 </div>
@@ -173,6 +207,7 @@ export function KeyboardShortcuts() {
                           <div
                             key={shortcut.label}
                             className="flex items-center justify-between p-3 rounded-xl bg-muted/30 group hover:bg-muted/50 transition-colors"
+                            role="row"
                           >
                             <div className="flex items-center gap-2.5">
                               {shortcut.icon}

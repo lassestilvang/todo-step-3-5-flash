@@ -1,12 +1,13 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Paperclip } from 'lucide-react';
+import { Plus, Paperclip, LoaderCircle } from 'lucide-react';
 import { useState, useMemo, useCallback } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import * as actions from '@/app/actions';
+import { useToast } from '@/components/toast-provider';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form } from '@/components/ui/form';
@@ -35,11 +36,7 @@ const taskSchema = z.object({
 
 type TaskFormData = z.infer<typeof taskSchema>;
 
-function getFormDefaults(
-  isEditing: boolean,
-  editTask: Task | null,
-  listDefault: string
-): TaskFormData {
+function getFormDefaults(isEditing: boolean, editTask: Task | null, listDefault: string): TaskFormData {
   if (!isEditing || !editTask) {
     return {
       title: '',
@@ -73,6 +70,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const selectedListId = useStore((s) => s.selectedListId);
   const tasks = useStore((s) => s.tasks);
   const addTask = useStore((s) => s.addTask);
+  const updateTask = useStore((s) => s.updateTask);
 
   const isEditing = !!editTaskId;
   const editTask = useMemo(
@@ -87,6 +85,8 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     return [];
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const listDefault = selectedListId || INBOX_LIST_ID;
   const formDefaults = useMemo(() => getFormDefaults(isEditing, editTask, listDefault), [isEditing, editTask, listDefault]);
 
@@ -95,14 +95,27 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     defaultValues: formDefaults,
   });
 
-  const handleSubmit = useCallback(async (data: TaskFormData) => {
-    if (isEditing && editTaskId) {
-      await submitEditTask(editTaskId, data, subtasks, tasks);
-    } else {
-      await submitNewTask(data, subtasks, addTask);
-    }
-    onClose();
-  }, [isEditing, editTaskId, subtasks, tasks, addTask, onClose]);
+  const { showToast } = useToast();
+
+  const handleSubmit = useCallback(
+    async (data: TaskFormData) => {
+      setIsSubmitting(true);
+      try {
+        if (isEditing && editTaskId) {
+          await submitEditTask(editTaskId, data, subtasks, tasks);
+        } else {
+          await submitNewTask(data, subtasks, addTask);
+        }
+        showToast('success', isEditing ? 'Task updated successfully' : 'Task created successfully');
+        onClose();
+      } catch (error) {
+        showToast('error', error instanceof Error ? error.message : 'Failed to save task');
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [isEditing, editTaskId, subtasks, tasks, addTask, onClose, showToast]
+  );
 
   const selectedLabelIds = useWatch({ control: form.control, name: 'labelIds' }) || [];
 
@@ -155,8 +168,21 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
               <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl font-bold px-8">
                 Cancel
               </Button>
-              <Button type="submit" className="rounded-xl font-bold px-12 h-12 shadow-xl shadow-primary/20">
-                {isEditing ? 'Save Changes' : 'Create Task'}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="rounded-xl font-bold px-12 h-12 shadow-xl shadow-primary/20 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <>
+                    <LoaderCircle className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : isEditing ? (
+                  'Save Changes'
+                ) : (
+                  'Create Task'
+                )}
               </Button>
             </DialogFooter>
           </form>

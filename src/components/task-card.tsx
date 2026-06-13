@@ -3,7 +3,7 @@
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Clock, ChevronRight, AlertTriangle, GripVertical, Play, PauseCircle, Zap, Trash2 } from 'lucide-react';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 
 import { useToast } from '@/components/toast-provider';
 import { Button } from '@/components/ui/button';
@@ -188,29 +188,42 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
     }
   }, [isSelected]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
-    if (isInput) return;
-
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      setSelectedTask(task.id);
-    }
-    if (e.key === 's' && !isInput) {
-      e.preventDefault();
-      e.stopPropagation();
-      const nextStatus = task.status === 'pending' ? 'in_progress' : 'completed';
-      void toggleTaskComplete(task.id, nextStatus);
-    }
-  };
-
-  const handleDelete = (id: string) => {
+  const handleDelete = useCallback((id: string) => {
     void deleteTask(id);
     showToast('success', 'Task deleted', {
       label: 'Undo',
       onClick: () => undoDeleteTask(id),
     });
-  };
+  }, [deleteTask, undoDeleteTask, showToast]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+    const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+    if (isInput) return;
+
+    const taskId = task.id;
+    switch (e.key) {
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        setSelectedTask(taskId);
+        break;
+      case 'd':
+        e.preventDefault();
+        e.stopPropagation();
+        handleDelete(taskId);
+        break;
+      case 'e':
+        e.preventDefault();
+        e.stopPropagation();
+        openEditTask(taskId);
+        break;
+      case 'f':
+        e.preventDefault();
+        e.stopPropagation();
+        startFocusTimer(taskId);
+        break;
+    }
+  }, [task.id, setSelectedTask, handleDelete, openEditTask, startFocusTimer]);
 
   return (
     <motion.div
@@ -224,13 +237,14 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
       tabIndex={0}
       aria-pressed={isSelected}
       className={cn(
-        'group relative w-full rounded-2xl border bg-card p-5 text-left transition-all duration-300',
+        'group relative w-full rounded-2xl border bg-card text-left transition-all duration-300',
         'hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-primary/20',
         'dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]',
         task.status === 'completed' && 'bg-muted/30 opacity-60 grayscale-[0.5]',
         task.status === 'in_progress' && 'border-amber-500/50 bg-amber-500/[0.03]',
         isSelected && 'ring-2 ring-primary ring-offset-4 ring-offset-background z-10 shadow-lg',
-        isOverdue && 'border-red-500/50 bg-red-500/[0.02]'
+        isOverdue && 'border-red-500/50 bg-red-500/[0.02]',
+        'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'
       )}
     >
       <div className="flex items-start gap-4">

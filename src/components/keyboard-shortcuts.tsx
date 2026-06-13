@@ -6,6 +6,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/store';
+import type { ViewType } from '@/types';
 
 interface ShortcutCategory {
   title: string;
@@ -30,6 +31,15 @@ const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
       { keys: ['⇧', 'S'], label: 'Magic sort tasks', icon: <SortAsc className="w-3 h-3" /> },
       { keys: ['X'], label: 'Delete task', description: 'When task is focused' },
       { keys: ['⌘', 'N'], label: 'Open quick add' },
+    ],
+  },
+  {
+    title: 'Task Filters',
+    shortcuts: [
+      { keys: ['1'], label: 'Filter: All tasks' },
+      { keys: ['2'], label: 'Filter: Today' },
+      { keys: ['3'], label: 'Filter: In Progress' },
+      { keys: ['4'], label: 'Filter: Completed' },
     ],
   },
   {
@@ -66,6 +76,7 @@ const handleShortcut = (
     onFocusSearch: () => void;
     onToggleCompleted: () => void;
     onMagicSort: () => void;
+    onFilterView: (view: string) => void;
   }
 ): boolean => {
   const {
@@ -75,6 +86,7 @@ const handleShortcut = (
     onFocusSearch,
     onToggleCompleted,
     onMagicSort,
+    onFilterView,
   } = callbacks;
 
   const handlers = [
@@ -84,6 +96,10 @@ const handleShortcut = (
     { condition: () => e.key === 'k' && !isInput && !isModdedEvent(e), action: () => { e.preventDefault(); onFocusSearch(); } },
     { condition: () => e.key === 't' && !isInput && !isModdedEvent(e), action: () => { e.preventDefault(); onToggleCompleted(); } },
     { condition: () => isModdedEvent(e) && e.key === 's', action: () => { e.preventDefault(); onMagicSort(); } },
+    { condition: () => e.key === '1' && !isInput, action: () => { e.preventDefault(); onFilterView('all'); } },
+    { condition: () => e.key === '2' && !isInput, action: () => { e.preventDefault(); onFilterView('today'); } },
+    { condition: () => e.key === '3' && !isInput, action: () => { e.preventDefault(); onFilterView('in_progress'); } },
+    { condition: () => e.key === '4' && !isInput, action: () => { e.preventDefault(); onFilterView('completed'); } },
   ];
 
   for (const { condition, action } of handlers) {
@@ -101,6 +117,7 @@ export function KeyboardShortcuts() {
   const magicSortTasks = useStore((s) => s.magicSortTasks);
   const toggleShowCompleted = useStore((s) => s.toggleShowCompleted);
   const openCreateTask = useStore((s) => s.openCreateTask);
+  const setCurrentView = useStore((s) => s.setCurrentView);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -115,9 +132,15 @@ export function KeyboardShortcuts() {
         },
         onToggleCompleted: toggleShowCompleted,
         onMagicSort: magicSortTasks,
+        onFilterView: (view: string) => {
+          setCurrentView(view as ViewType);
+          if (view === 'completed') {
+            toggleShowCompleted();
+          }
+        },
       });
     },
-    [openCreateTask, toggleShowCompleted, magicSortTasks]
+    [openCreateTask, toggleShowCompleted, magicSortTasks, setCurrentView]
   );
 
   useEffect(() => {

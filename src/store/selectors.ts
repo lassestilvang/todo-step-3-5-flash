@@ -30,6 +30,7 @@ function getWeekRange(): { start: Date; end: Date } {
 export function taskMatchesView(task: Task, view: ViewType): boolean {
   if (view === 'all') return true;
   if (view === 'in_progress') return task.status === 'in_progress';
+  if (view === 'completed') return task.status === 'completed';
 
   const dueDate = task.dueDate ?? task.deadline;
   if (!dueDate) return false;
@@ -58,17 +59,23 @@ export function getFilteredTasks(
 ): Task[] {
   let result = tasks;
 
-  if (selectedListId) {
-    result = filterByList(result, selectedListId);
+  // For 'completed' view, show only completed tasks regardless of showCompleted setting
+  if (currentView === 'completed') {
+    result = tasks.filter(t => t.status === 'completed');
   } else {
-    result = filterByView(result, currentView);
+    if (selectedListId) {
+      result = filterByList(result, selectedListId);
+    } else {
+      result = filterByView(result, currentView);
+    }
+
+    if (statusFilter) {
+      result = filterByStatus(result, statusFilter);
+    }
+
+    result = filterByCompletion(result, showCompleted);
   }
 
-  if (statusFilter) {
-    result = filterByStatus(result, statusFilter);
-  }
-
-  result = filterByCompletion(result, showCompleted);
   result = filterBySearch(result, searchQuery);
   result = sortTasks(result);
 

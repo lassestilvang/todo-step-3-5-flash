@@ -27,6 +27,8 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const brandColor = useStore((s) => s.brandColor);
   const setBrandColor = useStore((s) => s.setBrandColor);
 
+  const completedCount = useMemo(() => tasks.filter(t => t.status === 'completed').length, [tasks]);
+
   const taskCountMap = useMemo(() => {
     const map = new Map<string, number>();
     for (const t of tasks) {
@@ -51,10 +53,9 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
                d.getMonth() === today.getMonth() &&
                d.getFullYear() === today.getFullYear();
       }).length,
+      completed: completedCount,
     };
-  }, [tasks]);
-
-  const completedCount = useMemo(() => tasks.filter(t => t.status === 'completed').length, [tasks]);
+  }, [tasks, completedCount]);
 
   const statusCounts = useMemo(() => {
     let pending = 0;

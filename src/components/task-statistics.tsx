@@ -46,7 +46,7 @@ export function TaskStatistics() {
       return due ? new Date(due) < now : false;
     });
     const completedThisWeek = completed.filter(t => {
-      const completedAt = t.completedAt ?? t.updatedAt;
+      const completedAt = t.completedAt;
       return completedAt && new Date(completedAt) >= weekAgo;
     });
 

@@ -53,3 +53,23 @@ export function debounce<T extends (...args: never[]) => void>(
   debounced.cancel = () => clearTimeout(timeoutId);
   return debounced as ((...args: Parameters<T>) => void) & { cancel: () => void };
 }
+
+/**
+ * Generate a consistent color from a string
+ */
+export function stringToColor(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const h = hash % 360;
+  return `hsl(${h}, 70%, 60%)`;
+}
+
+/**
+ * Truncate text with ellipsis if it exceeds max length
+ */
+export function truncate(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength - 1) + '…';
+}

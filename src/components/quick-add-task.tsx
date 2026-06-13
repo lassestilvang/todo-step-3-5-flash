@@ -60,7 +60,12 @@ export const QuickAddTask = () => {
         aria-label="Quick add new task"
       />
       {title.trim() && (
-        <Button size="xs" variant="default" onClick={() => void handleSubmit()}>
+        <Button
+          size="xs"
+          variant="default"
+          onClick={() => void handleSubmit()}
+          aria-label="Add task"
+        >
           Add
         </Button>
       )}

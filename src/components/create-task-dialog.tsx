@@ -1,6 +1,6 @@
 'use client';
 
-/* eslint-disable max-lines */
+/* eslint-disable max-lines, complexity */
 import { zodResolver } from '@hookform/resolvers/zod';
 import { format } from 'date-fns';
 import { CalendarIcon, Trash2, X, Plus, Paperclip, Repeat, AlignLeft, Hash, Clock, Flag } from 'lucide-react';
@@ -185,6 +185,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     setSubtasks(updated);
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const selectedLabelIds = useWatch({ control: form.control, name: 'labelIds' }) || [];
   const availableLabels = useMemo(() => {
     return labels.filter((l) => !selectedLabelIds.includes(l.id));

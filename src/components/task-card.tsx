@@ -202,6 +202,11 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
       e.preventDefault();
       setSelectedTask(task.id);
     }
+    if (e.key === 'e' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      e.stopPropagation();
+      openEditTask(task.id);
+    }
   };
 
   return (

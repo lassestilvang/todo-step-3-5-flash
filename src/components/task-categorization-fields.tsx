@@ -100,9 +100,8 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                 <button
                   type="button"
                   onClick={() => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const current = form.getValues('labelIds' as Path<T>) as any;
-                    form.setValue('labelIds' as Path<T>, current.filter((id: string) => id !== labelId) as any);
+                    const current = form.getValues('labelIds' as Path<T>) as string[];
+                    form.setValue('labelIds' as Path<T>, current.filter((id) => id !== labelId));
                   }}
                   className="ml-1 p-0.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
                 >
@@ -126,9 +125,8 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                     key={label.id}
                     className="rounded-lg"
                     onClick={() => {
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      const current = form.getValues('labelIds' as Path<T>) as any;
-                      form.setValue('labelIds' as Path<T>, [...current, label.id] as any);
+                      const current = form.getValues('labelIds' as Path<T>) as string[];
+                      form.setValue('labelIds' as Path<T>, [...current, label.id]);
                     }}
                   >
                     <span className="mr-2">{label.icon}</span>

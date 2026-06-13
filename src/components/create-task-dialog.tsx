@@ -20,8 +20,6 @@ import { TaskCategorizationFields } from './task-categorization-fields';
 import { TaskScheduleFields } from './task-schedule-fields';
 import { TaskSubtasksEditor } from './task-subtasks-editor';
 
-import type { Subtask } from '@/types';
-
 interface SubtaskType {
   id?: string;
   title: string;

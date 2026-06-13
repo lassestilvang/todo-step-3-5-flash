@@ -109,6 +109,8 @@ function SortableTaskCard({ task }: { task: Task }) {
       )}
       {...attributes}
       {...listeners}
+      aria-label={`Drag to move ${task.title}`}
+      aria-describedby="drag-instructions"
     >
       <TaskCard task={task} />
     </div>
@@ -167,7 +169,10 @@ export function TaskBoard({ tasks }: { tasks: Task[] }) {
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-6 h-[calc(100vh-280px)] overflow-x-auto pb-6 scrollbar-thin">
+      <div id="drag-instructions" className="sr-only">
+        Drag tasks between columns to change their status
+      </div>
+      <div className="flex gap-6 h-[calc(100vh-280px)] overflow-x-auto pb-6 scrollbar-thin" role="region" aria-label="Kanban board">
         {statuses.map((status) => (
           <StatusColumn
             key={status}

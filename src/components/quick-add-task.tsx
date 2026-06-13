@@ -57,6 +57,7 @@ export const QuickAddTask = () => {
         className={cn(
           'flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60'
         )}
+        aria-label="Quick add new task"
       />
       {title.trim() && (
         <Button size="xs" variant="default" onClick={() => void handleSubmit()}>

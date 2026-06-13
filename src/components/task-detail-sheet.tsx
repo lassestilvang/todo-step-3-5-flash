@@ -1,7 +1,7 @@
 'use client';
 
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { TaskAttachmentsSection } from '@/components/task-attachments-section';
 import { TaskDetailHeader } from '@/components/task-detail-header';
@@ -12,10 +12,8 @@ import { TaskSubtasksSection } from '@/components/task-subtasks-section';
 import { TaskTitleSection } from '@/components/task-title-section';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import { DATE_FORMATS, STRINGS } from '@/constants';
+import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { Task } from '@/types';
 
@@ -41,8 +39,6 @@ function getMagicBreakdownSuggestions(title: string): string[] {
 }
 
 function ReminderSection({ reminders }: { reminders: Task['reminders'] }) {
-  const [newReminder, setNewReminder] = useState('');
-
   if (!reminders || reminders.length === 0) {
     return (
       <div className="text-xs text-muted-foreground/60">

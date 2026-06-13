@@ -1,9 +1,9 @@
 'use client';
 
+import { format } from 'date-fns';
 import { AnimatePresence, motion } from 'framer-motion';
 import { PanelLeft, Sparkles, CheckCircle2, Trophy, Calendar } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
-import { format } from 'date-fns';
 
 import { CreateTaskDialog } from '@/components/create-task-dialog';
 import { FocusTimer } from '@/components/focus-timer';

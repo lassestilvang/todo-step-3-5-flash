@@ -4,7 +4,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -114,7 +114,6 @@ function SortableTaskCard({ task }: { task: Task }) {
 
 export function TaskBoard({ tasks }: { tasks: Task[] }) {
   const updateTask = useStore((s) => s.updateTask);
-  const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -135,9 +134,8 @@ export function TaskBoard({ tasks }: { tasks: Task[] }) {
     return cols;
   }, [tasks]);
 
-  function handleDragEnd(event: Parameters<typeof DndContext>[0]['onDragEnd']) {
+  function handleDragEnd(event: { active: { id: unknown }; over: { id: unknown } | null }) {
     const { active, over } = event;
-    setActiveId(null);
 
     if (!over) return;
 
@@ -164,7 +162,6 @@ export function TaskBoard({ tasks }: { tasks: Task[] }) {
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      onDragStart={(event) => setActiveId(event.active.id as string)}
       onDragEnd={handleDragEnd}
     >
       <div className="flex gap-6 h-[calc(100vh-280px)] overflow-x-auto pb-6 scrollbar-thin">

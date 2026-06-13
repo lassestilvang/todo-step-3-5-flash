@@ -9,29 +9,40 @@ export function computeOverdue(tasks: Task[]): number {
   }).length;
 }
 
+function matchesDateRange(due: Date, start: Date, end: Date): boolean {
+  return due >= start && due <= end;
+}
+
+function getTodayRange(): { start: Date; end: Date } {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  return { start, end: new Date(start.getTime() + 86400000) };
+}
+
+function getWeekRange(): { start: Date; end: Date } {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  return { start, end: new Date(start.getTime() + 604800000) };
+}
+
 export function taskMatchesView(task: Task, view: ViewType): boolean {
   if (view === 'all') return true;
   if (view === 'in_progress') return task.status === 'in_progress';
   if (!task.dueDate && !task.deadline) return false;
 
-  const due = task.dueDate || task.deadline!;
+  const due = new Date(task.dueDate || task.deadline!);
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const tomorrowStart = new Date(todayStart);
-  tomorrowStart.setDate(tomorrowStart.getDate() + 1);
-  const weekLater = new Date(todayStart);
-  weekLater.setDate(weekLater.getDate() + 7);
 
-  switch (view) {
-    case 'today':
-      return due >= todayStart && due < tomorrowStart;
-    case 'week':
-      return due >= todayStart && due <= weekLater;
-    case 'upcoming':
-      return due > now;
-    default:
-      return true;
+  if (view === 'today') {
+    const { start, end } = getTodayRange();
+    return matchesDateRange(due, start, end);
   }
+  if (view === 'week') {
+    const { start, end } = getWeekRange();
+    return matchesDateRange(due, start, end);
+  }
+  if (view === 'upcoming') return due > now;
+  return true;
 }
 
 export function getFilteredTasks(

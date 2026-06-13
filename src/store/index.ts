@@ -34,6 +34,9 @@ export const useStore = create<AppState>()(
         isActive: false,
         mode: 'work',
         taskId: null,
+        workDuration: 25 * 60,
+        breakDuration: 5 * 60,
+        autoStartNext: false,
       } as FocusTimerState,
       loading: false,
       error: null,
@@ -111,31 +114,47 @@ export const useStore = create<AppState>()(
       },
 
       resetFocusTimer: () => {
-        const { mode } = get().focusTimer;
+        const { mode, workDuration, breakDuration } = get().focusTimer;
+        const duration = mode === 'work' ? workDuration : breakDuration;
         set((state) => ({
           focusTimer: {
             ...state.focusTimer,
             isActive: false,
-            timeLeft: mode === 'work' ? 25 * 60 : 5 * 60,
+            timeLeft: duration,
           },
         }));
       },
 
       tickFocusTimer: () => {
-        const { timeLeft, mode, isActive } = get().focusTimer;
+        const { timeLeft, mode, isActive, autoStartNext, workDuration, breakDuration } = get().focusTimer;
         if (!isActive) return;
 
         if (timeLeft <= 0) {
           playSound('timer_end');
+          try {
+            navigator.vibrate([100, 50, 100]);
+          } catch {
+            // Vibration not supported
+          }
           const nextMode = mode === 'work' ? 'break' : 'work';
+          const nextDuration = nextMode === 'work' ? workDuration : breakDuration;
+          const shouldAutoStart = autoStartNext && mode === 'work';
+
           set((state) => ({
             focusTimer: {
               ...state.focusTimer,
-              isActive: false,
+              isActive: shouldAutoStart,
               mode: nextMode,
-              timeLeft: nextMode === 'work' ? 25 * 60 : 5 * 60,
+              timeLeft: nextDuration,
             },
           }));
+
+          if (shouldAutoStart) {
+            setTimeout(() => {
+              const { startFocusTimer } = get();
+              startFocusTimer();
+            }, 1000);
+          }
           return;
         }
 
@@ -145,13 +164,21 @@ export const useStore = create<AppState>()(
       },
 
       setFocusMode: (mode) => {
+        const { workDuration, breakDuration } = get().focusTimer;
+        const duration = mode === 'work' ? workDuration : breakDuration;
         set((state) => ({
           focusTimer: {
             ...state.focusTimer,
             mode,
-            timeLeft: mode === 'work' ? 25 * 60 : 5 * 60,
+            timeLeft: duration,
             isActive: false,
           },
+        }));
+      },
+
+      setFocusTimerSettings: (settings) => {
+        set((state) => ({
+          focusTimer: { ...state.focusTimer, ...settings },
         }));
       },
 

@@ -105,6 +105,9 @@ const initialState = {
     isActive: false,
     mode: 'work',
     taskId: null,
+    workDuration: 25 * 60,
+    breakDuration: 5 * 60,
+    autoStartNext: false,
   },
   loading: false,
   error: null,
@@ -620,6 +623,15 @@ describe('Focus Timer Actions', () => {
     expect(useStore.getState().focusTimer.mode).toBe('break');
     expect(useStore.getState().focusTimer.timeLeft).toBe(5 * 60);
     expect(useStore.getState().focusTimer.isActive).toBe(false);
+  });
+
+  it('setFocusTimerSettings should update timer settings', () => {
+    useStore.getState().setFocusTimerSettings({
+      workDuration: 30 * 60,
+      breakDuration: 10 * 60,
+    });
+    expect(useStore.getState().focusTimer.workDuration).toBe(30 * 60);
+    expect(useStore.getState().focusTimer.breakDuration).toBe(10 * 60);
   });
 });
 

@@ -5,6 +5,9 @@ export interface FocusTimerState {
   isActive: boolean;
   mode: 'work' | 'break';
   taskId: string | null;
+  workDuration: number;
+  breakDuration: number;
+  autoStartNext: boolean;
 }
 
 export interface AppState {
@@ -39,6 +42,7 @@ export interface AppState {
   resetFocusTimer: () => void;
   tickFocusTimer: () => void;
   setFocusMode: (mode: 'work' | 'break') => void;
+  setFocusTimerSettings: (settings: Partial<FocusTimerState>) => void;
   openCreateTask: (listId?: string) => void;
   openEditTask: (taskId: string) => void;
   closeTaskModal: () => void;

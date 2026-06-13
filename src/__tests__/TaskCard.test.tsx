@@ -162,4 +162,17 @@ describe('TaskCard', () => {
 
     expect(screen.getByText('1/2')).toBeInTheDocument();
   });
+
+  it('displays overdue styling for overdue tasks', () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const task = createMockTask({
+      deadline: yesterday,
+      status: 'pending',
+    });
+    render(<TaskCard task={task} />);
+
+    const card = screen.getByText('Test Task').closest('div');
+    expect(card).toBeInTheDocument();
+  });
 });

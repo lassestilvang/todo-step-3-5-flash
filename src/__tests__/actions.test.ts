@@ -481,6 +481,34 @@ describe('Task error handling', () => {
   });
 });
 
+describe('List error handling', () => {
+  it('createListAction should throw for invalid name', async () => {
+    await expect(actions.createListAction({ name: '', color: '#ff0000' })).rejects.toThrow();
+  });
+});
+
+describe('loadAppData', () => {
+  it('should return tasks for different views', async () => {
+    // Test 'week' view
+    const weekResult = await actions.loadAppData({
+      view: 'week',
+      selectedListId: null,
+      showCompleted: true,
+      searchQuery: '',
+    });
+    expect(Array.isArray(weekResult.tasks)).toBe(true);
+
+    // Test 'upcoming' view
+    const upcomingResult = await actions.loadAppData({
+      view: 'upcoming',
+      selectedListId: null,
+      showCompleted: true,
+      searchQuery: '',
+    });
+    expect(Array.isArray(upcomingResult.tasks)).toBe(true);
+  });
+});
+
 describe('Database constraint errors', () => {
   it('createLabelAction should throw for duplicate name', async () => {
     // First create a label

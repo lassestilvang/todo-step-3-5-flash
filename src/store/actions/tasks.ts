@@ -21,7 +21,7 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
       return newTask;
     },
 
-    updateTask: async (id: string, data: Partial<CreateTaskData>): Promise<void> => {
+    updateTask: async (id: string, data: Partial<CreateTaskData> & { status?: Task['status'] }): Promise<void> => {
       const updated = await actions.updateTaskAction(id, data);
       if (updated) {
         set((state: AppState) => {

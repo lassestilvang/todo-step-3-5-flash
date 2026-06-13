@@ -1,6 +1,7 @@
 'use client';
 
 import { Hash, Flag, X, Plus } from 'lucide-react';
+import type { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,18 +12,14 @@ import { PRIORITY_VALUES, PRIORITY_LABELS, PRIORITY_TEXT_COLORS } from '@/consta
 import { cn } from '@/lib/utils';
 import type { Label as LabelType } from '@/types';
 
-interface TaskCategorizationFieldsProps {
-  form: {
-    control: unknown;
-    getValues: (name: string) => string[];
-    setValue: (name: string, value: unknown) => void;
-  };
+interface TaskCategorizationFieldsProps<T extends FieldValues> {
+  form: UseFormReturn<T>;
   lists: { id: string; name: string; icon: string }[];
   labels: LabelType[];
   selectedLabelIds: string[];
 }
 
-export function TaskCategorizationFields({ form, lists, labels, selectedLabelIds }: TaskCategorizationFieldsProps) {
+export function TaskCategorizationFields<T extends FieldValues>({ form, lists, labels, selectedLabelIds }: TaskCategorizationFieldsProps<T>) {
   const availableLabels = labels.filter((l) => !selectedLabelIds.includes(l.id));
 
   return (
@@ -34,7 +31,7 @@ export function TaskCategorizationFields({ form, lists, labels, selectedLabelIds
 
       <div className="grid grid-cols-2 gap-4">
         <FormField
-          control={form.control as unknown as { name: string }}
+          control={form.control}
           name="listId"
           render={({ field }) => (
             <FormItem>
@@ -60,7 +57,7 @@ export function TaskCategorizationFields({ form, lists, labels, selectedLabelIds
         />
 
         <FormField
-          control={form.control as unknown as { name: string }}
+          control={form.control}
           name="priority"
           render={({ field }) => (
             <FormItem>
@@ -103,8 +100,8 @@ export function TaskCategorizationFields({ form, lists, labels, selectedLabelIds
                 <button
                   type="button"
                   onClick={() => {
-                    const current = form.getValues('labelIds') || [];
-                    form.setValue('labelIds', current.filter((id: string) => id !== labelId));
+                    const current = form.getValues('labelIds' as Path<T>) || [];
+                    form.setValue('labelIds' as Path<T>, current.filter((id: string) => id !== labelId));
                   }}
                   className="ml-1 p-0.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
                 >
@@ -128,8 +125,8 @@ export function TaskCategorizationFields({ form, lists, labels, selectedLabelIds
                     key={label.id}
                     className="rounded-lg"
                     onClick={() => {
-                      const current = form.getValues('labelIds') || [];
-                      form.setValue('labelIds', [...current, label.id]);
+                      const current = form.getValues('labelIds' as Path<T>) || [];
+                      form.setValue('labelIds' as Path<T>, [...current, label.id]);
                     }}
                   >
                     <span className="mr-2">{label.icon}</span>

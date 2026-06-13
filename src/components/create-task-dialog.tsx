@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Form } from '@/components/ui/form';
 import { INBOX_LIST_ID } from '@/constants';
 import { useStore } from '@/store';
-import type { Subtask as SubtaskType, Task } from '@/types';
+import type { Task } from '@/types';
 
 import { TaskBasicFields } from './task-basic-fields';
 import { TaskCategorizationFields } from './task-categorization-fields';

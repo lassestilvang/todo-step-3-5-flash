@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
-import type { Task, TaskStatus } from '@/types';
+import type { Task, TaskStatus, CreateTaskData } from '@/types';
 
 import { TaskCard } from './task-card';
 
@@ -154,7 +154,7 @@ export function TaskBoard({ tasks }: { tasks: Task[] }) {
     }
 
     if (newStatus !== activeTask.status) {
-      void updateTask(activeTaskId, { status: newStatus });
+      void updateTask(activeTaskId, { status } as Partial<CreateTaskData> & { status: Task['status'] });
     }
   }
 

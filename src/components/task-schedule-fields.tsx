@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns';
 import { CalendarIcon, Clock, Repeat } from 'lucide-react';
+import type { FieldValues, UseFormReturn } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -12,13 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RECURRENCE_OPTIONS } from '@/constants';
 import { cn } from '@/lib/utils';
 
-interface TaskScheduleFieldsProps {
-  form: {
-    control: unknown;
-  };
+interface TaskScheduleFieldsProps<T extends FieldValues> {
+  form: UseFormReturn<T>;
 }
 
-export function TaskScheduleFields({ form }: TaskScheduleFieldsProps) {
+export function TaskScheduleFields<T extends FieldValues>({ form }: TaskScheduleFieldsProps<T>) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-muted-foreground">

@@ -17,7 +17,6 @@ import { getMagicBreakdownSuggestions } from '@/lib/magic-breakdown';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { Task } from '@/types';
-import type { Task } from '@/types';
 
 function ReminderSection({ reminders }: { reminders: Task['reminders'] }) {
   if (!reminders || reminders.length === 0) {

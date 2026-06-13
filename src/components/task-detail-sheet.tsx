@@ -1,7 +1,7 @@
 'use client';
 
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { TaskAttachmentsSection } from '@/components/task-attachments-section';
 import { TaskDetailHeader } from '@/components/task-detail-header';
@@ -12,6 +12,9 @@ import { TaskSubtasksSection } from '@/components/task-subtasks-section';
 import { TaskTitleSection } from '@/components/task-title-section';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { DATE_FORMATS, STRINGS } from '@/constants';
 import { useStore } from '@/store';
 import type { Task } from '@/types';
@@ -35,6 +38,29 @@ function getMagicBreakdownSuggestions(title: string): string[] {
     return ['Check inventory', 'Compare prices', 'Make a list'];
   }
   return ['Analyze requirements', 'Break into steps', 'Set initial milestone'];
+}
+
+function ReminderSection({ reminders }: { reminders: Task['reminders'] }) {
+  const [newReminder, setNewReminder] = useState('');
+
+  if (!reminders || reminders.length === 0) {
+    return (
+      <div className="text-xs text-muted-foreground/60">
+        No reminders set. Add a due date to enable reminders.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {reminders.map((r) => (
+        <div key={r.id} className="flex items-center gap-2 px-3 py-2 bg-muted/30 rounded-lg text-xs">
+          <span>{format(new Date(r.remindAt), 'MMM d, h:mm a')}</span>
+          <span className={cn('w-2 h-2 rounded-full', r.sent ? 'bg-green-500' : 'bg-amber-500')} />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export function TaskDetailSheet() {
@@ -145,6 +171,13 @@ export function TaskDetailSheet() {
                   <span>📎</span> Attachments
                 </div>
                 <TaskAttachmentsSection attachments={selectedTask.attachments} />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                  <span>🔔</span> Reminders
+                </div>
+                <ReminderSection reminders={selectedTask.reminders} />
               </div>
 
               <div className="space-y-4">

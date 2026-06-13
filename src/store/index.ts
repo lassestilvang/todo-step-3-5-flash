@@ -10,7 +10,7 @@ import { playSound } from '@/lib/sounds';
 import { createLabelActions } from './actions/labels';
 import { createListActions } from './actions/lists';
 import { createTaskActions } from './actions/tasks';
-import type { AppState, StoreSetter, StoreGetter } from './types';
+import type { AppState, StoreSetter, StoreGetter, FocusTimerState } from './types';
 
 export const useStore = create<AppState>()(
   persist(
@@ -34,7 +34,7 @@ export const useStore = create<AppState>()(
         isActive: false,
         mode: 'work',
         taskId: null,
-      },
+      } as FocusTimerState,
       loading: false,
       error: null,
 

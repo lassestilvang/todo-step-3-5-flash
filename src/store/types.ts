@@ -22,12 +22,7 @@ export interface AppState {
   editTaskId: string | null;
   theme: string;
   brandColor: string;
-  focusTimer: {
-    timeLeft: number;
-    isActive: boolean;
-    mode: 'work' | 'break';
-    taskId: string | null;
-  };
+  focusTimer: FocusTimerState;
   loading: boolean;
   error: string | null;
   loadData: () => Promise<void>;

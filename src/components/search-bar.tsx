@@ -163,6 +163,13 @@ export function SearchBar() {
           <kbd className="hidden md:inline-flex h-5 items-center gap-1 rounded border bg-muted/50 px-1.5 font-mono text-[10px] font-bold text-muted-foreground/60">
             ⌘K
           </kbd>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="text-[10px] font-bold text-muted-foreground/60 hover:text-primary transition-colors hidden sm:inline"
+            title="Show keyboard shortcuts"
+          >
+            ?
+          </button>
         </div>
       </div>
 

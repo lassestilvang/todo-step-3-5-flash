@@ -303,18 +303,19 @@ describe('Task Actions', () => {
   });
 
   describe('deleteTask', () => {
-    it('should call deleteTaskAction and loadData', async () => {
+    it('should call deleteTaskAction and update state with deleted task', async () => {
+      const task = createSampleTask({ id: 'task-1' });
+      useStore.setState({ tasks: [task] });
+
       (actions.deleteTaskAction as any).mockResolvedValue(undefined);
-      (actions.loadAppData as any).mockResolvedValue({
-        tasks: [],
-        lists: [],
-        labels: [],
-        overdueCount: 0,
-      });
 
       await useStore.getState().deleteTask('task-1');
 
       expect(actions.deleteTaskAction).toHaveBeenCalledWith('task-1');
+      const state = useStore.getState();
+      expect(state.tasks).toHaveLength(0);
+      expect(state.deletedTasks).toHaveLength(1);
+      expect(state.deletedTasks[0].task.id).toBe('task-1');
     });
   });
 
@@ -537,6 +538,30 @@ describe('Getters', () => {
     const t2 = createSampleTask({ id: 't2' });
     useStore.setState({ tasks: [t1, t2], currentView: 'all', selectedListId: null, statusFilter: null, showCompleted: true, searchQuery: '' });
     expect(getFilteredTasks([t1, t2], 'all', null, null, true, '')).toEqual([t1, t2]);
+  });
+});
+
+describe('undoDeleteTask', () => {
+  it('should restore a deleted task and remove it from deletedTasks', () => {
+    const task = createSampleTask({ id: 'task-1' });
+    useStore.setState({ tasks: [], deletedTasks: [{ task, timestamp: Date.now() }] });
+
+    useStore.getState().undoDeleteTask('task-1');
+
+    const state = useStore.getState();
+    expect(state.tasks).toHaveLength(1);
+    expect(state.tasks[0].id).toBe('task-1');
+    expect(state.deletedTasks).toHaveLength(0);
+  });
+
+  it('should do nothing if task not found in deletedTasks', () => {
+    const existingTask = createSampleTask({ id: 'task-1' });
+    useStore.setState({ tasks: [existingTask], deletedTasks: [] });
+
+    useStore.getState().undoDeleteTask('nonexistent');
+
+    const state = useStore.getState();
+    expect(state.tasks).toHaveLength(1);
   });
 });
 

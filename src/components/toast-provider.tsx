@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, Info, AlertTriangle, Undo } from 'lucide-react';
 import { createContext, useContext, useState, useCallback } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -12,32 +12,45 @@ interface Toast {
   id: string;
   type: ToastType;
   message: string;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 interface ToastContextValue {
-  showToast: (type: ToastType, message: string) => void;
+  showToast: (type: ToastType, message: string, action?: { label: string; onClick: () => void }) => void;
+  dismissToast: (id: string) => void;
 }
 
-const ToastContext = createContext<ToastContextValue>({
-  showToast: () => {},
-});
+const ToastContext = createContext<ToastContextValue | null>(null);
 
 export function useToast() {
-  return useContext(ToastContext);
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error('useToast must be used within a ToastProvider');
+  }
+  return context;
 }
+
+export const showToast = (type: ToastType, message: string, action?: { label: string; onClick: () => void }) => {
+  console.warn('showToast called outside of ToastProvider context');
+};
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = useCallback((type: ToastType, message: string) => {
+  const showToast = useCallback((type: ToastType, message: string, action?: { label: string; onClick: () => void }) => {
     const id = crypto.randomUUID();
-    setToasts((prev) => [...prev, { id, type, message }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
+    setToasts((prev) => [...prev, { id, type, message, action }]);
+    if (!action) {
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 4000);
+    }
   }, []);
 
-  const dismiss = useCallback((id: string) => {
+  const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
@@ -56,7 +69,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={{ showToast, dismissToast }}>
       {children}
       <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-2 max-w-sm">
         <AnimatePresence mode="popLayout">
@@ -73,13 +86,24 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             >
               {iconMap[toast.type]}
               <p className="text-sm font-medium flex-1">{toast.message}</p>
-              <button
-                onClick={() => dismiss(toast.id)}
-                className="shrink-0 rounded-lg p-1 hover:bg-muted transition-colors"
-                aria-label="Dismiss notification"
-              >
-                <X className="h-3.5 w-3.5 text-muted-foreground" />
-              </button>
+              {toast.action ? (
+                <button
+                  onClick={toast.action.onClick}
+                  className="shrink-0 rounded-lg p-1 hover:bg-muted transition-colors text-primary font-medium text-xs flex items-center gap-1"
+                  aria-label={toast.action.label}
+                >
+                  <Undo className="h-3.5 w-3.5" />
+                  {toast.action.label}
+                </button>
+              ) : (
+                <button
+                  onClick={() => dismissToast(toast.id)}
+                  className="shrink-0 rounded-lg p-1 hover:bg-muted transition-colors"
+                  aria-label="Dismiss notification"
+                >
+                  <X className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+              )}
             </motion.div>
           ))}
         </AnimatePresence>

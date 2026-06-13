@@ -2,11 +2,12 @@
 
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, ChevronRight, AlertTriangle, GripVertical, Play, PauseCircle, Zap } from 'lucide-react';
-import React from 'react';
+import { Clock, ChevronRight, AlertTriangle, GripVertical, Play, PauseCircle, Zap, Trash2, Undo } from 'lucide-react';
+import React, { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/components/toast-provider';
 import { PRIORITY_LABELS, DATE_FORMATS, STRINGS } from '@/constants';
 import { cn, formatDuration } from '@/lib/utils';
 import { useStore } from '@/store';
@@ -204,13 +205,29 @@ function StatusCycleButton({ task, onCycle }: { task: Task; onCycle: (id: string
   );
 }
 
+function DeleteButton({ task, onDelete }: { task: Task; onDelete: (id: string) => void }) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-destructive/10 hover:text-destructive"
+      onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
+      title="Delete task"
+      aria-label="Delete task"
+    >
+      <Trash2 className="h-4 w-4" />
+    </Button>
+  );
+}
+
 function computeIsOverdue(dueDate: string | Date | undefined, status: Task['status']): boolean {
   if (!dueDate || status === 'completed') return false;
   return new Date(dueDate) < new Date();
 }
 
 export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
-  const { toggleTaskComplete, openEditTask, setSelectedTask, selectedTaskId, startFocusTimer } = useStore();
+  const { toggleTaskComplete, openEditTask, setSelectedTask, selectedTaskId, startFocusTimer, deleteTask, undoDeleteTask } = useStore();
+  const { showToast } = useToast();
 
   const isSelected = selectedTaskId === task.id;
   const due = task.dueDate ?? task.deadline;
@@ -227,6 +244,14 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
       const nextStatus = task.status === 'pending' ? 'in_progress' : 'completed';
       void toggleTaskComplete(task.id, nextStatus);
     }
+  };
+
+  const handleDelete = (id: string) => {
+    void deleteTask(id);
+    showToast('success', 'Task deleted', {
+      label: 'Undo',
+      onClick: () => undoDeleteTask(id),
+    });
   };
 
   return (
@@ -271,6 +296,7 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
               >
                 <Zap className="h-4 w-4" />
               </Button>
+              <DeleteButton task={task} onDelete={handleDelete} />
               <Button
                 variant="ghost"
                 size="icon-sm"

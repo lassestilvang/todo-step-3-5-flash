@@ -39,6 +39,7 @@ export const useStore = create<AppState>()(
       } as FocusTimerState,
       loading: false,
       error: null,
+      deletedTasks: [],
 
       loadData: async () => {
         set({ loading: true, error: null });
@@ -202,6 +203,17 @@ export const useStore = create<AppState>()(
 
       getTaskById: (id) => {
         return get().tasks.find((t) => t.id === id);
+      },
+
+      undoDeleteTask: (id: string) => {
+        const deletedTasks = get().deletedTasks || [];
+        const deletedEntry = deletedTasks.find((d) => d.task.id === id);
+        if (!deletedEntry) return;
+
+        set((state: AppState) => ({
+          tasks: [deletedEntry.task, ...state.tasks],
+          deletedTasks: state.deletedTasks?.filter((d) => d.task.id !== id) || [],
+        }));
       },
 
       ...createTaskActions(set as StoreSetter, get as StoreGetter),

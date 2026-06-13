@@ -10,6 +10,11 @@ export interface FocusTimerState {
   autoStartNext: boolean;
 }
 
+export interface DeletedTask {
+  task: Task;
+  timestamp: number;
+}
+
 export interface AppState {
   tasks: Task[];
   lists: TaskList[];
@@ -28,6 +33,7 @@ export interface AppState {
   focusTimer: FocusTimerState;
   loading: boolean;
   error: string | null;
+  deletedTasks: DeletedTask[];
   loadData: () => Promise<void>;
   setCurrentView: (view: ViewType) => void;
   setSelectedList: (listId: string | null) => void;
@@ -50,6 +56,7 @@ export interface AppState {
   addTask: (data: CreateTaskData) => Promise<Task | null>;
   updateTask: (id: string, data: Partial<CreateTaskData> & { status?: Task['status'] }) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
+  undoDeleteTask: (id: string) => void;
   toggleTaskComplete: (id: string, status?: Task['status']) => Promise<void>;
   addSubtask: (taskId: string, title: string) => Promise<void>;
   toggleSubtask: (taskId: string, subtaskId: string) => Promise<void>;

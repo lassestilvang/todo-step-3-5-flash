@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { TaskCard } from '@/components/task-card';
+import { ToastProvider } from '@/components/toast-provider';
 import type { Task } from '@/types';
 
 // Mock framer-motion to avoid animation issues
@@ -28,12 +29,16 @@ vi.mock('framer-motion', () => ({
 const mockToggleTaskComplete = vi.fn();
 const mockOpenEditTask = vi.fn();
 const mockSetSelectedTask = vi.fn();
+const mockDeleteTask = vi.fn();
+const mockUndoDeleteTask = vi.fn();
 
 const mockStore = {
   toggleTaskComplete: mockToggleTaskComplete,
   openEditTask: mockOpenEditTask,
   setSelectedTask: mockSetSelectedTask,
   selectedTaskId: null,
+  deleteTask: mockDeleteTask,
+  undoDeleteTask: mockUndoDeleteTask,
 };
 
 vi.mock('@/store', () => ({
@@ -72,10 +77,14 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+const renderWithToast = (ui: React.ReactElement) => {
+  return render(<ToastProvider>{ui}</ToastProvider>);
+};
+
 describe('TaskCard', () => {
   it('renders task title and description', () => {
     const task = createMockTask();
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     expect(screen.getByText('Test Task')).toBeInTheDocument();
     expect(screen.getByText('A test description')).toBeInTheDocument();
@@ -85,7 +94,7 @@ describe('TaskCard', () => {
     const task = createMockTask({
       list: { name: 'My List', icon: '📁', color: '#ffffff' },
     });
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     expect(screen.getByText('My List')).toBeInTheDocument();
     expect(screen.getByText('📁')).toBeInTheDocument();
@@ -93,7 +102,7 @@ describe('TaskCard', () => {
 
   it('calls toggleTaskComplete when checkbox is clicked', () => {
     const task = createMockTask();
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     const checkbox = screen.getByRole('checkbox');
     fireEvent.click(checkbox);
@@ -103,7 +112,7 @@ describe('TaskCard', () => {
 
   it('calls openEditTask when edit button is clicked', () => {
     const task = createMockTask();
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     const editButton = screen.getByLabelText('Edit task');
     fireEvent.click(editButton);
@@ -114,7 +123,7 @@ describe('TaskCard', () => {
   it('displays due date badge when dueDate is today', () => {
     const today = new Date();
     const task = createMockTask({ dueDate: today });
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     expect(screen.getByText('Today')).toBeInTheDocument();
   });
@@ -123,7 +132,7 @@ describe('TaskCard', () => {
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 5);
     const task = createMockTask({ dueDate: nextWeek });
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     // Format: e.g., "Feb 2"
     const formatted = nextWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -132,14 +141,14 @@ describe('TaskCard', () => {
 
   it('displays estimate time when estimateMinutes > 0', () => {
     const task = createMockTask({ estimateMinutes: 90 });
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     expect(screen.getByText('1h 30m')).toBeInTheDocument();
   });
 
   it('displays priority badge when priority is not none', () => {
     const task = createMockTask({ priority: 'high' });
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     expect(screen.getByText(/High/i)).toBeInTheDocument();
   });
@@ -158,7 +167,7 @@ describe('TaskCard', () => {
         },
       ],
     });
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     expect(screen.getByText('1/2')).toBeInTheDocument();
   });
@@ -170,7 +179,7 @@ describe('TaskCard', () => {
       deadline: yesterday,
       status: 'pending',
     });
-    render(<TaskCard task={task} />);
+    renderWithToast(<TaskCard task={task} />);
 
     const card = screen.getByText('Test Task').closest('div');
     expect(card).toBeInTheDocument();

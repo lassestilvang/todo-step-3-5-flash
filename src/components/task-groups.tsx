@@ -51,26 +51,25 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
     setSelectedTask(taskIds[nextIdx]!);
   }, [taskIds, setSelectedTask]);
 
+  /* eslint-disable-next-line complexity */
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const tag = document.activeElement?.tagName;
     const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || e.target instanceof HTMLInputElement;
     if (isInput) return;
-    const isModifier = e.metaKey || e.ctrlKey;
 
-    // Only handle navigation when Shift is pressed to avoid conflict with search
+    const isModifier = e.metaKey || e.ctrlKey;
+    const current = useStore.getState().selectedTaskId;
+
     if (e.key === 'j' && isModifier) {
       e.preventDefault();
       handleNext();
     } else if (e.key === 'k' && isModifier) {
       e.preventDefault();
       handlePrev();
-    } else if (e.key === 'x' && !isModifier) {
+    } else if (e.key === 'x' && !isModifier && current) {
       e.preventDefault();
-      const current = useStore.getState().selectedTaskId;
-      if (current) {
-        void useStore.getState().deleteTask(current);
-        useStore.getState().setSelectedTask(null);
-      }
+      void useStore.getState().deleteTask(current);
+      useStore.getState().setSelectedTask(null);
     }
   }, [handleNext, handlePrev]);
 

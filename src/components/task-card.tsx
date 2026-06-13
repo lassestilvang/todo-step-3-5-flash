@@ -2,7 +2,7 @@
 
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, ChevronRight, AlertTriangle, GripVertical, Play, PauseCircle, Zap, Trash2, ExternalLink } from 'lucide-react';
+import { Clock, ChevronRight, AlertTriangle, GripVertical, Play, PauseCircle, Zap, Trash2 } from 'lucide-react';
 import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 
 import { useToast } from '@/components/toast-provider';

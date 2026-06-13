@@ -1,7 +1,7 @@
 'use client';
 
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 
 import { TaskAttachmentsSection } from '@/components/task-attachments-section';
 import { TaskDetailHeader } from '@/components/task-detail-header';
@@ -87,46 +87,42 @@ export function TaskDetailSheet() {
     return format(date, DATE_FORMATS.FULL_DATE);
   }, [selectedTask]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     if (prevTask) setSelectedTask(prevTask.id);
-  };
+  }, [prevTask, setSelectedTask]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (nextTask) setSelectedTask(nextTask.id);
-  };
+  }, [nextTask, setSelectedTask]);
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!selectedTask) return;
     if (window.confirm('Are you sure you want to delete this task?')) {
       await deleteTask(selectedTask.id);
       setSelectedTask(null);
     }
-  };
+  }, [selectedTask, deleteTask, setSelectedTask]);
 
   // Keyboard navigation for task detail sheet
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    /* eslint-disable-next-line complexity */
+    const handleKeyDown = (e: KeyboardEvent): void => {
       if (!selectedTaskId) return;
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        handlePrev();
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        handleNext();
-      } else if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (e.metaKey || e.ctrlKey) return;
+      const isMod = e.metaKey || e.ctrlKey;
+
+      if (e.key === 'ArrowLeft') handlePrev();
+      else if (e.key === 'ArrowRight') handleNext();
+      else if ((e.key === 'Delete' || e.key === 'Backspace') && !isMod) {
         e.preventDefault();
         void handleDelete();
-      } else if (e.key === 'Escape') {
-        setSelectedTask(null);
-      }
+      } else if (e.key === 'Escape') setSelectedTask(null);
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedTaskId, currentIndex, tasksArray.length, handlePrev, handleNext, handleDelete, setSelectedTask]);
+  }, [selectedTaskId, handlePrev, handleNext, handleDelete, setSelectedTask]);
 
   if (!selectedTask) return null;
 

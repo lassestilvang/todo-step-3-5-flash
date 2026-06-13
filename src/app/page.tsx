@@ -19,8 +19,8 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { ViewToggle } from '@/components/view-toggle';
 import { VIEW_LABELS } from '@/constants';
-import { useStore } from '@/store';
 import { cn } from '@/lib/utils';
+import { useStore } from '@/store';
 
 export default function HomePage() {
   const showCompleted = useStore((s) => s.showCompleted);

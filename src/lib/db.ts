@@ -144,6 +144,49 @@ export function generateId() {
   return crypto.randomUUID();
 }
 
+// Batch fetch helpers to avoid N+1 queries
+export function getLabelsForTasks(taskIds: string[]): Record<string, LabelRow[]> {
+  if (taskIds.length === 0) return {};
+  const placeholders = taskIds.map(() => '?').join(',');
+  const rows = db
+    .prepare(
+      `
+      SELECT tl.task_id, l.id, l.name, l.color, l.icon, l.created_at
+      FROM task_labels tl
+      JOIN labels l ON tl.label_id = l.id
+      WHERE tl.task_id IN (${placeholders})
+    `
+    )
+    .all(...taskIds) as Array<{ task_id: string; id: string; name: string; color: string; icon: string | null; created_at: string }>;
+
+  const map: Record<string, LabelRow[]> = {};
+  for (const row of rows) {
+    (map[row.task_id] ??= []).push({
+      id: row.id,
+      name: row.name,
+      color: row.color,
+      icon: row.icon,
+      created_at: row.created_at,
+    });
+  }
+  return map;
+}
+
+export function getSubtasksForTasks(taskIds: string[]): Record<string, SubtaskRow[]> {
+  if (taskIds.length === 0) return {};
+  const placeholders = taskIds.map(() => '?').join(',');
+  const rows = db
+    .prepare(
+      `SELECT * FROM subtasks WHERE task_id IN (${placeholders}) ORDER BY task_id, order_index`
+    )
+    .all(...taskIds) as SubtaskRow[];
+  const map: Record<string, SubtaskRow[]> = {};
+  for (const row of rows) {
+    (map[row.task_id] ??= []).push(row);
+  }
+  return map;
+}
+
 // Migrations
 export const migrations = [
   {

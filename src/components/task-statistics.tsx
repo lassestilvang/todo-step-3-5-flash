@@ -71,21 +71,28 @@ export function TaskStatistics() {
   }, [tasks]);
 
   const streak = useMemo(() => {
-    let currentStreak = 0;
-    const sorted = [...tasks].sort((a, b) => {
-      const dateA = a.completedAt ? new Date(a.completedAt).getTime() : 0;
-      const dateB = b.completedAt ? new Date(b.completedAt).getTime() : 0;
-      return dateB - dateA;
+    // Calculate consecutive days with at least one completed task
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const completedByDay = new Set<string>();
+    tasks.forEach(t => {
+      if (t.status === 'completed' && t.completedAt) {
+        const day = new Date(t.completedAt!);
+        day.setHours(0, 0, 0, 0);
+        completedByDay.add(day.toISOString().split('T')[0]!);
+      }
     });
 
-    for (const task of sorted) {
-      if (task.status === 'completed') {
-        currentStreak++;
-      } else {
-        break;
-      }
+    // Count consecutive days from today backwards
+    let streakCount = 0;
+    for (let daysAgo = 0; ; daysAgo++) {
+      const checkDate = new Date(today.getTime() - daysAgo * 86400000);
+      if (!completedByDay.has(checkDate.toISOString().split('T')[0]!)) break;
+      streakCount++;
     }
-    return currentStreak;
+
+    return streakCount;
   }, [tasks]);
 
   return (

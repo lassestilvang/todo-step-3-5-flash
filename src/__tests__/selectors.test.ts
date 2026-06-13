@@ -32,12 +32,16 @@ describe('computeOverdue', () => {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
 
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     const tasks: Task[] = [
       createTask({ id: '1', deadline: yesterday, status: 'pending' }),
-      createTask({ id: '2', deadline: new Date(), status: 'pending' }),
-      createTask({ id: '3', deadline: new Date(Date.now() + 86400000), status: 'pending' }),
+      createTask({ id: '2', deadline: tomorrow, status: 'pending' }),
+      createTask({ id: '3', deadline: undefined, status: 'pending' }),
     ];
 
+    // Only task 1 (yesterday) should be counted as overdue
     expect(computeOverdue(tasks)).toBe(1);
   });
 
@@ -202,5 +206,102 @@ describe('getFilteredTasks', () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('t1');
     });
+  });
+});
+
+describe('computeOverdue edge cases', () => {
+  it('should handle tasks with both dueDate and deadline (prefer deadline)', () => {
+    const past = new Date(Date.now() - 86400000);
+    const future = new Date(Date.now() + 86400000);
+
+    const tasks: Task[] = [
+      createTask({ id: '1', deadline: past, dueDate: future, status: 'pending' }),
+    ];
+
+    expect(computeOverdue(tasks)).toBe(1);
+  });
+
+  it('should handle tasks with only dueDate', () => {
+    const past = new Date(Date.now() - 86400000);
+
+    const tasks: Task[] = [
+      createTask({ id: '1', dueDate: past, deadline: undefined, status: 'pending' }),
+    ];
+
+    expect(computeOverdue(tasks)).toBe(1);
+  });
+
+  it('should return 0 for empty tasks array', () => {
+    expect(computeOverdue([])).toBe(0);
+  });
+
+  it('should return 0 when all tasks are completed', () => {
+    const past = new Date(Date.now() - 86400000);
+    const tasks: Task[] = [
+      createTask({ id: '1', deadline: past, status: 'completed' }),
+    ];
+
+    expect(computeOverdue(tasks)).toBe(0);
+  });
+});
+
+describe('taskMatchesView edge cases', () => {
+  it('should handle tasks with no due date for today view', () => {
+    const task = createTask({ dueDate: undefined, deadline: undefined });
+    expect(taskMatchesView(task, 'today')).toBe(false);
+  });
+
+  it('should handle tasks with no due date for week view', () => {
+    const task = createTask({ dueDate: undefined, deadline: undefined });
+    expect(taskMatchesView(task, 'week')).toBe(false);
+  });
+
+  it('should handle tasks with no due date for upcoming view', () => {
+    const task = createTask({ dueDate: undefined, deadline: undefined });
+    expect(taskMatchesView(task, 'upcoming')).toBe(false);
+  });
+
+  it('should return true for all views when view is all', () => {
+    const task = createTask();
+    expect(taskMatchesView(task, 'all')).toBe(true);
+  });
+});
+
+describe('getFilteredTasks edge cases', () => {
+  it('should handle empty tasks array', () => {
+    const result = getFilteredTasks([], 'all', null, null, true, '');
+    expect(result).toEqual([]);
+  });
+
+  it('should handle tasks with no description in search', () => {
+    const tasks: Task[] = [
+      createTask({ id: 't1', title: 'Task A', description: '' }),
+    ];
+    const result = getFilteredTasks(tasks, 'all', null, null, true, 'description');
+    expect(result).toEqual([]);
+  });
+
+  it('should handle null statusFilter', () => {
+    const tasks: Task[] = [
+      createTask({ id: 't1', status: 'completed' }),
+    ];
+    const result = getFilteredTasks(tasks, 'all', null, null, true, '');
+    expect(result).toHaveLength(1);
+  });
+
+  it('should handle null selectedListId', () => {
+    const tasks: Task[] = [
+      createTask({ id: 't1', listId: 'list-1' }),
+    ];
+    const result = getFilteredTasks(tasks, 'all', null, null, true, '');
+    expect(result).toHaveLength(1);
+  });
+
+  it('should return empty array when no tasks match', () => {
+    const tasks: Task[] = [
+      createTask({ id: 't1', listId: 'list-1' }),
+    ];
+    const result = getFilteredTasks(tasks, 'all', 'nonexistent', null, true, '');
+    expect(result).toEqual([]);
   });
 });

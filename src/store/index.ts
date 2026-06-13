@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -273,10 +274,13 @@ export const useFilteredTasks = () => {
   const showCompleted = useStore(selectShowCompleted);
   const searchQuery = useStore(selectSearchQuery);
 
-  return getFilteredTasks(tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery);
+  return useMemo(
+    () => getFilteredTasks(tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery),
+    [tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery]
+  );
 };
 
 export const useOverdueCount = () => {
   const tasks = useStore(selectTasks);
-  return computeOverdue(tasks);
+  return useMemo(() => computeOverdue(tasks), [tasks]);
 };

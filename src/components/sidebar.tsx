@@ -112,12 +112,13 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
                       ? 'bg-accent text-accent-foreground font-semibold shadow-sm'
                       : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                   )}
+                  aria-current={isActive ? 'page' : undefined}
                 >
-                  <div className="w-1.5 h-6 rounded-full shrink-0" style={{ backgroundColor: list.color }} />
-                  <span className="text-base leading-none">{list.icon}</span>
+                  <div className="w-1.5 h-6 rounded-full shrink-0" style={{ backgroundColor: list.color }} aria-hidden="true" />
+                  <span className="text-base leading-none" aria-hidden="true">{list.icon}</span>
                   <span className="flex-1 text-left truncate">{list.name}</span>
-                  {count > 0 && <span className="text-[10px] tabular-nums text-muted-foreground/60">{count}</span>}
-                  {list.isMagic && <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" />}
+                  {count > 0 && <span className="text-[10px] tabular-nums text-muted-foreground/60" aria-label={`${count} tasks`}>{count}</span>}
+                  {list.isMagic && <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" aria-hidden="true" />}
                 </button>
                 {list.id !== INBOX_LIST_ID && (
                   <button
@@ -125,7 +126,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
                     aria-label={`Delete list ${list.name}`}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
                 )}
               </motion.div>
@@ -221,10 +222,11 @@ function StatusFilterButton({
         'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200',
         isActive ? `${c.active} font-semibold` : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
       )}
+      aria-current={isActive ? 'true' : undefined}
     >
-      <c.icon className="h-4 w-4" />
+      <c.icon className="h-4 w-4" aria-hidden="true" />
       <span className="flex-1 text-left">{status.replace('_', ' ')}</span>
-      <span className="text-[10px] tabular-nums">{counts[status]}</span>
+      <span className="text-[10px] tabular-nums" aria-label={`${counts[status]} ${status.replace('_', ' ')} tasks`}>{counts[status]}</span>
     </button>
   );
 }
@@ -242,7 +244,7 @@ function BrandColorSelector({ brandColor, setBrandColor }: { brandColor: string;
   return (
     <div className="mt-4 px-3 py-2 space-y-3">
       <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Brand Accent</div>
-      <div className="flex flex-wrap gap-2.5">
+      <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Brand color selector">
         {colors.map((color) => (
           <button
             key={color.value}
@@ -252,7 +254,9 @@ function BrandColorSelector({ brandColor, setBrandColor }: { brandColor: string;
               brandColor === color.value ? 'ring-2 ring-foreground ring-offset-2 scale-110' : 'opacity-60 hover:opacity-100'
             )}
             style={{ backgroundColor: color.value }}
-            title={color.name}
+            role="radio"
+            aria-checked={brandColor === color.value}
+            aria-label={color.name}
           />
         ))}
       </div>

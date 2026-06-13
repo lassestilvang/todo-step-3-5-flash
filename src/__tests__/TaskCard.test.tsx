@@ -150,7 +150,8 @@ describe('TaskCard', () => {
     const task = createMockTask({ priority: 'high' });
     renderWithToast(<TaskCard task={task} />);
 
-    expect(screen.getByText(/High/i)).toBeInTheDocument();
+    const priorityBadge = screen.getByText('!!! High');
+    expect(priorityBadge).toBeInTheDocument();
   });
 
   it('displays subtasks progress', () => {

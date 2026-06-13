@@ -13,6 +13,12 @@ import { cn, formatDuration } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { Task, Priority } from '@/types';
 
+const STATUS_LABELS: Record<Task['status'], string> = {
+  pending: 'Not started',
+  in_progress: 'In progress',
+  completed: 'Completed',
+};
+
 interface TaskCardProps {
   task: Task;
 }
@@ -24,23 +30,26 @@ const TaskCheckbox = React.memo(function TaskCheckbox({
 }: { task: Task; toggleTaskComplete: (id: string, status?: Task['status']) => Promise<void> | void; }) {
   const isCompleted = task.status === 'completed';
   const isInProgress = task.status === 'in_progress';
+  const checkboxId = `task-checkbox-${task.id}`;
   return (
     <div className="relative flex items-center justify-center">
       <Checkbox
+        id={checkboxId}
         checked={isCompleted}
         onCheckedChange={() => { void toggleTaskComplete(task.id, isCompleted ? 'pending' : 'completed'); }}
         aria-label={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
+        aria-checked={isCompleted}
         className={cn('h-6 w-6 rounded-full border-2 transition-all',
           isCompleted ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/20 scale-110' :
           isInProgress ? 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-500/20' :
           'border-muted-foreground/30 hover:border-primary bg-background')} />
       {isInProgress && (
         <motion.div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }} />
+          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }} aria-hidden="true" />
       )}
       {isCompleted && (
         <motion.div initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1.5, opacity: 0.3 }}
-          className="absolute inset-0 rounded-full bg-green-500" />
+          className="absolute inset-0 rounded-full bg-green-500" aria-hidden="true" />
       )}
     </div>
   );
@@ -185,15 +194,17 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
   useEffect(() => {
     if (isSelected && cardRef.current) {
       cardRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      // Announce to screen reader
+      const announcement = document.createElement('div');
+      announcement.className = 'sr-only';
+      announcement.textContent = `${task.title}, ${STATUS_LABELS[task.status]}`;
+      document.body.appendChild(announcement);
+      setTimeout(() => document.body.removeChild(announcement), 1000);
     }
-  }, [isSelected]);
+  }, [isSelected, task.title, task.status]);
 
   // Memoize status text for screen readers
-  const statusText = useMemo(() => {
-    if (task.status === 'completed') return 'completed';
-    if (task.status === 'in_progress') return 'in progress';
-    return 'pending';
-  }, [task.status]);
+  const statusText = useMemo(() => STATUS_LABELS[task.status], [task.status]);
 
   const handleDelete = useCallback((id: string) => {
     void deleteTask(id);
@@ -256,7 +267,7 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
       )}
     >
       <div className="flex items-start gap-4">
-        <div className="opacity-0 -ml-2 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
+        <div className="opacity-0 -ml-2 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing" aria-hidden="true">
           <GripVertical className="h-5 w-5 text-muted-foreground/30" />
         </div>
         <TaskCheckbox task={task} toggleTaskComplete={toggleTaskComplete} />
@@ -265,6 +276,9 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
             <div className="flex-1">
               <TaskTitle task={task} />
               <TaskDescription task={task} />
+              <span id="task-card-description" className="sr-only">
+                {task.description} {STATUS_LABELS[task.status]} priority {task.priority}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <StatusCycleButton task={task} onCycle={(id, status) => void toggleTaskComplete(id, status)} />
@@ -293,7 +307,7 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
           <TaskMeta task={task} due={due} isOverdue={isOverdue} />
         </div>
       </div>
-      {isSelected && <motion.div layoutId="focus-ring" className="absolute -inset-[2px] rounded-[18px] border-2 border-primary pointer-events-none" />}
+      {isSelected && <motion.div layoutId="focus-ring" className="absolute -inset-[2px] rounded-[18px] border-2 border-primary pointer-events-none" aria-hidden="true" />}
     </motion.div>
   );
 });

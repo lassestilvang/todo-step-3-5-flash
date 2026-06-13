@@ -10,7 +10,7 @@ import {
   updateSubtask,
   deleteSubtask,
   getTaskById,
-  type TaskRow,
+  type EnrichedTaskRow,
 } from '@/lib/db';
 import { AppError } from '@/lib/errors';
 import {
@@ -109,7 +109,7 @@ export async function deleteTaskAction(id: string) {
 
 export async function toggleTaskCompleteAction(id: string) {
   try {
-    const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow | undefined;
+    const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as EnrichedTaskRow | undefined;
     if (!existing) {
       throw new AppError('Task not found', 'NOT_FOUND');
     }

@@ -91,8 +91,8 @@ describe('Database', () => {
       expect(obj!).toBeInstanceOf(Object);
       expect(obj!.created_at).toBeInstanceOf(Date);
       expect(obj!.updated_at).toBeInstanceOf(Date);
-      // due_date does not end with _at or contain "Date", so remains string
-      expect(obj!.due_date).toBe('2024-02-01T00:00:00.000Z');
+      // due_date is now converted to Date for task fields
+      expect(obj!.due_date).toBeInstanceOf(Date);
       expect(obj!.some_other_field).toBe('value');
     });
 
@@ -559,7 +559,7 @@ describe('Database', () => {
         const updated = getTaskById(task.id);
 
         expect(updated?.status).toBe('pending');
-        expect(updated?.completed_at).toBeNull();
+        expect(updated?.completed_at).toBeUndefined();
       });
 
       it('should return null for non-existent task', () => {

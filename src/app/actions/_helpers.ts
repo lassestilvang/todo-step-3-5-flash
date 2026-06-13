@@ -1,39 +1,39 @@
 import { getListById } from '@/lib/db';
-import type { TaskRow, SubtaskRow, LabelRow, ListRow } from '@/lib/db';
+import type { EnrichedTaskRow, ListRow, EnrichedLabelRow } from '@/lib/db';
 import type { Task, TaskList, Label, TaskStatus, Priority, RecurrenceType } from '@/types';
 
-export function toTask(row: TaskRow & { labels: LabelRow[]; subtasks: SubtaskRow[] }): Task {
+export function toTask(row: EnrichedTaskRow): Task {
   return {
     id: row.id,
     listId: row.list_id,
     parentId: row.parent_id || undefined,
     title: row.title,
     description: row.description,
-    dueDate: row.due_date ? new Date(row.due_date) : undefined,
-    deadline: row.deadline ? new Date(row.deadline) : undefined,
+    dueDate: row.due_date,
+    deadline: row.deadline,
     estimateMinutes: row.estimate_minutes,
     actualMinutes: row.actual_minutes,
     status: row.status as TaskStatus,
     priority: row.priority as Priority,
-    recurrence: row.recurrence ? (row.recurrence as RecurrenceType) : undefined,
+    recurrence: row.recurrence as RecurrenceType | undefined,
     recurrenceRule: row.recurrence_rule || undefined,
-    createdAt: new Date(row.created_at),
-    updatedAt: new Date(row.updated_at),
-    completedAt: row.completed_at ? new Date(row.completed_at) : undefined,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    completedAt: row.completed_at,
     labels: row.labels.map((l) => ({
       id: l.id,
       name: l.name,
       color: l.color,
-      icon: l.icon ?? undefined,
-      createdAt: new Date(l.created_at),
+      icon: l.icon,
+      createdAt: l.created_at,
     })),
     subtasks: row.subtasks.map((s) => ({
       id: s.id,
-      taskId: s.task_id,
+      taskId: s.taskId,
       title: s.title,
-      completed: s.completed === 1,
-      order: s.order_index,
-      createdAt: new Date(s.created_at),
+      completed: s.completed,
+      order: s.order,
+      createdAt: s.createdAt,
     })),
     attachments: [],
     reminders: [],
@@ -59,12 +59,12 @@ export function toList(row: ListRow): TaskList {
   };
 }
 
-export function toLabel(row: LabelRow): Label {
+export function toLabel(row: EnrichedLabelRow): Label {
   return {
     id: row.id,
     name: row.name,
     color: row.color,
-    icon: row.icon ?? undefined,
-    createdAt: new Date(row.created_at),
+    icon: row.icon,
+    createdAt: row.created_at,
   };
 }

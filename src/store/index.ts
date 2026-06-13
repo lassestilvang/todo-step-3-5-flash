@@ -4,7 +4,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import * as actions from '@/app/actions';
-import { seedDefaultData } from '@/lib/db';
 import { playSound } from '@/lib/sounds';
 
 import { createLabelActions } from './actions/labels';
@@ -42,7 +41,6 @@ export const useStore = create<AppState>()(
       error: null,
 
       loadData: async () => {
-        seedDefaultData();
         set({ loading: true, error: null });
         try {
           const result = await actions.loadAppData({

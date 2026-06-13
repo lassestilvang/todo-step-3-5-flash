@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports */
 // Database initialization module
 // This module handles the creation of the database connection
+// This file is server-side only - better-sqlite3 is a Node.js module
 
 // Check if we're in a test environment before importing
 const isTestEnv = typeof process !== 'undefined' && process.env.NODE_ENV === 'test';
@@ -19,24 +20,9 @@ export function getDb(): any {
     return dbInstance;
   }
 
-  // Import better-sqlite3 only in non-test environments
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const Database = require('better-sqlite3').default;
-
-  // Check if it's a mock (object with prepare method) or constructor
-  if (Database && typeof Database.prepare === 'function') {
-    // It's a mock object
-    dbInstance = Database;
-  } else if (typeof Database === 'function') {
-    // It's a constructor
-    dbInstance = new Database(':memory:');
-  } else {
-    throw new Error('Could not initialize database');
-  }
-
-  // Add no-op pragma for test environments
-  if (dbInstance && typeof dbInstance.pragma !== 'function') {
-    dbInstance.pragma = (_cmd: string) => ({});
-  }
-
+  dbInstance = new Database(':memory:');
+  dbInstance.pragma('foreign_keys = ON');
   return dbInstance;
 }

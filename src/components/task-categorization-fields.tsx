@@ -12,6 +12,8 @@ import { PRIORITY_VALUES, PRIORITY_LABELS, PRIORITY_TEXT_COLORS } from '@/consta
 import { cn } from '@/lib/utils';
 import type { Label as LabelType } from '@/types';
 
+type LabelIdsFieldValues = { labelIds: string[] };
+
 interface TaskCategorizationFieldsProps<T extends FieldValues> {
   form: UseFormReturn<T>;
   lists: { id: string; name: string; icon: string }[];
@@ -100,10 +102,9 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                 <button
                   type="button"
                   onClick={() => {
-                    const current = form.getValues('labelIds' as Path<T>) as string[];
+                    const current = form.getValues('labelIds' as Path<LabelIdsFieldValues>) as string[];
                     const updated = current.filter((id) => id !== labelId);
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    (form as any).setValue('labelIds', updated);
+                    form.setValue('labelIds', updated);
                   }}
                   className="ml-1 p-0.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
                 >
@@ -127,10 +128,9 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                     key={label.id}
                     className="rounded-lg"
                     onClick={() => {
-                      const current = form.getValues('labelIds' as Path<T>) as string[];
+                      const current = form.getValues('labelIds' as Path<LabelIdsFieldValues>) as string[];
                       const updated = [...current, label.id];
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      (form as any).setValue('labelIds', updated);
+                      form.setValue('labelIds', updated);
                     }}
                   >
                     <span className="mr-2">{label.icon}</span>

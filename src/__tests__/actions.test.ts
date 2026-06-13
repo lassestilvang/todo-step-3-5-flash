@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, max-lines */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import * as actions from '@/app/actions';

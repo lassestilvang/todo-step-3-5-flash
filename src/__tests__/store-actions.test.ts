@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, max-lines */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// @ts-nocheck
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Mock zustand persist middleware

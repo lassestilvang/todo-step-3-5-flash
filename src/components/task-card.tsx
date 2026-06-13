@@ -2,7 +2,7 @@
 
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, ChevronRight, AlertTriangle, GripVertical, Brain, Play, PauseCircle } from 'lucide-react';
+import { Clock, ChevronRight, AlertTriangle, GripVertical, Brain, Play, PauseCircle, Zap } from 'lucide-react';
 import React from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -170,9 +170,9 @@ function TaskMeta({ task, due, isOverdue }: { task: Task; due: Date | undefined;
 function StatusCycleButton({ task, onCycle }: { task: Task; onCycle: (id: string, status: Task['status']) => void }) {
   const nextStatus = task.status === 'pending' ? 'in_progress' : 'completed';
   const statusConfig = {
-    pending: { label: 'Start', icon: Play, color: 'text-blue-500' },
-    in_progress: { label: 'Complete', icon: PauseCircle, color: 'text-amber-500' },
-    completed: { label: 'Reset', icon: Clock, color: 'text-green-500' },
+    pending: { label: 'Start', icon: Play, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    in_progress: { label: 'Complete', icon: PauseCircle, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+    completed: { label: 'Reset', icon: Clock, color: 'text-green-500', bg: 'bg-green-500/10' },
   };
   const config = statusConfig[task.status] || statusConfig.pending;
 
@@ -180,7 +180,10 @@ function StatusCycleButton({ task, onCycle }: { task: Task; onCycle: (id: string
     <Button
       variant="ghost"
       size="icon-sm"
-      className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-primary/10 hover:text-primary"
+      className={cn(
+        'opacity-0 group-hover:opacity-100 transition-all rounded-xl',
+        `hover:${config.bg} hover:text-${config.color.replace('text-', '')}`
+      )}
       onClick={(e) => { e.stopPropagation(); onCycle(task.id, nextStatus); }}
       title={`Mark as ${nextStatus.replace('_', ' ')}`}
       aria-label={`Mark as ${nextStatus.replace('_', ' ')}`}
@@ -247,10 +250,23 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
             </div>
             <div className="flex items-center gap-1">
               <StatusCycleButton task={task} onCycle={(id, status) => void toggleTaskComplete(id, status)} />
-              <Button variant="ghost" size="icon-sm" className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-primary/10 hover:text-primary" onClick={(e) => { e.stopPropagation(); startFocusTimer(task.id); }} title="Start Focus Session">
-                <Brain className="h-4 w-4" />
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-amber-500/10 hover:text-amber-500"
+                onClick={(e) => { e.stopPropagation(); startFocusTimer(task.id); }}
+                title="Start Focus Session"
+                aria-label="Start focus session for this task"
+              >
+                <Zap className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon-sm" className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-primary/10 hover:text-primary" onClick={(e) => { e.stopPropagation(); openEditTask(task.id); }} aria-label="Edit task">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-primary/10 hover:text-primary"
+                onClick={(e) => { e.stopPropagation(); openEditTask(task.id); }}
+                aria-label="Edit task"
+              >
                 <ChevronRight className="h-5 w-5" />
               </Button>
             </div>

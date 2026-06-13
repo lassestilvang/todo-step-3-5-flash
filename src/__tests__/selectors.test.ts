@@ -189,7 +189,6 @@ describe('getFilteredTasks', () => {
     });
 
     it('should sort by priority within same status', () => {
-      const pendingTasks = tasks.filter((t) => t.status === 'pending');
       const result = getFilteredTasks(tasks, 'all', null, null, true, '');
       const pendingResult = result.filter((t) => t.status === 'pending');
       expect(pendingResult.map((t) => t.priority)).toEqual(['high', 'low', 'none']);

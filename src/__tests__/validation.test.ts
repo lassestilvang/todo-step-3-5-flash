@@ -70,6 +70,7 @@ describe('validation', () => {
     });
 
     it('should reject invalid status', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = updateTaskSchema.safeParse({ status: 'invalid' as any });
       expect(result.success).toBe(false);
     });

@@ -18,7 +18,7 @@ const fanPlugins = {
 const rawConfig = [
   ...nextVitals,
   ...nextTs,
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'commitlint.config.*']),
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'coverage/**', 'next-env.d.ts', 'commitlint.config.*']),
   {
     files: ['**/*.{ts,tsx}', '!src/__tests__/**'],
     languageOptions: {

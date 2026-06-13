@@ -117,8 +117,6 @@ function SortableTaskCard({ task }: { task: Task }) {
 
 export function TaskBoard({ tasks }: { tasks: Task[] }) {
   const updateTask = useStore((s) => s.updateTask);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  void updateTask; // Used in handleDragEnd
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -159,7 +157,7 @@ export function TaskBoard({ tasks }: { tasks: Task[] }) {
     }
 
     if (newStatus !== activeTask.status) {
-      void updateTask(activeTaskId, { status: newStatus } as { status: TaskStatus });
+      void updateTask(activeTaskId, { status: newStatus });
     }
   }
 

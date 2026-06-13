@@ -57,13 +57,15 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const completedCount = useMemo(() => tasks.filter(t => t.status === 'completed').length, [tasks]);
 
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { pending: 0, in_progress: 0, completed: 0 };
+    let pending = 0;
+    let inProgress = 0;
+    let completed = 0;
     for (const t of tasks) {
-      if (t.status && t.status in counts) {
-        counts[t.status]++;
-      }
+      if (t.status === 'pending') pending++;
+      else if (t.status === 'in_progress') inProgress++;
+      else if (t.status === 'completed') completed++;
     }
-    return counts;
+    return { pending, in_progress: inProgress, completed };
   }, [tasks]);
 
   const handleDeleteList = (e: React.MouseEvent, id: string) => {

@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns';
 import { CalendarIcon, Clock, Repeat } from 'lucide-react';
-import type { FieldValues, UseFormReturn } from 'react-hook-form';
+import type { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -27,8 +27,8 @@ export function TaskScheduleFields<T extends FieldValues>({ form }: TaskSchedule
 
       <div className="grid grid-cols-2 gap-4">
         <FormField
-          control={form.control as unknown as { name: string }}
-          name="dueDate"
+          control={form.control}
+          name={'dueDate' as Path<T>}
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">Start Date</FormLabel>
@@ -56,8 +56,8 @@ export function TaskScheduleFields<T extends FieldValues>({ form }: TaskSchedule
         />
 
         <FormField
-          control={form.control as unknown as { name: string }}
-          name="estimateMinutes"
+          control={form.control}
+          name={'estimateMinutes' as Path<T>}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">Est. Time (min)</FormLabel>
@@ -79,8 +79,8 @@ export function TaskScheduleFields<T extends FieldValues>({ form }: TaskSchedule
       </div>
 
       <FormField
-        control={form.control as unknown as { name: string }}
-        name="recurrence"
+        control={form.control}
+        name={'recurrence' as Path<T>}
         render={({ field }) => (
           <FormItem>
             <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60 flex items-center gap-1">

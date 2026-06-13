@@ -1,6 +1,6 @@
 'use client';
 
-import { Hash, Flag, X, Plus } from 'lucide-react';
+import { Hash, Flag, Plus, X } from 'lucide-react';
 import type { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
 import { Badge } from '@/components/ui/badge';
@@ -32,7 +32,7 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
       <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="listId"
+          name={'listId' as Path<T>}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">List</FormLabel>
@@ -58,7 +58,7 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
 
         <FormField
           control={form.control}
-          name="priority"
+          name={'priority' as Path<T>}
           render={({ field }) => (
             <FormItem>
               <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">Priority</FormLabel>
@@ -100,8 +100,9 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                 <button
                   type="button"
                   onClick={() => {
-                    const current = form.getValues('labelIds' as Path<T>) || [];
-                    form.setValue('labelIds' as Path<T>, current.filter((id: string) => id !== labelId));
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const current = form.getValues('labelIds' as Path<T>) as any;
+                    form.setValue('labelIds' as Path<T>, current.filter((id: string) => id !== labelId) as any);
                   }}
                   className="ml-1 p-0.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
                 >
@@ -125,8 +126,9 @@ export function TaskCategorizationFields<T extends FieldValues>({ form, lists, l
                     key={label.id}
                     className="rounded-lg"
                     onClick={() => {
-                      const current = form.getValues('labelIds' as Path<T>) || [];
-                      form.setValue('labelIds' as Path<T>, [...current, label.id]);
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      const current = form.getValues('labelIds' as Path<T>) as any;
+                      form.setValue('labelIds' as Path<T>, [...current, label.id] as any);
                     }}
                   >
                     <span className="mr-2">{label.icon}</span>

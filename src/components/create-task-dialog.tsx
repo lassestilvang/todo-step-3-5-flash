@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Paperclip, LoaderCircle } from 'lucide-react';
-import { useState, useMemo, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -16,15 +16,17 @@ import { useStore } from '@/store';
 import type { Task } from '@/types';
 
 import { TaskBasicFields } from './task-basic-fields';
+import { TaskCategorizationFields } from './task-categorization-fields';
+import { TaskScheduleFields } from './task-schedule-fields';
+import { TaskSubtasksEditor } from './task-subtasks-editor';
+
+import type { Subtask } from '@/types';
 
 interface SubtaskType {
   id?: string;
   title: string;
-  completed?: boolean;
+  completed: boolean;
 }
-import { TaskCategorizationFields } from './task-categorization-fields';
-import { TaskScheduleFields } from './task-schedule-fields';
-import { TaskSubtasksEditor } from './task-subtasks-editor';
 
 const RECURRENCE_VALUES = ['daily', 'weekly', 'weekday', 'monthly', 'yearly', 'custom'] as const;
 
@@ -76,7 +78,6 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const selectedListId = useStore((s) => s.selectedListId);
   const tasks = useStore((s) => s.tasks);
   const addTask = useStore((s) => s.addTask);
-  const updateTask = useStore((s) => s.updateTask);
 
   const isEditing = !!editTaskId;
   const editTask = useMemo(
@@ -221,7 +222,7 @@ async function submitEditTask(
 
   const deletePromises = existingSubtasks
     .filter((st) => !subtasks.some((s) => s.id === st.id))
-    .map((st) => actions.deleteSubtaskAction(st.id));
+    .map((st) => actions.deleteSubtaskAction(st.id!));
   await Promise.all(deletePromises);
 
   const subtaskPromises = subtasks.map(async (st, i) => {

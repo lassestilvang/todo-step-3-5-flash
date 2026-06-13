@@ -48,7 +48,7 @@ export interface AppState {
   closeTaskModal: () => void;
   clearError: () => void;
   addTask: (data: CreateTaskData) => Promise<Task | null>;
-  updateTask: (id: string, data: Partial<CreateTaskData>) => Promise<void>;
+  updateTask: (id: string, data: Partial<CreateTaskData> & { status?: Task['status'] }) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   toggleTaskComplete: (id: string, status?: Task['status']) => Promise<void>;
   addSubtask: (taskId: string, title: string) => Promise<void>;

@@ -1,6 +1,6 @@
 'use client';
 
-import { LayoutList, Calendar, CalendarDays, Sparkles } from 'lucide-react';
+import { LayoutList, Calendar, CalendarDays, Sparkles, LayoutGrid } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,6 +15,7 @@ export function ViewToggle() {
       { id: 'today' as const, label: 'Today', icon: Calendar },
       { id: 'week' as const, label: 'Week', icon: CalendarDays },
       { id: 'upcoming' as const, label: 'Upcoming', icon: Sparkles },
+      { id: 'board' as const, label: 'Board', icon: LayoutGrid },
       { id: 'all' as const, label: 'All', icon: LayoutList },
     ],
     []

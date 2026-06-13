@@ -14,6 +14,7 @@ import { SearchBar } from '@/components/search-bar';
 import { Sidebar } from '@/components/sidebar';
 import { TaskDetailSheet } from '@/components/task-detail-sheet';
 import { TaskList } from '@/components/task-list';
+import { TaskStatistics } from '@/components/task-statistics';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -241,10 +242,10 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Task List */}
+        {/* Task List or Statistics */}
         <ScrollArea className="flex-1 px-4 md:px-8">
           <div className="max-w-5xl mx-auto pb-24">
-            <TaskList />
+            {currentView === 'statistics' ? <TaskStatistics /> : <TaskList />}
           </div>
           <ScrollBar />
         </ScrollArea>

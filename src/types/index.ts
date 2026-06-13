@@ -1,7 +1,7 @@
 export type Priority = 'none' | 'low' | 'medium' | 'high';
 export type RecurrenceType = 'daily' | 'weekly' | 'weekday' | 'monthly' | 'yearly' | 'custom';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed';
-export type ViewType = 'today' | 'week' | 'upcoming' | 'all' | 'board' | 'in_progress';
+export type ViewType = 'today' | 'week' | 'upcoming' | 'all' | 'board' | 'in_progress' | 'statistics';
 
 export interface Label {
   id: string;

@@ -9,10 +9,22 @@ const getRandomQuote = () => QUOTES[Math.floor(Math.random() * QUOTES.length)];
 export function EmptyState({ isFiltered }: { isFiltered: boolean }) {
   const openCreateTask = useStore((s) => s.openCreateTask);
   const setSearchQuery = useStore((s) => s.setSearchQuery);
+  const currentView = useStore((s) => s.currentView);
 
   const handleCreateClick = () => openCreateTask();
 
   const quote = useMemo(() => getRandomQuote(), []);
+
+  const getTitle = () => {
+    if (isFiltered) return 'No tasks match your filters';
+    switch (currentView) {
+      case 'today': return 'All caught up for today!';
+      case 'week': return 'No tasks this week';
+      case 'in_progress': return 'No tasks in progress';
+      case 'completed': return 'No completed tasks yet';
+      default: return 'You are all caught up!';
+    }
+  };
 
   return (
     <motion.div
@@ -39,7 +51,7 @@ export function EmptyState({ isFiltered }: { isFiltered: boolean }) {
         animate={{ opacity: 1, y: 0 }}
         className="text-xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent"
       >
-        {isFiltered ? 'No tasks match your filters' : 'You are all caught up!'}
+        {getTitle()}
       </motion.h3>
       <motion.p
         initial={{ opacity: 0, y: 10 }}

@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, max-lines */
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
+// Mock Audio for playSound calls
+class MockAudio {
+  volume = 1;
+  play = () => Promise.resolve();
+  pause = () => {};
+}
+global.Audio = MockAudio as any;
+
 // Mock zustand persist middleware to avoid localStorage issues in tests
 vi.mock('zustand/middleware', () => ({
   persist: (config: any, _options: any) => (set: any, get: any) => {
@@ -84,12 +92,22 @@ const initialState = {
   overdueCount: 0,
   currentView: 'today' as const,
   selectedListId: null as string | null,
+  statusFilter: null as Task['status'] | null,
   searchQuery: '',
   showCompleted: false,
   selectedTaskId: null as string | null,
   isCreateTaskOpen: false,
   editTaskId: null as string | null,
   theme: 'system',
+  brandColor: 'oklch(0.55 0.25 260)',
+  focusTimer: {
+    timeLeft: 25 * 60,
+    isActive: false,
+    mode: 'work',
+    taskId: null,
+  },
+  loading: false,
+  error: null,
 };
 
 beforeEach(() => {
@@ -516,5 +534,142 @@ describe('Getters', () => {
     const t2 = createSampleTask({ id: 't2' });
     useStore.setState({ tasks: [t1, t2], currentView: 'all', selectedListId: null, statusFilter: null, showCompleted: true, searchQuery: '' });
     expect(getFilteredTasks([t1, t2], 'all', null, null, true, '')).toEqual([t1, t2]);
+  });
+});
+
+describe('Focus Timer Actions', () => {
+  it('startFocusTimer should set isActive to true and assign taskId', () => {
+    useStore.getState().startFocusTimer('task-123');
+    const state = useStore.getState();
+    expect(state.focusTimer.isActive).toBe(true);
+    expect(state.focusTimer.taskId).toBe('task-123');
+  });
+
+  it('startFocusTimer should fallback to selectedTaskId if no taskId provided', () => {
+    useStore.setState({ selectedTaskId: 'task-456' });
+    useStore.getState().startFocusTimer(null as any);
+    expect(useStore.getState().focusTimer.taskId).toBe('task-456');
+  });
+
+  it('pauseFocusTimer should set isActive to false', () => {
+    useStore.getState().startFocusTimer('task-1');
+    useStore.getState().pauseFocusTimer();
+    expect(useStore.getState().focusTimer.isActive).toBe(false);
+  });
+
+  it('resetFocusTimer should set isActive to false and reset timeLeft based on mode', () => {
+    useStore.getState().setFocusMode('work');
+    useStore.getState().startFocusTimer('task-1');
+    useStore.getState().tickFocusTimer(); // tick once
+    expect(useStore.getState().focusTimer.timeLeft).toBe(25 * 60 - 1);
+
+    useStore.getState().resetFocusTimer();
+    expect(useStore.getState().focusTimer.isActive).toBe(false);
+    expect(useStore.getState().focusTimer.timeLeft).toBe(25 * 60);
+  });
+
+  it('resetFocusTimer should use break duration for break mode', () => {
+    useStore.getState().setFocusMode('break');
+    useStore.getState().resetFocusTimer();
+    expect(useStore.getState().focusTimer.timeLeft).toBe(5 * 60);
+  });
+
+  it('tickFocusTimer should decrement timeLeft when active', () => {
+    useStore.getState().setFocusMode('work');
+    useStore.getState().startFocusTimer('task-1');
+    const initialTime = useStore.getState().focusTimer.timeLeft;
+
+    useStore.getState().tickFocusTimer();
+
+    expect(useStore.getState().focusTimer.timeLeft).toBe(initialTime - 1);
+  });
+
+  it('tickFocusTimer should not decrement when not active', () => {
+    useStore.getState().focusTimer.isActive = false;
+    const timeLeft = useStore.getState().focusTimer.timeLeft;
+
+    useStore.getState().tickFocusTimer();
+
+    expect(useStore.getState().focusTimer.timeLeft).toBe(timeLeft);
+  });
+
+  it('tickFocusTimer should switch modes when timeLeft reaches 0', () => {
+    useStore.getState().setFocusMode('work');
+    useStore.getState().startFocusTimer('task-1');
+    useStore.getState().focusTimer.timeLeft = 0;
+
+    useStore.getState().tickFocusTimer();
+
+    expect(useStore.getState().focusTimer.mode).toBe('break');
+    expect(useStore.getState().focusTimer.timeLeft).toBe(5 * 60);
+  });
+
+  it('tickFocusTimer should switch from break to work', () => {
+    useStore.getState().setFocusMode('break');
+    useStore.getState().startFocusTimer('task-1');
+    useStore.getState().focusTimer.timeLeft = 0;
+
+    useStore.getState().tickFocusTimer();
+
+    expect(useStore.getState().focusTimer.mode).toBe('work');
+    expect(useStore.getState().focusTimer.timeLeft).toBe(25 * 60);
+  });
+
+  it('setFocusMode should update mode and reset timeLeft', () => {
+    useStore.getState().setFocusMode('break');
+    expect(useStore.getState().focusTimer.mode).toBe('break');
+    expect(useStore.getState().focusTimer.timeLeft).toBe(5 * 60);
+    expect(useStore.getState().focusTimer.isActive).toBe(false);
+  });
+});
+
+describe('setStatusFilter', () => {
+  it('should set statusFilter to the provided value', () => {
+    useStore.getState().setStatusFilter('completed');
+    expect(useStore.getState().statusFilter).toBe('completed');
+  });
+
+  it('should allow setting statusFilter to null', () => {
+    useStore.getState().setStatusFilter('in_progress');
+    expect(useStore.getState().statusFilter).toBe('in_progress');
+    useStore.getState().setStatusFilter(null);
+    expect(useStore.getState().statusFilter).toBeNull();
+  });
+});
+
+describe('setBrandColor', () => {
+  it('should update brandColor', () => {
+    useStore.getState().setBrandColor('#ff0000');
+    expect(useStore.getState().brandColor).toBe('#ff0000');
+  });
+});
+
+describe('clearError', () => {
+  it('should clear the error state', () => {
+    useStore.setState({ error: 'Test error' });
+    expect(useStore.getState().error).toBe('Test error');
+
+    useStore.getState().clearError();
+    expect(useStore.getState().error).toBeNull();
+  });
+});
+
+describe('loadData error handling', () => {
+  it('should set error and loading states when loadAppData fails', async () => {
+    (actions.loadAppData as any).mockRejectedValue(new Error('Network error'));
+
+    await useStore.getState().loadData();
+
+    const state = useStore.getState();
+    expect(state.error).toBe('Network error');
+    expect(state.loading).toBe(false);
+  });
+
+  it('should handle non-Error rejection', async () => {
+    (actions.loadAppData as any).mockRejectedValue('Something went wrong');
+
+    await useStore.getState().loadData();
+
+    expect(useStore.getState().error).toBe('Failed to load data');
   });
 });

@@ -419,3 +419,85 @@ describe('Label Actions (proxies)', () => {
     expect(db.getLabelById(label.id)).toBeNull();
   });
 });
+
+describe('Subtask Actions (error paths)', () => {
+  it('updateSubtaskAction returns null for non-existent subtask', async () => {
+    const result = await actions.updateSubtaskAction('nonexistent', { title: 'New' });
+    expect(result).toBeNull();
+  });
+});
+
+describe('Task Actions with validation errors', () => {
+  it('createTaskAction should throw for invalid data', async () => {
+    await expect(
+      actions.createTaskAction({ listId: '', title: '' } as any)
+    ).rejects.toThrow();
+  });
+
+  it('updateTaskAction should throw for invalid data', async () => {
+    await expect(
+      actions.updateTaskAction('task-1', { title: '' })
+    ).rejects.toThrow();
+  });
+});
+
+describe('toggleTaskCompleteAction', () => {
+  it('should toggle task status', async () => {
+    const task = db.createTask({ list_id: 'inbox', title: 'Toggle' });
+    const result = await actions.toggleTaskCompleteAction(task.id);
+    expect(result?.status).toBe('completed');
+
+    const result2 = await actions.toggleTaskCompleteAction(task.id);
+    expect(result2?.status).toBe('pending');
+  });
+
+  it('should throw for non-existent task', async () => {
+    await expect(actions.toggleTaskCompleteAction('nonexistent')).rejects.toThrow();
+  });
+});
+
+describe('deleteCompletedTasksAction', () => {
+  it('should return deleted count', async () => {
+    const result = await actions.deleteCompletedTasksAction();
+    expect(typeof result.deleted).toBe('number');
+  });
+});
+
+describe('Label error handling', () => {
+  it('createLabelAction should throw for invalid color', async () => {
+    await expect(actions.createLabelAction('Test', 'invalid-color')).rejects.toThrow();
+  });
+});
+
+describe('List error handling', () => {
+  it('createListAction should throw for invalid color', async () => {
+    await expect(actions.createListAction({ name: 'Test', color: 'invalid' })).rejects.toThrow();
+  });
+});
+
+describe('Task error handling', () => {
+  it('updateTaskAction should throw for invalid title', async () => {
+    await expect(actions.updateTaskAction('task-1', { title: '' })).rejects.toThrow();
+  });
+});
+
+describe('Database constraint errors', () => {
+  it('createLabelAction should throw for duplicate name', async () => {
+    // First create a label
+    await actions.createLabelAction('UniqueLabel', '#ff0000');
+    // Try to create another with the same name - should fail unique constraint
+    await expect(actions.createLabelAction('UniqueLabel', '#00ff00')).rejects.toThrow();
+  });
+});
+
+describe('deleteSubtaskAction', () => {
+  it('deleteSubtaskAction should work for existing subtask', async () => {
+    const task = db.createTask({ list_id: 'inbox', title: 'Parent' });
+    const subtask = db.createSubtask({ task_id: task.id, title: 'ToDelete' });
+
+    const result = await actions.deleteSubtaskAction(subtask.id);
+
+    expect(result).toBeDefined();
+    expect(result.id).toBe(subtask.id);
+  });
+});

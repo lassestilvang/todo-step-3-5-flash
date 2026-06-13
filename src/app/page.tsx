@@ -1,8 +1,9 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { PanelLeft, Sparkles, CheckCircle2, Trophy } from 'lucide-react';
+import { PanelLeft, Sparkles, CheckCircle2, Trophy, Calendar } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
+import { format } from 'date-fns';
 
 import { CreateTaskDialog } from '@/components/create-task-dialog';
 import { FocusTimer } from '@/components/focus-timer';
@@ -149,9 +150,15 @@ export default function HomePage() {
                   <Sparkles className="h-4 w-4 text-amber-500" />
                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Personal Workspace</span>
                 </motion.div>
-                <h2 className="text-3xl md:text-5xl font-black tracking-tight">
-                  {VIEW_LABELS[currentView] || currentView}
-                </h2>
+                <div className="flex items-center gap-3">
+                  <h2 className="text-3xl md:text-5xl font-black tracking-tight">
+                    {VIEW_LABELS[currentView] || currentView}
+                  </h2>
+                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted/30 text-sm text-muted-foreground">
+                    <Calendar className="h-4 w-4" />
+                    <span>{format(new Date(), 'EEEE, MMMM d')}</span>
+                  </div>
+                </div>
                 <div className="flex items-center gap-3 mt-2">
                   <p className="text-sm font-medium text-muted-foreground">
                     {productivityStats.total} tasks active

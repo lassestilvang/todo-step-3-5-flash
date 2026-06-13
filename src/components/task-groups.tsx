@@ -46,10 +46,11 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
     if (isInput) return;
     const isModifier = e.metaKey || e.ctrlKey;
 
-    if (e.key === 'j' && !isModifier) {
+    // Only handle navigation when Shift is pressed to avoid conflict with search
+    if (e.key === 'j' && isModifier) {
       e.preventDefault();
       handleNext();
-    } else if (e.key === 'k' && !isModifier) {
+    } else if (e.key === 'k' && isModifier) {
       e.preventDefault();
       handlePrev();
     } else if (e.key === 'x' && !isModifier) {

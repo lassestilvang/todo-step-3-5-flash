@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Form } from '@/components/ui/form';
 import { INBOX_LIST_ID } from '@/constants';
 import { useStore } from '@/store';
-import type { Subtask } from '@/types';
+import type { Subtask as SubtaskType, Task } from '@/types';
 
 import { TaskBasicFields } from './task-basic-fields';
 import { TaskCategorizationFields } from './task-categorization-fields';
@@ -37,7 +37,7 @@ type TaskFormData = z.infer<typeof taskSchema>;
 
 function getFormDefaults(
   isEditing: boolean,
-  editTask: { title: string; description?: string; listId: string; dueDate?: Date; deadline?: Date; estimateMinutes?: number; priority: string; recurrence?: string; labels?: { id: string }[] } | null,
+  editTask: Task | null,
   listDefault: string
 ): TaskFormData {
   if (!isEditing || !editTask) {
@@ -80,9 +80,9 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     [isEditing, editTaskId, tasks]
   );
 
-  const [subtasks, setSubtasks] = useState<Subtask[]>(() => {
+  const [subtasks, setSubtasks] = useState<SubtaskType[]>(() => {
     if (isEditing && editTask) {
-      return editTask.subtasks.map((s) => ({ id: s.id, title: s.title, completed: s.completed }));
+      return editTask.subtasks;
     }
     return [];
   });
@@ -169,8 +169,8 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
 async function submitEditTask(
   editTaskId: string,
   data: TaskFormData,
-  subtasks: Subtask[],
-  tasks: { id: string; subtasks: Subtask[] }[]
+  subtasks: SubtaskType[],
+  tasks: { id: string; subtasks: SubtaskType[] }[]
 ) {
   await actions.updateTaskAction(editTaskId, {
     title: data.title,
@@ -206,7 +206,7 @@ async function submitEditTask(
   await Promise.all(subtaskPromises);
 }
 
-async function submitNewTask(data: TaskFormData, subtasks: Subtask[], addTask: (d: TaskFormData) => Promise<unknown>) {
+async function submitNewTask(data: TaskFormData, subtasks: SubtaskType[], addTask: (d: TaskFormData) => Promise<unknown>) {
   const newTask = await addTask({
     title: data.title,
     description: data.description,

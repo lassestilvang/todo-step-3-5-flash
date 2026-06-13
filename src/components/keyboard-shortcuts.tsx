@@ -81,7 +81,10 @@ export function KeyboardShortcuts() {
         onToggleShortcuts: () => setIsOpen((prev) => !prev),
         onClose: () => setIsOpen(false),
         onCreateTask: openCreateTask,
-        onFocusSearch: () => document.querySelector('input[placeholder*="Search"]')?.focus(),
+        onFocusSearch: () => {
+          const el = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement | null;
+          el?.focus();
+        },
         onToggleCompleted: toggleShowCompleted,
         onToggleSidebar: () => setIsOpen((prev) => !prev),
         onMagicSort: magicSortTasks,

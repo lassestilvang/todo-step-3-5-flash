@@ -104,7 +104,7 @@ export function TaskCategorizationFields({ form, lists, labels, selectedLabelIds
                   type="button"
                   onClick={() => {
                     const current = form.getValues('labelIds') || [];
-                    form.setValue('labelIds', current.filter((id) => id !== labelId));
+                    form.setValue('labelIds', current.filter((id: string) => id !== labelId));
                   }}
                   className="ml-1 p-0.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
                 >

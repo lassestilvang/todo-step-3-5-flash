@@ -14,29 +14,9 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { DATE_FORMATS, STRINGS } from '@/constants';
 import { cn } from '@/lib/utils';
+import { getMagicBreakdownSuggestions } from '@/lib/magic-breakdown';
 import { useStore } from '@/store';
 import type { Task } from '@/types';
-
-function getMagicBreakdownSuggestions(title: string): string[] {
-  const lowerTitle = title.toLowerCase();
-
-  if (lowerTitle.includes('meeting')) {
-    return ['Prepare agenda', 'Take notes', 'Send follow-up email'];
-  }
-  if (lowerTitle.includes('project')) {
-    return ['Define objectives', 'Draft roadmap', 'Review with stakeholders'];
-  }
-  if (lowerTitle.includes('learn') || lowerTitle.includes('study')) {
-    return ['Find resources', 'Take notes', 'Practice exercise'];
-  }
-  if (lowerTitle.includes('clean') || lowerTitle.includes('house')) {
-    return ['Gather supplies', 'Focus on one room', 'Organize belongings'];
-  }
-  if (lowerTitle.includes('buy') || lowerTitle.includes('shop')) {
-    return ['Check inventory', 'Compare prices', 'Make a list'];
-  }
-  return ['Analyze requirements', 'Break into steps', 'Set initial milestone'];
-}
 
 function ReminderSection({ reminders }: { reminders: Task['reminders'] }) {
   if (!reminders || reminders.length === 0) {

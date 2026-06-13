@@ -35,20 +35,13 @@ export function SearchBar() {
     icon: string;
   }
   
-  const fuse = useMemo(
-    () =>
-      new Fuse<SearchableTask>([], {
-        keys: ['title', 'description', 'listName'],
-        threshold: 0.3,
-        includeScore: true,
-      }),
-    []
-  );
+  const fuse = useMemo(() => new Fuse<SearchableTask>(searchableTasks, {
+    keys: ['title', 'description', 'listName'],
+    threshold: 0.3,
+    includeScore: true,
+  }), [searchableTasks]);
 
-  useEffect(() => {
-    fuse.setCollection(searchableTasks);
-  }, [fuse, searchableTasks]);
-
+  
   const fastFilter = useMemo(
     () => (query: string, data: SearchableTask[]): SearchableTask[] => {
       if (query.length <= 2) {

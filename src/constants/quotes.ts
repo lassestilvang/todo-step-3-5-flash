@@ -24,4 +24,7 @@ export const QUOTES = [
   "Quality means doing it right when no one is looking.",
   "The hardest battle is fighting against laziness.",
   "One hour of work produces many of the best results.",
+  "The journey of a thousand miles begins with one step.",
+  "Consistency beats talent when talent doesn't work consistently.",
+  "Your potential is endless. Your possibilities are infinite.",
 ];

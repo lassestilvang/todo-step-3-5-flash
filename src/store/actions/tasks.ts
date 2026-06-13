@@ -39,21 +39,21 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
       });
     },
 
-    toggleTaskComplete: async (id: string): Promise<void> => {
+    toggleTaskComplete: async (id: string, status?: Task['status']): Promise<void> => {
       const prevTask = get().tasks.find((t: Task) => t.id === id);
       if (!prevTask) return;
 
-      const optimisticStatus = prevTask.status === 'completed' ? 'pending' : 'completed';
+      const newStatus = status ?? (prevTask.status === 'completed' ? 'pending' : 'completed');
 
       set((state: AppState) => {
         const tasks = state.tasks.map((t: Task) =>
-          t.id === id ? ({ ...t, status: optimisticStatus } as Task) : t
+          t.id === id ? ({ ...t, status: newStatus } as Task) : t
         );
         return { tasks, overdueCount: computeOverdue(tasks) };
       });
 
       try {
-        const updated = await actions.toggleTaskCompleteAction(id);
+        const updated = await actions.updateTaskAction(id, { status: newStatus });
         if (updated) {
           if (updated.status === 'completed') {
             playSound('complete');

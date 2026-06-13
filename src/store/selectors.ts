@@ -11,6 +11,7 @@ export function computeOverdue(tasks: Task[]): number {
 
 export function taskMatchesView(task: Task, view: ViewType): boolean {
   if (view === 'all') return true;
+  if (view === 'in_progress') return task.status === 'in_progress';
   if (!task.dueDate && !task.deadline) return false;
 
   const due = task.dueDate || task.deadline!;

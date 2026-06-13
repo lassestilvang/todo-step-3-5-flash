@@ -321,6 +321,17 @@ describe('Task Actions (proxies)', () => {
     expect(updated?.title).toBe('Updated');
   });
 
+  it('updateTaskAction should update task status', async () => {
+    const task = db.createTask({ list_id: 'inbox', title: 'Status Test' });
+    await actions.updateTaskAction(task.id, { status: 'in_progress' });
+    let updated = db.getTaskById(task.id);
+    expect(updated?.status).toBe('in_progress');
+
+    await actions.updateTaskAction(task.id, { status: 'completed' });
+    updated = db.getTaskById(task.id);
+    expect(updated?.status).toBe('completed');
+  });
+
   it('deleteTaskAction should delete task', async () => {
     const task = db.createTask({ list_id: 'inbox', title: 'Delete' });
     await actions.deleteTaskAction(task.id);

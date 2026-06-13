@@ -49,7 +49,7 @@ export async function createTaskAction(data: CreateTaskData) {
   }
 }
 
-export async function updateTaskAction(id: string, data: Partial<CreateTaskData>) {
+export async function updateTaskAction(id: string, data: Partial<CreateTaskData> & { status?: string }) {
   try {
     const parsed = updateTaskSchema.parse(data);
     type UpdateKey =
@@ -79,6 +79,9 @@ export async function updateTaskAction(id: string, data: Partial<CreateTaskData>
       if (value !== undefined) {
         updateData[dbKey] = value;
       }
+    }
+    if (parsed.status !== undefined) {
+      updateData.status = parsed.status;
     }
     const result = updateTask(id, updateData as Parameters<typeof updateTask>[1]);
     if (!result) return null;

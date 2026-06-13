@@ -98,7 +98,7 @@ describe('TaskCard', () => {
     const checkbox = screen.getByRole('checkbox');
     fireEvent.click(checkbox);
 
-    expect(mockToggleTaskComplete).toHaveBeenCalledWith('task-1');
+    expect(mockToggleTaskComplete).toHaveBeenCalledWith('task-1', 'completed');
   });
 
   it('calls openEditTask when edit button is clicked', () => {

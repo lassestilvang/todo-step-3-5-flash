@@ -2,7 +2,7 @@
 
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Clock, ChevronRight, AlertTriangle, GripVertical, Brain } from 'lucide-react';
+import { Clock, ChevronRight, AlertTriangle, GripVertical, Brain, Play, PauseCircle } from 'lucide-react';
 import React from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { PRIORITY_LABELS, DATE_FORMATS, STRINGS } from '@/constants';
 import { cn, formatDuration } from '@/lib/utils';
 import { useStore } from '@/store';
-import type { Task, Priority } from '@/types';
+import type { Task, Priority, TaskStatus } from '@/types';
 
 interface TaskCardProps {
   task: Task;
@@ -21,23 +21,31 @@ const TaskCheckbox = React.memo(function TaskCheckbox({
   toggleTaskComplete,
 }: {
   task: Task;
-  toggleTaskComplete: (id: string) => Promise<void> | void;
+  toggleTaskComplete: (id: string, status?: Task['status']) => Promise<void> | void;
 }) {
+  const isCompleted = task.status === 'completed';
+  const isInProgress = task.status === 'in_progress';
+
   return (
     <div className="relative flex items-center justify-center">
       <Checkbox
-        checked={task.status === 'completed'}
+        checked={isCompleted}
         onCheckedChange={() => {
-          void toggleTaskComplete(task.id);
+          void toggleTaskComplete(task.id, isCompleted ? 'pending' : 'completed');
         }}
-        aria-label={task.status === 'completed' ? 'Mark as incomplete' : 'Mark as complete'}
+        aria-label={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
         className={cn(
           'h-6 w-6 rounded-full transition-all duration-300 border-2',
-          task.status === 'completed'
+          isCompleted
             ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/20'
+            : isInProgress
+            ? 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-500/20'
             : 'border-muted-foreground/30 hover:border-primary bg-background'
         )}
       />
+      {isInProgress && (
+        <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full animate-pulse" />
+      )}
     </div>
   );
 });
@@ -47,7 +55,8 @@ const TaskTitle = React.memo(function TaskTitle({ task }: { task: Task }) {
     <h4
       className={cn(
         'text-base font-semibold leading-tight transition-all duration-300',
-        task.status === 'completed' ? 'line-through text-muted-foreground/60' : 'text-foreground'
+        task.status === 'completed' ? 'line-through text-muted-foreground/60' : 'text-foreground',
+        task.status === 'in_progress' && 'text-amber-600'
       )}
     >
       {task.title}
@@ -167,21 +176,49 @@ function TaskMeta({
         <span className="text-sm leading-none">{task.list?.icon}</span>
         {task.list?.name}
       </div>
-      
+
       <DueDateBadge due={due} isOverdue={isOverdue} />
       <PriorityBadge priority={task.priority} />
-      
+
       {(task.estimateMinutes ?? 0) > 0 && (
         <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground uppercase">
           <Clock className="h-3 w-3" />
           {formatDuration(task.estimateMinutes!)}
         </div>
       )}
-      
+
       <LabelsList labels={task.labels} />
       <div className="flex-1" />
       <SubtasksProgress subtasks={task.subtasks} status={task.status} />
     </div>
+  );
+}
+
+const STATUS_ORDER: TaskStatus[] = ['pending', 'in_progress', 'completed'];
+
+function StatusCycleButton({ task, onCycle, stopPropagation }: { task: Task; onCycle: (id: string, status: Task['status']) => void; stopPropagation: (e: React.MouseEvent) => void }) {
+  const nextStatus = task.status === 'pending' ? 'in_progress' : 'completed';
+  const statusConfig = {
+    pending: { label: 'Start', icon: Play, color: 'text-blue-500' },
+    in_progress: { label: 'Complete', icon: PauseCircle, color: 'text-amber-500' },
+    completed: { label: 'Reset', icon: Clock, color: 'text-green-500' },
+  };
+  const config = statusConfig[task.status] || statusConfig.pending;
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      className="opacity-0 group-hover:opacity-100 transition-all rounded-xl hover:bg-primary/10 hover:text-primary"
+      onClick={(e) => {
+        e.stopPropagation();
+        onCycle(task.id, nextStatus);
+      }}
+      title={`Mark as ${nextStatus.replace('_', ' ')}`}
+      aria-label={`Mark as ${nextStatus.replace('_', ' ')}`}
+    >
+      <config.icon className="h-4 w-4" />
+    </Button>
   );
 }
 
@@ -207,6 +244,12 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
       e.stopPropagation();
       openEditTask(task.id);
     }
+    if (e.key === 's' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+      e.preventDefault();
+      e.stopPropagation();
+      const nextStatus = task.status === 'pending' ? 'in_progress' : 'completed';
+      void toggleTaskComplete(task.id, nextStatus);
+    }
   };
 
   return (
@@ -223,6 +266,7 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
         'hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-primary/20',
         'dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]',
         task.status === 'completed' && 'bg-muted/30 opacity-60 grayscale-[0.5]',
+        task.status === 'in_progress' && 'border-amber-500/50 bg-amber-500/[0.03]',
         isSelected && 'ring-2 ring-primary ring-offset-4 ring-offset-background z-10',
         isOverdue && 'border-red-500/50 bg-red-500/[0.02]'
       )}
@@ -240,8 +284,13 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
               <TaskTitle task={task} />
               <TaskDescription task={task} />
             </div>
-            
+
             <div className="flex items-center gap-1">
+              <StatusCycleButton
+                task={task}
+                onCycle={(id, status) => void toggleTaskComplete(id, status)}
+                stopPropagation={(e) => e.stopPropagation()}
+              />
               <Button
                 variant="ghost"
                 size="icon-sm"
@@ -254,7 +303,7 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
               >
                 <Brain className="h-4 w-4" />
               </Button>
-              
+
               <Button
                 variant="ghost"
                 size="icon-sm"

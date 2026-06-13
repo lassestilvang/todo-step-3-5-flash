@@ -40,6 +40,7 @@ export const updateTaskSchema = z
     ...taskCommonFields,
     listId: z.string().min(1).optional(),
     title: z.string().min(1).max(200).optional(),
+    status: z.enum(['pending', 'in_progress', 'completed']).optional(),
   })
   .partial()
   .refine(deadlineAfterDueDate, {

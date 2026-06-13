@@ -298,11 +298,11 @@ describe('Task Actions', () => {
   });
 
   describe('toggleTaskComplete', () => {
-    it('should call toggleTaskCompleteAction and loadData', async () => {
+    it('should call updateTaskAction and loadData', async () => {
       const task = createSampleTask({ id: 'task-1' });
       useStore.setState({ tasks: [task] });
 
-      (actions.toggleTaskCompleteAction as any).mockResolvedValue({});
+      (actions.updateTaskAction as any).mockResolvedValue({});
       (actions.loadAppData as any).mockResolvedValue({
         tasks: [],
         lists: [],
@@ -312,7 +312,7 @@ describe('Task Actions', () => {
 
       await useStore.getState().toggleTaskComplete('task-1');
 
-      expect(actions.toggleTaskCompleteAction).toHaveBeenCalledWith('task-1');
+      expect(actions.updateTaskAction).toHaveBeenCalledWith('task-1', { status: 'completed' });
     });
   });
 

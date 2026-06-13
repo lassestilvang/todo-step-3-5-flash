@@ -49,7 +49,7 @@ export interface AppState {
   addTask: (data: CreateTaskData) => Promise<Task | null>;
   updateTask: (id: string, data: Partial<CreateTaskData>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
-  toggleTaskComplete: (id: string) => Promise<void>;
+  toggleTaskComplete: (id: string, status?: Task['status']) => Promise<void>;
   addSubtask: (taskId: string, title: string) => Promise<void>;
   toggleSubtask: (taskId: string, subtaskId: string) => Promise<void>;
   deleteSubtask: (taskId: string, subtaskId: string) => Promise<void>;

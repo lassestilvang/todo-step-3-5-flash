@@ -1,7 +1,7 @@
 export type Priority = 'none' | 'low' | 'medium' | 'high';
 export type RecurrenceType = 'daily' | 'weekly' | 'weekday' | 'monthly' | 'yearly' | 'custom';
 export type TaskStatus = 'pending' | 'in_progress' | 'completed';
-export type ViewType = 'today' | 'week' | 'upcoming' | 'all' | 'board';
+export type ViewType = 'today' | 'week' | 'upcoming' | 'all' | 'board' | 'in_progress';
 
 export interface Label {
   id: string;
@@ -121,6 +121,7 @@ export interface CreateTaskData {
 
 export interface UpdateTaskData extends Partial<CreateTaskData> {
   id: string;
+  status?: TaskStatus;
 }
 
 export interface CreateListData {

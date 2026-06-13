@@ -12,7 +12,7 @@ export function TaskHistorySection({ changeLogs }: { changeLogs: Task['changeLog
         <History className="h-4 w-4" /> History
       </div>
       <div className="space-y-2">
-        {changeLogs && changeLogs.length > 0 ? (
+        {changeLogs.length > 0 ? (
           changeLogs.map((log) => (
             <div key={log.id} className="text-sm border-l-2 pl-3 border-muted">
               <div className="font-medium capitalize">{log.field}</div>

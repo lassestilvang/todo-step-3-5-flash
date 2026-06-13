@@ -79,6 +79,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               initial={{ opacity: 0, x: 40, scale: 0.95 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 40, scale: 0.95 }}
+              role="alert"
+              aria-live="polite"
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-2xl backdrop-blur-xl',
                 bgMap[toast.type]
@@ -89,7 +91,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               {toast.action ? (
                 <button
                   onClick={toast.action.onClick}
-                  className="shrink-0 rounded-lg p-1 hover:bg-muted transition-colors text-primary font-medium text-xs flex items-center gap-1"
+                  className="shrink-0 rounded-lg p-1 hover:bg-muted transition-colors text-primary font-medium text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   aria-label={toast.action.label}
                 >
                   <Undo className="h-3.5 w-3.5" />
@@ -98,7 +100,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               ) : (
                 <button
                   onClick={() => dismissToast(toast.id)}
-                  className="shrink-0 rounded-lg p-1 hover:bg-muted transition-colors"
+                  className="shrink-0 rounded-lg p-1 hover:bg-muted transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                   aria-label="Dismiss notification"
                 >
                   <X className="h-3.5 w-3.5 text-muted-foreground" />

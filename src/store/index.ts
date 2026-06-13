@@ -21,6 +21,7 @@ export const useStore = create<AppState>()(
       overdueCount: 0,
       currentView: 'today',
       selectedListId: null,
+      statusFilter: null,
       searchQuery: '',
       showCompleted: false,
       selectedTaskId: null,
@@ -67,6 +68,10 @@ export const useStore = create<AppState>()(
 
       setSelectedList: (listId) => {
         set({ selectedListId: listId });
+      },
+
+      setStatusFilter: (status) => {
+        set({ statusFilter: status });
       },
 
       setSearchQuery: (query) => {

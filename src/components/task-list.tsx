@@ -16,11 +16,12 @@ export function TaskList() {
   const searchQuery = useStore((s) => s.searchQuery);
   const selectedListId = useStore((s) => s.selectedListId);
   const currentView = useStore((s) => s.currentView);
+  const statusFilter = useStore((s) => s.statusFilter);
   const showCompleted = useStore((s) => s.showCompleted);
 
   const filteredTasks = useMemo(
-    () => getFilteredTasks(tasks, currentView, selectedListId, showCompleted, searchQuery),
-    [tasks, currentView, selectedListId, showCompleted, searchQuery]
+    () => getFilteredTasks(tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery),
+    [tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery]
   );
 
   const isFiltered = !!searchQuery.trim() || !!selectedListId;

@@ -14,6 +14,7 @@ export interface AppState {
   overdueCount: number;
   currentView: ViewType;
   selectedListId: string | null;
+  statusFilter: Task['status'] | null;
   searchQuery: string;
   showCompleted: boolean;
   selectedTaskId: string | null;
@@ -32,6 +33,7 @@ export interface AppState {
   loadData: () => Promise<void>;
   setCurrentView: (view: ViewType) => void;
   setSelectedList: (listId: string | null) => void;
+  setStatusFilter: (status: Task['status'] | null) => void;
   setSearchQuery: (query: string) => void;
   toggleShowCompleted: () => void;
   setShowCompleted: (show: boolean) => void;

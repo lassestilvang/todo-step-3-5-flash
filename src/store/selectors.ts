@@ -38,6 +38,7 @@ export function getFilteredTasks(
   tasks: Task[],
   currentView: ViewType,
   selectedListId: string | null,
+  statusFilter: Task['status'] | null,
   showCompleted: boolean,
   searchQuery: string
 ): Task[] {
@@ -47,6 +48,10 @@ export function getFilteredTasks(
     result = filterByList(result, selectedListId);
   } else {
     result = filterByView(result, currentView);
+  }
+
+  if (statusFilter) {
+    result = filterByStatus(result, statusFilter);
   }
 
   result = filterByCompletion(result, showCompleted);
@@ -62,6 +67,10 @@ function filterByList(tasks: Task[], listId: string): Task[] {
 
 function filterByView(tasks: Task[], view: ViewType): Task[] {
   return tasks.filter((t) => taskMatchesView(t, view));
+}
+
+function filterByStatus(tasks: Task[], status: Task['status']): Task[] {
+  return tasks.filter((t) => t.status === status);
 }
 
 function filterByCompletion(tasks: Task[], show: boolean): Task[] {

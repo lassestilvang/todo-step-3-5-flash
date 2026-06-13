@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Trash, CheckCircle2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, CheckCircle2, Sparkles, Circle } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,8 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const overdueCount = useStore((s) => s.overdueCount);
   const setCurrentView = useStore((s) => s.setCurrentView);
   const setSelectedList = useStore((s) => s.setSelectedList);
+  const setStatusFilter = useStore((s) => s.setStatusFilter);
+  const statusFilter = useStore((s) => s.statusFilter);
   const addList = useStore((s) => s.addList);
   const deleteList = useStore((s) => s.deleteList);
   const clearCompleted = useStore((s) => s.clearCompleted);
@@ -66,8 +68,8 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
         if (!due) return false;
         const d = new Date(due);
         const today = new Date();
-        return d.getDate() === today.getDate() && 
-               d.getMonth() === today.getMonth() && 
+        return d.getDate() === today.getDate() &&
+               d.getMonth() === today.getMonth() &&
                d.getFullYear() === today.getFullYear();
       }).length,
     };
@@ -78,6 +80,16 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
     () => tasks.filter((t) => t.status === 'completed').length,
     [tasks]
   );
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { pending: 0, in_progress: 0, completed: 0 };
+    for (const t of tasks) {
+      if (t.status in counts) {
+        counts[t.status]++;
+      }
+    }
+    return counts;
+  }, [tasks]);
 
   const handleCreateList = () => {
     if (!newListName.trim()) return;
@@ -106,6 +118,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
 
   const handleListClick = (id: string | null) => {
     setSelectedList(id);
+    setStatusFilter(null);
     if (id) {
       setCurrentView('all');
     }
@@ -199,8 +212,8 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
             const isActive = selectedListId === list.id;
             const count = taskCountMap.get(list.id) ?? 0;
             return (
-              <motion.div 
-                key={list.id} 
+              <motion.div
+                key={list.id}
                 className="group relative"
                 whileHover={{ x: 4 }}
               >
@@ -208,14 +221,14 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
                   onClick={() => handleListClick(list.id)}
                   className={cn(
                     'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200',
-                    isActive 
-                      ? 'bg-accent text-accent-foreground font-semibold shadow-sm' 
+                    isActive
+                      ? 'bg-accent text-accent-foreground font-semibold shadow-sm'
                       : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
                   )}
                 >
-                  <div 
-                    className="w-1.5 h-6 rounded-full shrink-0" 
-                    style={{ backgroundColor: list.color }} 
+                  <div
+                    className="w-1.5 h-6 rounded-full shrink-0"
+                    style={{ backgroundColor: list.color }}
                   />
                   <span className="text-base leading-none">{list.icon}</span>
                   <span className="flex-1 text-left truncate">{list.name}</span>
@@ -241,6 +254,63 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
         </div>
       </div>
 
+      <div className="space-y-1 pt-4 border-t border-border/50 mt-4">
+        <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+          Status Filter
+        </div>
+        <div className="space-y-0.5 px-2">
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'pending' ? null : 'pending')}
+            className={cn(
+              'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200',
+              statusFilter === 'pending'
+                ? 'bg-blue-500/10 text-blue-600 font-semibold'
+                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+            )}
+          >
+            <Circle className="h-4 w-4" />
+            <span className="flex-1 text-left">Pending</span>
+            <span className="text-[10px] tabular-nums">{statusCounts.pending}</span>
+          </button>
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'in_progress' ? null : 'in_progress')}
+            className={cn(
+              'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200',
+              statusFilter === 'in_progress'
+                ? 'bg-amber-500/10 text-amber-600 font-semibold'
+                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+            )}
+          >
+            <div className="w-4 h-4 rounded-full border-2 border-amber-500 flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+            </div>
+            <span className="flex-1 text-left">In Progress</span>
+            <span className="text-[10px] tabular-nums">{statusCounts.in_progress}</span>
+          </button>
+          <button
+            onClick={() => setStatusFilter(statusFilter === 'completed' ? null : 'completed')}
+            className={cn(
+              'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200',
+              statusFilter === 'completed'
+                ? 'bg-green-500/10 text-green-600 font-semibold'
+                : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+            )}
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            <span className="flex-1 text-left">Completed</span>
+            <span className="text-[10px] tabular-nums">{statusCounts.completed}</span>
+          </button>
+          {statusFilter && (
+            <button
+              onClick={() => setStatusFilter(null)}
+              className="w-full px-3 py-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              Clear filter
+            </button>
+          )}
+        </div>
+      </div>
+
       <div className="mt-auto pt-4 border-t border-border/50">
         <AnimatePresence>
           {completedCount > 0 && (
@@ -262,7 +332,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {overdueCount > 0 && (
           <div className="mt-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-600 flex items-center gap-2">
             <div className="p-1 rounded-md bg-red-500 text-white">

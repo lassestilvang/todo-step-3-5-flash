@@ -24,7 +24,7 @@ export function TaskList() {
     [tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery]
   );
 
-  const isFiltered = !!searchQuery.trim() || !!selectedListId;
+  const isFiltered = !!searchQuery.trim() || !!selectedListId || !!statusFilter;
 
   if (loading && filteredTasks.length === 0) {
     return (

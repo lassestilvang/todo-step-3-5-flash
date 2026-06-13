@@ -40,7 +40,7 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
     setSelectedTask(taskIds[nextIdx]!);
   }, [taskIds, setSelectedTask]);
 
-  const handleKeyDown = useCallback((e: KeyboardEvent, handleNext: () => void, handlePrev: () => void) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const tag = document.activeElement?.tagName;
     const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || e.target instanceof HTMLInputElement;
     if (isInput) return;
@@ -60,13 +60,12 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
         useStore.getState().setSelectedTask(null);
       }
     }
-  }, []);
+  }, [handleNext, handlePrev]);
 
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => handleKeyDown(e, handleNext, handlePrev);
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [handleNext, handlePrev, handleKeyDown]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
 
   const grouped = useMemo(() => {
     const map: Record<string, Task[]> = {};

@@ -97,7 +97,7 @@ function filterBySearch(tasks: Task[], query: string): Task[] {
   if (!q) return tasks;
   const lower = q.toLowerCase();
   return tasks.filter(
-    (t) => t.title.toLowerCase().includes(lower) || t.description.toLowerCase().includes(lower)
+    (t) => t.title.toLowerCase().includes(lower) || (t.description?.toLowerCase().includes(lower) ?? false)
   );
 }
 

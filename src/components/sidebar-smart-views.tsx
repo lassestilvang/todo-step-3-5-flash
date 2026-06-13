@@ -48,7 +48,7 @@ export function SidebarSmartViews({
           >
             <div className={cn(
               "p-1.5 rounded-lg transition-colors",
-              isActive ? "bg-primary text-primary-foreground" : cn("bg-muted group-hover:bg-background", view.color)
+              isActive ? "bg-primary text-primary-foreground" : "bg-muted group-hover:bg-background"
             )}>
               <Icon className="h-4 w-4" />
             </div>

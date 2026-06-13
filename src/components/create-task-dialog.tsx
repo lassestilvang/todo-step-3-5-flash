@@ -1,61 +1,25 @@
 'use client';
 
-/* eslint-disable max-lines, complexity */
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
-import { CalendarIcon, Trash2, X, Plus, Paperclip, Repeat, AlignLeft, Hash, Clock, Flag } from 'lucide-react';
-import { useState, useMemo } from 'react';
-import React from 'react';
+import { Plus, Paperclip } from 'lucide-react';
+import { useState, useMemo, useCallback } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import * as actions from '@/app/actions';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  INBOX_LIST_ID,
-  PRIORITY_LABELS,
-  PRIORITY_TEXT_COLORS,
-  PRIORITY_VALUES,
-  RECURRENCE_OPTIONS,
-} from '@/constants';
-import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form } from '@/components/ui/form';
+import { INBOX_LIST_ID } from '@/constants';
 import { useStore } from '@/store';
+import type { Subtask } from '@/types';
 
-const RECURRENCE_VALUES = RECURRENCE_OPTIONS.map((o) => o.value);
+import { TaskBasicFields } from './task-basic-fields';
+import { TaskCategorizationFields } from './task-categorization-fields';
+import { TaskScheduleFields } from './task-schedule-fields';
+import { TaskSubtasksEditor } from './task-subtasks-editor';
+
+const RECURRENCE_VALUES = ['daily', 'weekly', 'weekday', 'monthly', 'yearly', 'custom'] as const;
 
 const taskSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
@@ -64,12 +28,43 @@ const taskSchema = z.object({
   dueDate: z.date().optional(),
   deadline: z.date().optional(),
   estimateMinutes: z.number().min(0).optional(),
-  priority: z.enum(PRIORITY_VALUES).default('none'),
+  priority: z.enum(['none', 'low', 'medium', 'high']).default('none'),
   recurrence: z.enum(RECURRENCE_VALUES).optional(),
   labelIds: z.array(z.string()).optional(),
 });
 
 type TaskFormData = z.infer<typeof taskSchema>;
+
+function getFormDefaults(
+  isEditing: boolean,
+  editTask: { title: string; description?: string; listId: string; dueDate?: Date; deadline?: Date; estimateMinutes?: number; priority: string; recurrence?: string; labels?: { id: string }[] } | null,
+  listDefault: string
+): TaskFormData {
+  if (!isEditing || !editTask) {
+    return {
+      title: '',
+      description: undefined,
+      listId: listDefault,
+      dueDate: undefined,
+      deadline: undefined,
+      estimateMinutes: undefined,
+      priority: 'none',
+      recurrence: undefined,
+      labelIds: [],
+    };
+  }
+  return {
+    title: editTask.title,
+    description: editTask.description,
+    listId: editTask.listId,
+    dueDate: editTask.dueDate,
+    deadline: editTask.deadline,
+    estimateMinutes: editTask.estimateMinutes,
+    priority: editTask.priority,
+    recurrence: editTask.recurrence,
+    labelIds: editTask.labels?.map((l) => l.id) || [],
+  };
+}
 
 export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const lists = useStore((s) => s.lists);
@@ -77,6 +72,7 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   const editTaskId = useStore((s) => s.editTaskId);
   const selectedListId = useStore((s) => s.selectedListId);
   const tasks = useStore((s) => s.tasks);
+  const addTask = useStore((s) => s.addTask);
 
   const isEditing = !!editTaskId;
   const editTask = useMemo(
@@ -84,118 +80,37 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
     [isEditing, editTaskId, tasks]
   );
 
-  const [subtasks, setSubtasks] = useState<{ id?: string; title: string; completed: boolean }[]>(() => {
-    if (isEditing && editTask) return editTask.subtasks.map((s) => ({ id: s.id, title: s.title, completed: s.completed }));
+  const [subtasks, setSubtasks] = useState<Subtask[]>(() => {
+    if (isEditing && editTask) {
+      return editTask.subtasks.map((s) => ({ id: s.id, title: s.title, completed: s.completed }));
+    }
     return [];
   });
-  const [newSubtask, setNewSubtask] = useState('');
 
   const listDefault = selectedListId || INBOX_LIST_ID;
-  const formDefaults = useMemo(
-    (): TaskFormData => ({
-      title: isEditing && editTask ? editTask.title : '',
-      description: isEditing && editTask ? editTask.description : undefined,
-      listId: isEditing && editTask ? editTask.listId : listDefault,
-      dueDate: isEditing && editTask ? editTask.dueDate : undefined,
-      deadline: isEditing && editTask ? editTask.deadline : undefined,
-      estimateMinutes: isEditing && editTask ? editTask.estimateMinutes : undefined,
-      priority: isEditing && editTask ? editTask.priority : 'none',
-      recurrence: isEditing && editTask ? editTask.recurrence : undefined,
-      labelIds: isEditing && editTask ? editTask.labels?.map((l) => l.id) || [] : [],
-    }),
-    [isEditing, editTask, listDefault]
-  );
+  const formDefaults = useMemo(() => getFormDefaults(isEditing, editTask, listDefault), [isEditing, editTask, listDefault]);
 
   const form = useForm({
     resolver: zodResolver(taskSchema),
     defaultValues: formDefaults,
   });
 
-  const onSubmit = async (data: TaskFormData) => {
+  const handleSubmit = useCallback(async (data: TaskFormData) => {
     if (isEditing && editTaskId) {
-      await actions.updateTaskAction(editTaskId, {
-        title: data.title,
-        description: data.description,
-        listId: data.listId,
-        dueDate: data.dueDate,
-        deadline: data.deadline,
-        estimateMinutes: data.estimateMinutes,
-        priority: data.priority,
-        recurrence: data.recurrence,
-        labelIds: data.labelIds,
-      });
-
-      const existingTask = tasks.find((t) => t.id === editTaskId);
-      const existingSubtasks = existingTask?.subtasks || [];
-
-      const deletePromises = existingSubtasks
-        .filter((st) => !subtasks.some((s) => s.id === st.id))
-        .map((st) => actions.deleteSubtaskAction(st.id));
-      await Promise.all(deletePromises);
-
-      const subtaskPromises = subtasks.map(async (st, i) => {
-        if (st.id) {
-          await actions.updateSubtaskAction(st.id, {
-            title: st.title,
-            completed: st.completed,
-            order: i,
-          });
-        } else {
-          await actions.createSubtaskAction(editTaskId, st.title, i);
-        }
-      });
-      await Promise.all(subtaskPromises);
+      await submitEditTask(editTaskId, data, subtasks, tasks);
     } else {
-      const newTask = await actions.createTaskAction({
-        title: data.title,
-        description: data.description,
-        listId: data.listId,
-        dueDate: data.dueDate,
-        deadline: data.deadline,
-        estimateMinutes: data.estimateMinutes,
-        priority: data.priority,
-        recurrence: data.recurrence,
-        labelIds: data.labelIds,
-      });
-
-      if (!newTask) return;
-
-      const subtaskPromises = subtasks.map((st, i) =>
-        actions.createSubtaskAction(newTask.id, st.title, i)
-      );
-      await Promise.all(subtaskPromises);
+      await submitNewTask(data, subtasks, addTask);
     }
-
     onClose();
-  };
+  }, [isEditing, editTaskId, subtasks, tasks, addTask, onClose]);
 
-  const addSubtask = () => {
-    if (!newSubtask.trim()) return;
-    setSubtasks([...subtasks, { title: newSubtask, completed: false }]);
-    setNewSubtask('');
-  };
-
-  const removeSubtask = (index: number) => {
-    setSubtasks(subtasks.filter((_, i) => i !== index));
-  };
-
-  const toggleSubtask = (index: number) => {
-    const updated = [...subtasks];
-    updated[index]!.completed = !updated[index]!.completed;
-    setSubtasks(updated);
-  };
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const selectedLabelIds = useWatch({ control: form.control, name: 'labelIds' }) || [];
-  const availableLabels = useMemo(() => {
-    return labels.filter((l) => !selectedLabelIds.includes(l.id));
-  }, [labels, selectedLabelIds]);
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent key={editTaskId || 'new'} className="max-w-3xl rounded-[32px] p-0 overflow-hidden border-0 shadow-2xl">
         <Form {...form}>
-          <form onSubmit={(e) => void form.handleSubmit(onSubmit)(e)} className="flex flex-col max-h-[90vh]">
+          <form onSubmit={(e) => void form.handleSubmit(handleSubmit)(e)} className="flex flex-col max-h-[90vh]">
             <div className="p-8 space-y-8 overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-3xl font-black tracking-tight flex items-center gap-3">
@@ -207,287 +122,22 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
               </DialogHeader>
 
               <div className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input 
-                          placeholder="Task title..." 
-                          className="text-2xl font-bold h-auto py-2 border-0 focus-visible:ring-0 px-0 placeholder:text-muted-foreground/30" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center gap-2 text-muted-foreground mb-2">
-                        <AlignLeft className="w-4 h-4" />
-                        <span className="text-xs font-bold uppercase tracking-wider">Description</span>
-                      </div>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Add more details about this task..." 
-                          className="min-h-[100px] rounded-2xl bg-muted/30 border-0 focus-visible:ring-1 focus-visible:ring-primary/20 p-4 resize-none" 
-                          {...field} 
-                          value={field.value || ''} 
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <TaskBasicFields form={form} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Hash className="w-4 h-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider">Categorization</span>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="listId"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">List</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger className="rounded-xl border-2 h-11">
-                                  <SelectValue placeholder="Select list" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {lists.map((list) => (
-                                  <SelectItem key={list.id} value={list.id}>
-                                    <span className="mr-2">{list.icon}</span>
-                                    {list.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="priority"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">Priority</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger className="rounded-xl border-2 h-11">
-                                  <SelectValue />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {PRIORITY_VALUES.map((p) => (
-                                  <SelectItem key={p} value={p}>
-                                    <Flag className={cn('mr-2 h-4 w-4 inline', PRIORITY_TEXT_COLORS[p])} />
-                                    {PRIORITY_LABELS[p]}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">Labels</FormLabel>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedLabelIds.map((labelId) => {
-                          const label = labels.find((l) => l.id === labelId);
-                          if (!label) return null;
-                          return (
-                            <Badge
-                              key={label.id}
-                              variant="outline"
-                              className="pl-2 pr-1 py-1 rounded-lg border-2"
-                              style={{ borderColor: `${label.color}40`, color: label.color, backgroundColor: `${label.color}10` }}
-                            >
-                              {label.name}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const current = form.getValues('labelIds') || [];
-                                  form.setValue('labelIds', current.filter((id) => id !== labelId));
-                                }}
-                                className="ml-1 p-0.5 rounded-md hover:bg-black/5 dark:hover:bg-white/5"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          );
-                        })}
-                        {availableLabels.length > 0 && (
-                          <DropdownMenu>
-                            <DropdownMenuTrigger
-                              render={
-                                <Button variant="outline" size="xs" type="button" className="rounded-lg border-dashed border-2 h-7">
-                                  <Plus className="h-3 w-3 mr-1" /> Label
-                                </Button>
-                              }
-                            />
-                            <DropdownMenuContent className="rounded-xl p-1">
-                              {availableLabels.map((label) => (
-                                <DropdownMenuItem
-                                  key={label.id}
-                                  className="rounded-lg"
-                                  onClick={() => {
-                                    const current = form.getValues('labelIds') || [];
-                                    form.setValue('labelIds', [...current, label.id]);
-                                  }}
-                                >
-                                  <span className="mr-2">{label.icon}</span>
-                                  <span style={{ color: label.color }}>{label.name}</span>
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Clock className="w-4 h-4" />
-                      <span className="text-xs font-bold uppercase tracking-wider">Schedule</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="dueDate"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col">
-                            <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">Start Date</FormLabel>
-                            <Popover>
-                              <PopoverTrigger
-                                render={
-                                  <FormControl>
-                                    <Button
-                                      variant="outline"
-                                      className={cn('rounded-xl border-2 h-11 px-3 text-left font-normal', !field.value && 'text-muted-foreground')}
-                                    >
-                                      {field.value ? format(field.value, 'MMM d') : 'Set date'}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                }
-                              />
-                              <PopoverContent className="w-auto p-0 rounded-3xl overflow-hidden border-0 shadow-2xl" align="start">
-                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                              </PopoverContent>
-                            </Popover>
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="estimateMinutes"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60">Est. Time (min)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min={0}
-                                className="rounded-xl border-2 h-11"
-                                {...field}
-                                onChange={(e) => field.onChange(Number(e.target.value))}
-                                value={field.value || ''}
-                                placeholder="0"
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="recurrence"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground/60 flex items-center gap-1">
-                            <Repeat className="w-3 h-3" /> Recurrence
-                          </FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger className="rounded-xl border-2 h-11">
-                                <SelectValue placeholder="One-time task" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {RECURRENCE_OPTIONS.map((opt) => (
-                                <SelectItem key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <TaskCategorizationFields
+                    form={form}
+                    lists={lists}
+                    labels={labels}
+                    selectedLabelIds={selectedLabelIds}
+                  />
+                  <TaskScheduleFields form={form} />
                 </div>
 
-                <div className="space-y-4 pt-4 border-t border-border/50">
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Plus className="w-4 h-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Subtasks</span>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    {subtasks.map((subtask, index) => (
-                      <div key={subtask.id || index} className="flex items-center gap-3 p-3 rounded-2xl bg-muted/20 group">
-                        <Checkbox checked={subtask.completed} onCheckedChange={() => toggleSubtask(index)} className="rounded-full" />
-                        <span className={cn('flex-1 text-sm font-medium', subtask.completed && 'line-through text-muted-foreground/60')}>
-                          {subtask.title}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
-                          onClick={() => removeSubtask(index)}
-                          type="button"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add a step..."
-                      value={newSubtask}
-                      onChange={(e) => setNewSubtask(e.target.value)}
-                      className="rounded-xl border-2 h-11"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addSubtask();
-                        }
-                      }}
-                    />
-                    <Button type="button" onClick={addSubtask} className="rounded-xl px-6 font-bold">Add</Button>
-                  </div>
-                </div>
+                <TaskSubtasksEditor
+                  subtasks={subtasks}
+                  onSubtasksChange={setSubtasks}
+                />
 
                 <div className="pt-4">
                   <div className="flex items-center gap-2 text-muted-foreground mb-4">
@@ -516,3 +166,63 @@ export function CreateTaskDialog({ open, onClose }: { open: boolean; onClose: ()
   );
 }
 
+async function submitEditTask(
+  editTaskId: string,
+  data: TaskFormData,
+  subtasks: Subtask[],
+  tasks: { id: string; subtasks: Subtask[] }[]
+) {
+  await actions.updateTaskAction(editTaskId, {
+    title: data.title,
+    description: data.description,
+    listId: data.listId,
+    dueDate: data.dueDate,
+    deadline: data.deadline,
+    estimateMinutes: data.estimateMinutes,
+    priority: data.priority,
+    recurrence: data.recurrence,
+    labelIds: data.labelIds,
+  });
+
+  const existingTask = tasks.find((t) => t.id === editTaskId);
+  const existingSubtasks = existingTask?.subtasks || [];
+
+  const deletePromises = existingSubtasks
+    .filter((st) => !subtasks.some((s) => s.id === st.id))
+    .map((st) => actions.deleteSubtaskAction(st.id));
+  await Promise.all(deletePromises);
+
+  const subtaskPromises = subtasks.map(async (st, i) => {
+    if (st.id) {
+      await actions.updateSubtaskAction(st.id, {
+        title: st.title,
+        completed: st.completed,
+        order: i,
+      });
+    } else {
+      await actions.createSubtaskAction(editTaskId, st.title, i);
+    }
+  });
+  await Promise.all(subtaskPromises);
+}
+
+async function submitNewTask(data: TaskFormData, subtasks: Subtask[], addTask: (d: TaskFormData) => Promise<unknown>) {
+  const newTask = await addTask({
+    title: data.title,
+    description: data.description,
+    listId: data.listId,
+    dueDate: data.dueDate,
+    deadline: data.deadline,
+    estimateMinutes: data.estimateMinutes,
+    priority: data.priority,
+    recurrence: data.recurrence,
+    labelIds: data.labelIds,
+  });
+
+  if (!newTask || typeof newTask !== 'object' || !('id' in newTask)) return;
+
+  const subtaskPromises = subtasks.map((st, i) =>
+    actions.createSubtaskAction((newTask as { id: string }).id, st.title, i)
+  );
+  await Promise.all(subtaskPromises);
+}

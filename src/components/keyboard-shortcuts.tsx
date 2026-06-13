@@ -18,8 +18,8 @@ const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
     shortcuts: [
       { keys: ['K'], label: 'Focus search', icon: <Search className="w-3 h-3" /> },
       { keys: ['N'], label: 'Create new task', icon: <Plus className="w-3 h-3" /> },
-      { keys: ['J'], label: 'Next task', description: 'Navigate tasks' },
-      { keys: ['K'], label: 'Previous task', description: 'Navigate tasks' },
+      { keys: ['⇧', 'K'], label: 'Next task', description: 'Navigate tasks' },
+      { keys: ['⇧', 'J'], label: 'Previous task', description: 'Navigate tasks' },
       { keys: ['T'], label: 'Toggle show completed', icon: <CheckSquare className="w-3 h-3" /> },
     ],
   },

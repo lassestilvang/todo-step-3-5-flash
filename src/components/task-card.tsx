@@ -189,11 +189,14 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
   }, [isSelected]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+    if (isInput) return;
+
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
       setSelectedTask(task.id);
     }
-    if (e.key === 's' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
+    if (e.key === 's' && !isInput) {
       e.preventDefault();
       e.stopPropagation();
       const nextStatus = task.status === 'pending' ? 'in_progress' : 'completed';

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
 
-import { playSound } from '@/lib/sounds';
 import { useStore } from '@/store';
 
 import { FocusTimerExpanded } from './focus-timer-expanded';
@@ -45,17 +44,6 @@ export function FocusTimer() {
     }
     return () => clearInterval(interval);
   }, [focusTimer.isActive, focusTimer.timeLeft, tickFocusTimer]);
-
-  useEffect(() => {
-    if (focusTimer.timeLeft === 0 && focusTimer.isActive) {
-      playSound('timer_end');
-      try {
-        navigator.vibrate([100, 50, 100]);
-      } catch {
-        // Vibration not supported
-      }
-    }
-  }, [focusTimer.timeLeft, focusTimer.isActive]);
 
   const handleStart = useCallback(() => {
     setIsMinimized(false);

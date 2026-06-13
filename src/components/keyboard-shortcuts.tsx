@@ -18,7 +18,8 @@ const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
     shortcuts: [
       { keys: ['K'], label: 'Focus search', icon: <Search className="w-3 h-3" /> },
       { keys: ['N'], label: 'Create new task', icon: <Plus className="w-3 h-3" /> },
-      { keys: ['B'], label: 'Toggle sidebar', description: 'Show/hide sidebar' },
+      { keys: ['J'], label: 'Next task', description: 'Navigate tasks' },
+      { keys: ['K'], label: 'Previous task', description: 'Navigate tasks' },
       { keys: ['T'], label: 'Toggle show completed', icon: <CheckSquare className="w-3 h-3" /> },
     ],
   },
@@ -27,6 +28,7 @@ const SHORTCUT_CATEGORIES: ShortcutCategory[] = [
     shortcuts: [
       { keys: ['S'], label: 'Cycle task status', description: 'When task is focused' },
       { keys: ['⇧', 'S'], label: 'Magic sort tasks', icon: <SortAsc className="w-3 h-3" /> },
+      { keys: ['X'], label: 'Delete task', description: 'When task is focused' },
       { keys: ['⌘', 'N'], label: 'Open quick add' },
     ],
   },

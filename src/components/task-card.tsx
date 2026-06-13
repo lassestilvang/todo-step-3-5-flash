@@ -147,7 +147,7 @@ function StatusCycleButton({ task, onCycle }: { task: Task; onCycle: (id: string
       title={`Mark as ${nextStatus.replace('_', ' ')}`}
       aria-label={`Mark as ${nextStatus.replace('_', ' ')}`}
     >
-      <config.icon className="h-4 w-4" />
+      <config.icon className="h-4 w-4" aria-hidden="true" />
     </Button>
   );
 }

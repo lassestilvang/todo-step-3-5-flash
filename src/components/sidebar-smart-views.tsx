@@ -19,6 +19,14 @@ export function SidebarSmartViews({
   const setCurrentView = useStore((s) => s.setCurrentView);
   const setSelectedList = useStore((s) => s.setSelectedList);
 
+  // Keyboard shortcuts for views
+  const viewShortcuts: Record<string, string> = {
+    all: '1',
+    today: '2',
+    in_progress: '3',
+    completed: '4',
+  };
+
   return (
     <div className="space-y-1">
       <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
@@ -28,7 +36,8 @@ export function SidebarSmartViews({
         const Icon = view.icon;
         const isActive = currentView === view.id && !selectedListId;
         const count = viewCounts[view.id];
-        
+        const shortcut = viewShortcuts[view.id];
+
         return (
           <motion.button
             key={view.id}
@@ -41,8 +50,8 @@ export function SidebarSmartViews({
             }}
             className={cn(
               'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200 group',
-              isActive 
-                ? 'bg-primary/10 text-primary font-semibold shadow-sm ring-1 ring-primary/20' 
+              isActive
+                ? 'bg-primary/10 text-primary font-semibold shadow-sm ring-1 ring-primary/20'
                 : 'text-muted-foreground hover:bg-accent hover:text-foreground'
             )}
           >
@@ -60,6 +69,11 @@ export function SidebarSmartViews({
               )}>
                 {count}
               </span>
+            )}
+            {shortcut && (
+              <kbd className="text-[10px] font-bold text-muted-foreground/60 min-w-[18px] h-4 px-1 rounded bg-muted/50">
+                {shortcut}
+              </kbd>
             )}
           </motion.button>
         );

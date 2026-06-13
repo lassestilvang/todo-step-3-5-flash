@@ -240,8 +240,8 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
         'group relative w-full rounded-2xl border bg-card text-left transition-all duration-300',
         'hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-primary/20',
         'dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]',
-        task.status === 'completed' && 'bg-muted/30 opacity-60 grayscale-[0.5]',
-        task.status === 'in_progress' && 'border-amber-500/50 bg-amber-500/[0.03]',
+        task.status === 'completed' && 'bg-muted/30 opacity-60 grayscale-[0.5] hover:opacity-70',
+        task.status === 'in_progress' && 'border-amber-500/50 bg-gradient-to-r from-amber-500/[0.03] to-transparent',
         isSelected && 'ring-2 ring-primary ring-offset-4 ring-offset-background z-10 shadow-lg',
         isOverdue && 'border-red-500/50 bg-red-500/[0.02]',
         'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2'

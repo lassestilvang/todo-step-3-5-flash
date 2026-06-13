@@ -59,7 +59,10 @@ export default function HomePage() {
   }, [tasks]);
 
   return (
-    <div className="flex h-screen bg-[#fafafa] dark:bg-[#050505]">
+    <div className="flex h-screen bg-[#fafafa] dark:bg-[#050505] relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDuration: '20s' }} />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDuration: '25s' }} />
       {/* Mobile Sidebar Sheet */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-80 p-0 border-r-0 shadow-2xl">

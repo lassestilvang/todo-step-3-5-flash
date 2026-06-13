@@ -9,6 +9,7 @@ import { CreateTaskDialog } from '@/components/create-task-dialog';
 import { FocusTimer } from '@/components/focus-timer';
 import { KeyboardShortcuts } from '@/components/keyboard-shortcuts';
 import { MobileNav } from '@/components/mobile-nav';
+import { QuickAddTask } from '@/components/quick-add-task';
 import { SearchBar } from '@/components/search-bar';
 import { Sidebar } from '@/components/sidebar';
 import { TaskDetailSheet } from '@/components/task-detail-sheet';
@@ -230,6 +231,13 @@ export default function HomePage() {
                   {showCompleted ? '✓' : '○'}
                 </Button>
             </div>
+          </div>
+        </div>
+
+        {/* Quick Add */}
+        <div className="px-4 md:px-8 pb-4">
+          <div className="max-w-5xl mx-auto">
+            <QuickAddTask />
           </div>
         </div>
 

@@ -158,6 +158,11 @@ function TaskMeta({ task, due, isOverdue }: { task: Task; due: Date | undefined;
       <LabelsList labels={task.labels} />
       <div className="flex-1" />
       <SubtasksProgress subtasks={task.subtasks} status={task.status} />
+      {task.subtasks.length > 0 && (
+        <div className="text-[10px] font-bold text-muted-foreground/60">
+          {task.subtasks.length} subtask{task.subtasks.length !== 1 ? 's' : ''}
+        </div>
+      )}
     </div>
   );
 }

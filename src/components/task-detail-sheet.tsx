@@ -13,9 +13,10 @@ import { TaskTitleSection } from '@/components/task-title-section';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { DATE_FORMATS, STRINGS } from '@/constants';
-import { cn } from '@/lib/utils';
 import { getMagicBreakdownSuggestions } from '@/lib/magic-breakdown';
+import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
+import type { Task } from '@/types';
 import type { Task } from '@/types';
 
 function ReminderSection({ reminders }: { reminders: Task['reminders'] }) {

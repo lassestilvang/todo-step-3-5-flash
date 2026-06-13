@@ -2,13 +2,13 @@ import React from 'react';
 
 export function TaskCardSkeleton() {
   return (
-    <div className="w-full rounded-lg border bg-card p-4 animate-pulse">
-      <div className="flex items-start gap-3">
-        <div className="mt-0.5 h-5 w-5 shrink-0 rounded border border-border" />
-        <div className="flex-1 min-w-0 space-y-2.5">
+    <div className="w-full rounded-2xl border bg-card p-5 animate-pulse hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div className="flex items-start gap-4">
+        <div className="mt-0.5 h-6 w-6 shrink-0 rounded-full border-2 border-border" />
+        <div className="flex-1 min-w-0 space-y-3">
           <div className="flex items-start justify-between gap-2">
-            <div className="h-4 flex-1 rounded bg-muted" />
-            <div className="h-6 w-6 rounded bg-muted" />
+            <div className="h-5 flex-1 rounded-lg bg-muted" />
+            <div className="h-6 w-6 rounded-lg bg-muted ml-2" />
           </div>
           <div className="h-3 w-3/4 rounded bg-muted/60" />
           <div className="flex flex-wrap gap-2">

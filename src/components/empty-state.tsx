@@ -22,17 +22,22 @@ export function EmptyState({ isFiltered }: { isFiltered: boolean }) {
       className="flex flex-col items-center justify-center h-full min-h-[400px] text-center p-8"
     >
       <motion.div
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
+        initial={{ scale: 0.8, rotate: -5 }}
+        animate={{ scale: 1, rotate: 0 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        className="text-4xl mb-6"
+        className="text-6xl mb-6 relative"
       >
-        ✨
+        <span className="relative z-10">✨</span>
+        <motion.div
+          className="absolute -inset-4 rounded-full bg-gradient-to-r from-primary/20 via-purple-500/20 to-pink-500/20 blur-xl"
+          animate={{ scale: [1, 1.1, 1] }}
+          transition={{ duration: 3, repeat: Infinity }}
+        />
       </motion.div>
       <motion.h3
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-xl font-bold mb-2"
+        className="text-xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent"
       >
         {isFiltered ? 'No tasks match your filters' : 'You are all caught up!'}
       </motion.h3>
@@ -40,9 +45,9 @@ export function EmptyState({ isFiltered }: { isFiltered: boolean }) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="text-muted-foreground max-w-sm mb-8"
+        className="text-muted-foreground max-w-sm mb-8 italic"
       >
-        {quote}
+        &ldquo;{quote}&rdquo;
       </motion.p>
       {isFiltered ? (
         <motion.button
@@ -50,7 +55,7 @@ export function EmptyState({ isFiltered }: { isFiltered: boolean }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           onClick={() => setSearchQuery('')}
-          className="text-sm font-semibold text-primary hover:underline"
+          className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
         >
           Clear filters
         </motion.button>

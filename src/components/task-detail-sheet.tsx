@@ -1,7 +1,7 @@
 'use client';
 
 import { format, formatDistanceToNow, isToday, isTomorrow, isThisWeek } from 'date-fns';
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 
 import { TaskAttachmentsSection } from '@/components/task-attachments-section';
 import { TaskDetailHeader } from '@/components/task-detail-header';
@@ -102,6 +102,31 @@ export function TaskDetailSheet() {
       setSelectedTask(null);
     }
   };
+
+  // Keyboard navigation for task detail sheet
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedTaskId) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNext();
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (e.metaKey || e.ctrlKey) return;
+        e.preventDefault();
+        void handleDelete();
+      } else if (e.key === 'Escape') {
+        setSelectedTask(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedTaskId, currentIndex, tasksArray.length, handlePrev, handleNext, handleDelete, setSelectedTask]);
 
   if (!selectedTask) return null;
 

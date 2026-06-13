@@ -9,6 +9,7 @@ import { playSound } from '@/lib/sounds';
 import { createLabelActions } from './actions/labels';
 import { createListActions } from './actions/lists';
 import { createTaskActions } from './actions/tasks';
+import { getFilteredTasks, computeOverdue } from './selectors';
 import type { AppState, StoreSetter, StoreGetter, FocusTimerState } from './types';
 
 export const useStore = create<AppState>()(
@@ -82,7 +83,7 @@ export const useStore = create<AppState>()(
       },
 
       toggleShowCompleted: () => {
-        set({ showCompleted: !get().showCompleted });
+        set((state) => ({ showCompleted: !state.showCompleted }));
       },
 
       setShowCompleted: (show) => {
@@ -94,8 +95,9 @@ export const useStore = create<AppState>()(
       },
 
       navigateTask: (direction) => {
-        const tasks = get().tasks;
-        const selectedTaskId = get().selectedTaskId;
+        const state = get();
+        const tasks = state.tasks;
+        const selectedTaskId = state.selectedTaskId;
         const currentIndex = tasks.findIndex((t) => t.id === selectedTaskId);
         const nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
         const nextTask = tasks[nextIndex];
@@ -125,7 +127,8 @@ export const useStore = create<AppState>()(
       },
 
       resetFocusTimer: () => {
-        const { mode, workDuration, breakDuration } = get().focusTimer;
+        const state = get();
+        const { mode, workDuration, breakDuration } = state.focusTimer;
         const duration = mode === 'work' ? workDuration : breakDuration;
         set((state) => ({
           focusTimer: {
@@ -137,7 +140,8 @@ export const useStore = create<AppState>()(
       },
 
       tickFocusTimer: () => {
-        const { timeLeft, mode, isActive, autoStartNext, workDuration, breakDuration } = get().focusTimer;
+        const state = get();
+        const { timeLeft, mode, isActive, autoStartNext, workDuration, breakDuration } = state.focusTimer;
         if (!isActive) return;
 
         if (timeLeft <= 0) {
@@ -162,8 +166,7 @@ export const useStore = create<AppState>()(
 
           if (shouldAutoStart) {
             setTimeout(() => {
-              const { startFocusTimer } = get();
-              startFocusTimer();
+              get().startFocusTimer();
             }, 1000);
           }
           return;
@@ -175,7 +178,8 @@ export const useStore = create<AppState>()(
       },
 
       setFocusMode: (mode) => {
-        const { workDuration, breakDuration } = get().focusTimer;
+        const state = get();
+        const { workDuration, breakDuration } = state.focusTimer;
         const duration = mode === 'work' ? workDuration : breakDuration;
         set((state) => ({
           focusTimer: {
@@ -218,7 +222,8 @@ export const useStore = create<AppState>()(
       },
 
       undoDeleteTask: (id: string) => {
-        const deletedTasks = get().deletedTasks || [];
+        const state = get();
+        const deletedTasks = state.deletedTasks || [];
         const deletedEntry = deletedTasks.find((d) => d.task.id === id);
         if (!deletedEntry) return;
 
@@ -245,3 +250,33 @@ export const useStore = create<AppState>()(
     }
   )
 );
+
+// Memoized selectors for performance
+export const selectTasks = (state: AppState) => state.tasks;
+export const selectLists = (state: AppState) => state.lists;
+export const selectLabels = (state: AppState) => state.labels;
+export const selectCurrentView = (state: AppState) => state.currentView;
+export const selectSelectedListId = (state: AppState) => state.selectedListId;
+export const selectSelectedTaskId = (state: AppState) => state.selectedTaskId;
+export const selectShowCompleted = (state: AppState) => state.showCompleted;
+export const selectSearchQuery = (state: AppState) => state.searchQuery;
+export const selectFocusTimer = (state: AppState) => state.focusTimer;
+export const selectLoading = (state: AppState) => state.loading;
+export const selectError = (state: AppState) => state.error;
+
+// Computed selectors with memoization
+export const useFilteredTasks = () => {
+  const tasks = useStore(selectTasks);
+  const currentView = useStore(selectCurrentView);
+  const selectedListId = useStore(selectSelectedListId);
+  const statusFilter = useStore((s) => s.statusFilter);
+  const showCompleted = useStore(selectShowCompleted);
+  const searchQuery = useStore(selectSearchQuery);
+
+  return getFilteredTasks(tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery);
+};
+
+export const useOverdueCount = () => {
+  const tasks = useStore(selectTasks);
+  return computeOverdue(tasks);
+};

@@ -42,6 +42,7 @@ export interface AppState {
   toggleShowCompleted: () => void;
   setShowCompleted: (show: boolean) => void;
   setSelectedTask: (taskId: string | null) => void;
+  navigateTask: (direction: 'next' | 'previous') => void;
   setBrandColor: (color: string) => void;
   startFocusTimer: (taskId?: string) => void;
   pauseFocusTimer: () => void;

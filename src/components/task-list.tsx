@@ -1,5 +1,5 @@
 'use client';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
 
 import { useStore } from '@/store';
 import { getFilteredTasks } from '@/store/selectors';
@@ -18,6 +18,9 @@ export function TaskList() {
   const currentView = useStore((s) => s.currentView);
   const statusFilter = useStore((s) => s.statusFilter);
   const showCompleted = useStore((s) => s.showCompleted);
+  const navigateTask = useStore((s) => s.navigateTask);
+
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const filteredTasks = useMemo(
     () => getFilteredTasks(tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery),
@@ -25,6 +28,30 @@ export function TaskList() {
   );
 
   const isFiltered = !!searchQuery.trim() || !!selectedListId || !!statusFilter;
+
+  // Keyboard navigation for task list
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle when not in input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Only handle when task list is visible (not in board/statistics view)
+      if (currentView === 'board' || currentView === 'statistics') return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        navigateTask('next');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        navigateTask('previous');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentView, navigateTask]);
 
   if (loading && filteredTasks.length === 0) {
     return (
@@ -45,7 +72,7 @@ export function TaskList() {
   }
 
   return (
-    <div className="space-y-4 p-4 md:p-0">
+    <div className="space-y-4 p-4 md:p-0" ref={containerRef}>
       <QuickAddTask />
       <TaskGroups tasks={filteredTasks} />
     </div>

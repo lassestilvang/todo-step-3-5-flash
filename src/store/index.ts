@@ -92,6 +92,17 @@ export const useStore = create<AppState>()(
         set({ selectedTaskId: taskId });
       },
 
+      navigateTask: (direction) => {
+        const tasks = get().tasks;
+        const selectedTaskId = get().selectedTaskId;
+        const currentIndex = tasks.findIndex((t) => t.id === selectedTaskId);
+        const nextIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+        const nextTask = tasks[nextIndex];
+        if (nextTask) {
+          set({ selectedTaskId: nextTask.id });
+        }
+      },
+
       setBrandColor: (color) => {
         set({ brandColor: color });
       },

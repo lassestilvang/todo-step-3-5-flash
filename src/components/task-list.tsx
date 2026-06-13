@@ -28,7 +28,7 @@ export function TaskList() {
 
   if (loading && filteredTasks.length === 0) {
     return (
-      <div className="space-y-2 animate-pulse">
+      <div className="space-y-2">
         {Array.from({ length: 4 }).map((_, i) => (
           <TaskCardSkeleton key={i} />
         ))}

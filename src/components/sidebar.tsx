@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, CheckCircle2, Sparkles, Circle, Volume2, Bell } from 'lucide-react';
+import { Trash2, CheckCircle2, Sparkles, Circle, Volume2, Bell, Download } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -195,6 +195,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
           </div>
         )}
 
+        <ExportButton />
         <SettingsSection />
         <BrandColorSelector brandColor={brandColor} setBrandColor={setBrandColor} />
       </div>
@@ -386,6 +387,27 @@ function BrandColorSelector({
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function ExportButton() {
+  const handleExport = () => {
+    window.open('/api/export', '_blank');
+  };
+
+  return (
+    <div className="px-3 py-2">
+      <Button
+        variant="ghost"
+        onClick={handleExport}
+        className="w-full justify-start text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 group px-3 h-10 rounded-xl"
+      >
+        <div className="p-1.5 rounded-lg bg-muted group-hover:bg-primary/10 transition-colors mr-3">
+          <Download className="h-3.5 w-3.5" />
+        </div>
+        Export as CSV
+      </Button>
     </div>
   );
 }

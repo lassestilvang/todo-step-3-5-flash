@@ -1,10 +1,11 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, CheckCircle2, Sparkles, Circle } from 'lucide-react';
+import { Trash2, CheckCircle2, Sparkles, Circle, Volume2, Bell } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { INBOX_LIST_ID } from '@/constants';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
@@ -27,7 +28,10 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const brandColor = useStore((s) => s.brandColor);
   const setBrandColor = useStore((s) => s.setBrandColor);
 
-  const completedCount = useMemo(() => tasks.filter(t => t.status === 'completed').length, [tasks]);
+  const completedCount = useMemo(
+    () => tasks.filter((t) => t.status === 'completed').length,
+    [tasks]
+  );
 
   const taskCountMap = useMemo(() => {
     const map = new Map<string, number>();
@@ -42,16 +46,18 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
 
   const viewCounts = useMemo(() => {
     return {
-      all: tasks.filter(t => t.status !== 'completed').length,
-      today: tasks.filter(t => {
+      all: tasks.filter((t) => t.status !== 'completed').length,
+      today: tasks.filter((t) => {
         if (t.status === 'completed') return false;
         const due = t.dueDate || t.deadline;
         if (!due) return false;
         const d = new Date(due);
         const today = new Date();
-        return d.getDate() === today.getDate() &&
-               d.getMonth() === today.getMonth() &&
-               d.getFullYear() === today.getFullYear();
+        return (
+          d.getDate() === today.getDate() &&
+          d.getMonth() === today.getMonth() &&
+          d.getFullYear() === today.getFullYear()
+        );
       }).length,
       completed: completedCount,
     };
@@ -94,7 +100,9 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
 
       <div className="space-y-1">
         <div className="flex items-center justify-between px-3 py-2">
-          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Your Lists</div>
+          <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+            Your Lists
+          </div>
           <CreateListDialog />
         </div>
 
@@ -114,11 +122,26 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <div className="w-1.5 h-6 rounded-full shrink-0" style={{ backgroundColor: list.color }} aria-hidden="true" />
-                  <span className="text-base leading-none" aria-hidden="true">{list.icon}</span>
+                  <div
+                    className="w-1.5 h-6 rounded-full shrink-0"
+                    style={{ backgroundColor: list.color }}
+                    aria-hidden="true"
+                  />
+                  <span className="text-base leading-none" aria-hidden="true">
+                    {list.icon}
+                  </span>
                   <span className="flex-1 text-left truncate">{list.name}</span>
-                  {count > 0 && <span className="text-[10px] tabular-nums text-muted-foreground/60" aria-label={`${count} tasks`}>{count}</span>}
-                  {list.isMagic && <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" aria-hidden="true" />}
+                  {count > 0 && (
+                    <span
+                      className="text-[10px] tabular-nums text-muted-foreground/60"
+                      aria-label={`${count} tasks`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                  {list.isMagic && (
+                    <Sparkles className="h-3 w-3 text-amber-500 animate-pulse" aria-hidden="true" />
+                  )}
                 </button>
                 {list.id !== INBOX_LIST_ID && (
                   <button
@@ -135,12 +158,20 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
         </div>
       </div>
 
-      <StatusFilterSection statusFilter={statusFilter} setStatusFilter={setStatusFilter} counts={statusCounts} />
+      <StatusFilterSection
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        counts={statusCounts}
+      />
 
       <div className="mt-auto pt-4 border-t border-border/50">
         <AnimatePresence>
           {completedCount > 0 && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+            >
               <Button
                 variant="ghost"
                 onClick={() => void handleClearCompleted()}
@@ -164,6 +195,7 @@ export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
           </div>
         )}
 
+        <SettingsSection />
         <BrandColorSelector brandColor={brandColor} setBrandColor={setBrandColor} />
       </div>
     </nav>
@@ -181,13 +213,33 @@ function StatusFilterSection({
 }) {
   return (
     <div className="space-y-1 pt-4 border-t border-border/50 mt-4">
-      <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Status Filter</div>
+      <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+        Status Filter
+      </div>
       <div className="space-y-0.5 px-2">
-        <StatusFilterButton status="pending" counts={counts} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
-        <StatusFilterButton status="in_progress" counts={counts} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
-        <StatusFilterButton status="completed" counts={counts} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
+        <StatusFilterButton
+          status="pending"
+          counts={counts}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+        />
+        <StatusFilterButton
+          status="in_progress"
+          counts={counts}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+        />
+        <StatusFilterButton
+          status="completed"
+          counts={counts}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+        />
         {statusFilter && (
-          <button onClick={() => setStatusFilter(null)} className="w-full px-3 py-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+          <button
+            onClick={() => setStatusFilter(null)}
+            className="w-full px-3 py-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+          >
             Clear filter
           </button>
         )}
@@ -208,9 +260,25 @@ function StatusFilterButton({
   setStatusFilter: (status: TaskStatus | null) => void;
 }) {
   const config = {
-    pending: { icon: Circle, color: 'text-muted-foreground', active: 'bg-blue-500/10 text-blue-600' },
-    in_progress: { icon: () => <div className="w-4 h-4 rounded-full border-2 border-amber-500 flex items-center justify-center"><div className="w-2 h-2 rounded-full bg-amber-500" /></div>, color: 'text-muted-foreground', active: 'bg-amber-500/10 text-amber-600' },
-    completed: { icon: CheckCircle2, color: 'text-muted-foreground', active: 'bg-green-500/10 text-green-600' },
+    pending: {
+      icon: Circle,
+      color: 'text-muted-foreground',
+      active: 'bg-blue-500/10 text-blue-600',
+    },
+    in_progress: {
+      icon: () => (
+        <div className="w-4 h-4 rounded-full border-2 border-amber-500 flex items-center justify-center">
+          <div className="w-2 h-2 rounded-full bg-amber-500" />
+        </div>
+      ),
+      color: 'text-muted-foreground',
+      active: 'bg-amber-500/10 text-amber-600',
+    },
+    completed: {
+      icon: CheckCircle2,
+      color: 'text-muted-foreground',
+      active: 'bg-green-500/10 text-green-600',
+    },
   };
   const c = config[status];
   const isActive = statusFilter === status;
@@ -220,18 +288,72 @@ function StatusFilterButton({
       onClick={() => setStatusFilter(isActive ? null : status)}
       className={cn(
         'w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all duration-200',
-        isActive ? `${c.active} font-semibold` : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
+        isActive
+          ? `${c.active} font-semibold`
+          : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
       )}
       aria-current={isActive ? 'true' : undefined}
     >
       <c.icon className="h-4 w-4" aria-hidden="true" />
       <span className="flex-1 text-left">{status.replace('_', ' ')}</span>
-      <span className="text-[10px] tabular-nums" aria-label={`${counts[status]} ${status.replace('_', ' ')} tasks`}>{counts[status]}</span>
+      <span
+        className="text-[10px] tabular-nums"
+        aria-label={`${counts[status]} ${status.replace('_', ' ')} tasks`}
+      >
+        {counts[status]}
+      </span>
     </button>
   );
 }
 
-function BrandColorSelector({ brandColor, setBrandColor }: { brandColor: string; setBrandColor: (color: string) => void }) {
+function SettingsSection() {
+  const soundEnabled = useStore((s) => s.soundEnabled);
+  const notificationsEnabled = useStore((s) => s.notificationsEnabled);
+  const setSoundEnabled = useStore((s) => s.setSoundEnabled);
+  const setNotificationsEnabled = useStore((s) => s.setNotificationsEnabled);
+
+  return (
+    <div className="mt-4 px-3 py-2 space-y-3 border-t border-border/50 pt-4">
+      <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+        Settings
+      </div>
+      <div className="space-y-2">
+        <label className="flex items-center justify-between group cursor-pointer px-1 py-1.5 rounded-lg hover:bg-accent/30 transition-colors">
+          <div className="flex items-center gap-2.5">
+            <Volume2 className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium">Sound</span>
+          </div>
+          <Switch
+            size="sm"
+            checked={soundEnabled}
+            onCheckedChange={(e: boolean | unknown) => setSoundEnabled(Boolean(e))}
+            aria-label="Toggle sound effects"
+          />
+        </label>
+        <label className="flex items-center justify-between group cursor-pointer px-1 py-1.5 rounded-lg hover:bg-accent/30 transition-colors">
+          <div className="flex items-center gap-2.5">
+            <Bell className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium">Notifications</span>
+          </div>
+          <Switch
+            size="sm"
+            checked={notificationsEnabled}
+            onCheckedChange={(e: boolean | unknown) => setNotificationsEnabled(Boolean(e))}
+            aria-label="Toggle browser notifications"
+          />
+        </label>
+      </div>
+    </div>
+  );
+}
+
+function BrandColorSelector({
+  brandColor,
+  setBrandColor,
+}: {
+  brandColor: string;
+  setBrandColor: (color: string) => void;
+}) {
   const colors = [
     { name: 'Default', value: 'oklch(0.55 0.25 260)' },
     { name: 'Emerald', value: 'oklch(0.6 0.18 160)' },
@@ -243,7 +365,9 @@ function BrandColorSelector({ brandColor, setBrandColor }: { brandColor: string;
 
   return (
     <div className="mt-4 px-3 py-2 space-y-3">
-      <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Brand Accent</div>
+      <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+        Brand Accent
+      </div>
       <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Brand color selector">
         {colors.map((color) => (
           <button
@@ -251,7 +375,9 @@ function BrandColorSelector({ brandColor, setBrandColor }: { brandColor: string;
             onClick={() => setBrandColor(color.value)}
             className={cn(
               'w-5 h-5 rounded-full transition-all hover:scale-125 active:scale-90 shadow-sm',
-              brandColor === color.value ? 'ring-2 ring-foreground ring-offset-2 scale-110' : 'opacity-60 hover:opacity-100'
+              brandColor === color.value
+                ? 'ring-2 ring-foreground ring-offset-2 scale-110'
+                : 'opacity-60 hover:opacity-100'
             )}
             style={{ backgroundColor: color.value }}
             role="radio"

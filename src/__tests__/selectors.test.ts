@@ -305,3 +305,34 @@ describe('getFilteredTasks edge cases', () => {
     expect(result).toEqual([]);
   });
 });
+
+describe('taskMatchesView edge cases for uncovered lines', () => {
+  it('should return true for completed view', () => {
+    const task = createTask({ status: 'completed' });
+    expect(taskMatchesView(task, 'completed')).toBe(true);
+  });
+
+  it('should return false for completed view with non-completed status', () => {
+    const task = createTask({ status: 'pending' });
+    expect(taskMatchesView(task, 'completed')).toBe(false);
+  });
+
+  it('should return true for board view (fallback) with due date', () => {
+    const future = new Date(Date.now() + 86400000);
+    const task = createTask({ dueDate: future, deadline: undefined });
+    // Test the fallback return true at line 49
+    expect(taskMatchesView(task, 'board')).toBe(true);
+  });
+});
+
+describe('getFilteredTasks with completed view', () => {
+  it('should show only completed tasks for completed view', () => {
+    const tasks: Task[] = [
+      createTask({ id: 't1', status: 'completed' }),
+      createTask({ id: 't2', status: 'pending' }),
+    ];
+    const result = getFilteredTasks(tasks, 'completed', null, null, true, '');
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('t1');
+  });
+});

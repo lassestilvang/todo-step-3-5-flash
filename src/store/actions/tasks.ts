@@ -47,6 +47,20 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
         ];
         return { tasks, overdueCount: computeOverdue(tasks), deletedTasks };
       });
+
+      // Auto-cleanup undo buffer after 10 seconds
+      setTimeout(() => {
+        set((state: AppState) => {
+          const stillHas = state.deletedTasks?.find(
+            (d: { task: { id: string } }) => d.task.id === id
+          );
+          if (!stillHas) return state;
+          return {
+            deletedTasks:
+              state.deletedTasks?.filter((d: { task: { id: string } }) => d.task.id !== id) || [],
+          };
+        });
+      }, 10000);
     },
 
     toggleTaskComplete: async (id: string, status?: Task['status']): Promise<void> => {

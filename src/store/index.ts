@@ -49,6 +49,12 @@ export const useStore = create<AppState>()(
       loadData: async () => {
         set({ loading: true, error: null });
         try {
+          // Clean stale undo entries (older than 10 seconds)
+          const staleCutoff = Date.now() - 10000;
+          set((s) => ({
+            deletedTasks: (s.deletedTasks || []).filter((d) => d.timestamp > staleCutoff),
+          }));
+
           const result = await actions.loadAppData({
             view: 'all',
             selectedListId: null,

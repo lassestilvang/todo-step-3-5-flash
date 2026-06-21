@@ -78,6 +78,7 @@ export interface AppState {
   deleteLabel: (id: string) => Promise<void>;
   getTaskById: (id: string) => Task | undefined;
   clearLastAddedTask: () => void;
+  reorderTasks: (taskIds: string[]) => Promise<void>;
   setSoundEnabled: (enabled: boolean) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
 }

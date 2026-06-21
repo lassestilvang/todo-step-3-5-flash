@@ -61,7 +61,7 @@ export function getFilteredTasks(
 
   // For 'completed' view, show only completed tasks regardless of showCompleted setting
   if (currentView === 'completed') {
-    result = tasks.filter(t => t.status === 'completed');
+    result = tasks.filter((t) => t.status === 'completed');
   } else {
     if (selectedListId) {
       result = filterByList(result, selectedListId);
@@ -104,7 +104,9 @@ function filterBySearch(tasks: Task[], query: string): Task[] {
   if (!q) return tasks;
   const lower = q.toLowerCase();
   return tasks.filter(
-    (t) => t.title.toLowerCase().includes(lower) || (t.description?.toLowerCase().includes(lower) ?? false)
+    (t) =>
+      t.title.toLowerCase().includes(lower) ||
+      (t.description?.toLowerCase().includes(lower) ?? false)
   );
 }
 
@@ -123,6 +125,8 @@ function sortTasks(tasks: Task[]): Task[] {
 
     const aPri = priorityOrder[a.priority] ?? 3;
     const bPri = priorityOrder[b.priority] ?? 3;
-    return aPri - bPri;
+    if (aPri !== bPri) return aPri - bPri;
+
+    return (a.order ?? 0) - (b.order ?? 0);
   });
 }

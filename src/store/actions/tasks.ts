@@ -2,6 +2,7 @@ import confetti from 'canvas-confetti';
 
 import * as actions from '@/app/actions';
 import { playSound } from '@/lib/sounds';
+import type { AppState as AppStateType } from '@/store/types';
 import type { Task, CreateTaskData, Subtask } from '@/types';
 
 import { computeOverdue } from '../selectors';
@@ -206,6 +207,23 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
           overdueCount: computeOverdue(state.tasks.filter((t: Task) => t.status !== 'completed')),
         }));
       }
+    },
+
+    reorderTasks: async (orderedIds: string[]): Promise<void> => {
+      await actions.reorderTasksAction(orderedIds);
+      set((state: AppStateType) => {
+        const taskMap = new Map(state.tasks.map((t: Task) => [t.id, t]));
+        const reordered: Task[] = [];
+        for (let i = 0; i < orderedIds.length; i++) {
+          const task = taskMap.get(orderedIds[i]);
+          if (task) {
+            reordered.push({ ...task, order: i });
+          }
+        }
+        const remainingIds = new Set(orderedIds);
+        const remaining = state.tasks.filter((t: Task) => !remainingIds.has(t.id));
+        return { tasks: [...reordered, ...remaining] };
+      });
     },
   };
 }

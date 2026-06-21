@@ -130,8 +130,13 @@ export function rowToObj(row: unknown): Record<string, unknown> | null {
   if (!row || typeof row !== 'object') return null;
   const obj = { ...(row as Record<string, unknown>) };
   const dateFields = new Set([
-    'created_at', 'updated_at', 'completed_at',
-    'due_date', 'deadline', 'remind_at', 'applied_at'
+    'created_at',
+    'updated_at',
+    'completed_at',
+    'due_date',
+    'deadline',
+    'remind_at',
+    'applied_at',
   ]);
   Object.keys(obj).forEach((key) => {
     const val = obj[key];
@@ -161,7 +166,14 @@ export function getLabelsForTasks(taskIds: string[]): Record<string, EnrichedLab
       WHERE tl.task_id IN (${placeholders})
     `
     )
-    .all(...taskIds) as Array<{ task_id: string; id: string; name: string; color: string; icon: string | null; created_at: string }>;
+    .all(...taskIds) as Array<{
+    task_id: string;
+    id: string;
+    name: string;
+    color: string;
+    icon: string | null;
+    created_at: string;
+  }>;
 
   const map: Record<string, EnrichedLabelRow[]> = {};
   for (const row of rows) {
@@ -184,13 +196,13 @@ export function getSubtasksForTasks(taskIds: string[]): Record<string, EnrichedS
       `SELECT * FROM subtasks WHERE task_id IN (${placeholders}) ORDER BY task_id, order_index`
     )
     .all(...taskIds) as Array<{
-      id: string;
-      task_id: string;
-      title: string;
-      completed: number;
-      order_index: number;
-      created_at: string;
-    }>;
+    id: string;
+    task_id: string;
+    title: string;
+    completed: number;
+    order_index: number;
+    created_at: string;
+  }>;
   const map: Record<string, EnrichedSubtaskRow[]> = {};
   for (const row of rows) {
     (map[row.task_id] ??= []).push({
@@ -239,6 +251,7 @@ export interface EnrichedTaskRow {
   priority: string;
   recurrence: string | null;
   recurrence_rule: string | null;
+  order_index: number;
   created_at: Date;
   updated_at: Date;
   completed_at: Date | undefined;
@@ -246,9 +259,7 @@ export interface EnrichedTaskRow {
   subtasks: EnrichedSubtaskRow[];
 }
 
-function enrichTasksWithRelations(
-  tasks: TaskRow[]
-): EnrichedTaskRow[] {
+function enrichTasksWithRelations(tasks: TaskRow[]): EnrichedTaskRow[] {
   const taskIds = tasks.map((t) => t.id);
   const labelsMap = getLabelsForTasks(taskIds);
   const subtasksMap = getSubtasksForTasks(taskIds);
@@ -269,6 +280,7 @@ function enrichTasksWithRelations(
       priority: task.priority,
       recurrence: task.recurrence,
       recurrence_rule: task.recurrence_rule,
+      order_index: task.order_index || 0,
       created_at: enriched.created_at instanceof Date ? enriched.created_at : new Date(),
       updated_at: enriched.updated_at instanceof Date ? enriched.updated_at : new Date(),
       completed_at: enriched.completed_at instanceof Date ? enriched.completed_at : undefined,
@@ -284,6 +296,14 @@ export const migrations = [
     version: 1,
     name: 'initial',
     up: initializeDatabase,
+  },
+  {
+    version: 2,
+    name: 'add_order_to_tasks',
+    up: () => {
+      getDatabase().exec('ALTER TABLE tasks ADD COLUMN order_index INTEGER NOT NULL DEFAULT 0');
+      getDatabase().exec('CREATE INDEX IF NOT EXISTS idx_tasks_order ON tasks(order_index)');
+    },
   },
 ];
 
@@ -304,10 +324,9 @@ export function runMigrations() {
   for (const migration of migrations) {
     if (!applied.has(migration.version)) {
       migration.up();
-      getDatabase().prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)').run(
-        migration.version,
-        migration.name
-      );
+      getDatabase()
+        .prepare('INSERT INTO schema_migrations (version, name) VALUES (?, ?)')
+        .run(migration.version, migration.name);
     }
   }
 }
@@ -362,12 +381,14 @@ export function createList(data: {
   id?: string;
 }): ListRow {
   const id = data.id ?? generateId();
-  getDatabase().prepare(
-    `
+  getDatabase()
+    .prepare(
+      `
     INSERT INTO lists (id, name, color, icon, parent_id, order_index)
     VALUES (?, ?, ?, ?, ?, ?)
   `
-  ).run(id, data.name, data.color, data.icon, data.parent_id ?? null, data.order ?? 0);
+    )
+    .run(id, data.name, data.color, data.icon, data.parent_id ?? null, data.order ?? 0);
   return getListById(id)!;
 }
 
@@ -408,9 +429,9 @@ export function updateList(
   if (updates.length === 0) return getListById(id);
 
   values.push(id);
-  getDatabase().prepare(
-    `UPDATE lists SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`
-  ).run(...values);
+  getDatabase()
+    .prepare(`UPDATE lists SET ${updates.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
+    .run(...values);
   return getListById(id)!;
 }
 
@@ -452,6 +473,7 @@ export interface TaskRow {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  order_index: number;
 }
 
 export function getAllTasks(): EnrichedTaskRow[] {
@@ -459,10 +481,10 @@ export function getAllTasks(): EnrichedTaskRow[] {
   return enrichTasksWithRelations(tasks);
 }
 
-export function getTaskById(
-  id: string
-): EnrichedTaskRow | null {
-  const task = getDatabase().prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow | undefined;
+export function getTaskById(id: string): EnrichedTaskRow | null {
+  const task = getDatabase().prepare('SELECT * FROM tasks WHERE id = ?').get(id) as
+    | TaskRow
+    | undefined;
 
   if (!task) return null;
 
@@ -481,6 +503,7 @@ export function getTaskById(
     priority: task.priority,
     recurrence: task.recurrence,
     recurrence_rule: task.recurrence_rule,
+    order_index: task.order_index || 0,
     created_at: enriched.created_at instanceof Date ? enriched.created_at : new Date(),
     updated_at: enriched.updated_at instanceof Date ? enriched.updated_at : new Date(),
     completed_at: enriched.completed_at instanceof Date ? enriched.completed_at : undefined,
@@ -489,9 +512,7 @@ export function getTaskById(
   };
 }
 
-export function getTasksByListId(
-  listId: string
-): EnrichedTaskRow[] {
+export function getTasksByListId(listId: string): EnrichedTaskRow[] {
   const tasks = db
     .prepare('SELECT * FROM tasks WHERE list_id = ? ORDER BY created_at DESC')
     .all(listId) as TaskRow[];
@@ -536,9 +557,7 @@ export function getTasksDueToday(): EnrichedTaskRow[] {
   return enrichTasksWithRelations(tasks);
 }
 
-export function getTasksDueInNextDays(
-  days: number
-): EnrichedTaskRow[] {
+export function getTasksDueInNextDays(days: number): EnrichedTaskRow[] {
   const now = new Date();
   const future = new Date(now);
   future.setDate(future.getDate() + days);
@@ -568,6 +587,7 @@ export function getTasksDueInNextDays(
 
 export function createTask(data: {
   list_id: string;
+  order_index?: number;
   title: string;
   description?: string;
   due_date?: Date;
@@ -591,33 +611,38 @@ export function createTask(data: {
   const recurrence_rule = data.recurrence_rule ?? null;
   const parent_id = data.parent_id ?? null;
 
-  getDatabase().prepare(
-    `
+  getDatabase()
+    .prepare(
+      `
     INSERT INTO tasks (
       id, list_id, title, description, due_date, deadline,
       estimate_minutes, priority, recurrence, recurrence_rule, parent_id,
-      created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      order_index, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `
-  ).run(
-    id,
-    data.list_id,
-    data.title,
-    description,
-    due_date,
-    deadline,
-    estimate_minutes,
-    priority,
-    recurrence,
-    recurrence_rule,
-    parent_id,
-    now,
-    now
-  );
+    )
+    .run(
+      id,
+      data.list_id,
+      data.title,
+      description,
+      due_date,
+      deadline,
+      estimate_minutes,
+      priority,
+      recurrence,
+      recurrence_rule,
+      parent_id,
+      data.order_index ?? 0,
+      now,
+      now
+    );
 
   function attachLabels(taskId: string, labelIds?: string[]) {
     if (labelIds && labelIds.length > 0) {
-      const insertLabel = getDatabase().prepare('INSERT INTO task_labels (task_id, label_id) VALUES (?, ?)');
+      const insertLabel = getDatabase().prepare(
+        'INSERT INTO task_labels (task_id, label_id) VALUES (?, ?)'
+      );
       for (const labelId of labelIds) {
         insertLabel.run(taskId, labelId);
       }
@@ -644,9 +669,12 @@ export function updateTask(
     priority: string;
     recurrence: string;
     recurrence_rule: string;
+    order_index: number;
   }>
 ): TaskRow | null {
-  const existing = getDatabase().prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow | null;
+  const existing = getDatabase()
+    .prepare('SELECT * FROM tasks WHERE id = ?')
+    .get(id) as TaskRow | null;
   if (!existing) return null;
 
   const updates: string[] = [];
@@ -664,6 +692,7 @@ export function updateTask(
     { column: 'priority', value: data.priority },
     { column: 'recurrence', value: data.recurrence },
     { column: 'recurrence_rule', value: data.recurrence_rule },
+    { column: 'order_index', value: data.order_index },
   ];
 
   for (const { column, value, transform } of fieldMap) {
@@ -686,7 +715,9 @@ export function updateTask(
   if (updates.length > 0) {
     updates.push('updated_at = CURRENT_TIMESTAMP');
     values.push(id);
-    getDatabase().prepare(`UPDATE tasks SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+    getDatabase()
+      .prepare(`UPDATE tasks SET ${updates.join(', ')} WHERE id = ?`)
+      .run(...values);
   }
 
   return getDatabase().prepare('SELECT * FROM tasks WHERE id = ?').get(id) as TaskRow;
@@ -719,20 +750,30 @@ export function getAllLabels(): EnrichedLabelRow[] {
 }
 
 export function getLabelById(id: string): LabelRow | null {
-  return rowToObj(getDatabase().prepare('SELECT * FROM labels WHERE id = ?').get(id)) as LabelRow | null;
+  return rowToObj(
+    getDatabase().prepare('SELECT * FROM labels WHERE id = ?').get(id)
+  ) as LabelRow | null;
 }
 
 export function getLabelByName(name: string): LabelRow | null {
-  return rowToObj(getDatabase().prepare('SELECT * FROM labels WHERE name = ?').get(name)) as LabelRow | null;
+  return rowToObj(
+    getDatabase().prepare('SELECT * FROM labels WHERE name = ?').get(name)
+  ) as LabelRow | null;
 }
 
-export function createLabel(data: { name: string; color: string; icon?: string }): EnrichedLabelRow {
+export function createLabel(data: {
+  name: string;
+  color: string;
+  icon?: string;
+}): EnrichedLabelRow {
   const id = generateId();
-  getDatabase().prepare(
-    `
+  getDatabase()
+    .prepare(
+      `
     INSERT INTO labels (id, name, color, icon) VALUES (?, ?, ?, ?)
   `
-  ).run(id, data.name, data.color, data.icon ?? null);
+    )
+    .run(id, data.name, data.color, data.icon ?? null);
   const row = getLabelById(id);
   return {
     id: row!.id,
@@ -769,25 +810,31 @@ export function updateLabel(
 
   if (updates.length === 0) {
     const row = getLabelById(id);
-    return row ? {
-      id: row.id,
-      name: row.name,
-      color: row.color,
-      icon: row.icon ?? undefined,
-      created_at: new Date(row.created_at),
-    } : null;
+    return row
+      ? {
+          id: row.id,
+          name: row.name,
+          color: row.color,
+          icon: row.icon ?? undefined,
+          created_at: new Date(row.created_at),
+        }
+      : null;
   }
 
   values.push(id);
-  getDatabase().prepare(`UPDATE labels SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+  getDatabase()
+    .prepare(`UPDATE labels SET ${updates.join(', ')} WHERE id = ?`)
+    .run(...values);
   const row = getLabelById(id);
-  return row ? {
-    id: row.id,
-    name: row.name,
-    color: row.color,
-    icon: row.icon ?? undefined,
-    created_at: new Date(row.created_at),
-  } : null;
+  return row
+    ? {
+        id: row.id,
+        name: row.name,
+        color: row.color,
+        icon: row.icon ?? undefined,
+        created_at: new Date(row.created_at),
+      }
+    : null;
 }
 
 export function deleteLabel(id: string): boolean {
@@ -796,14 +843,15 @@ export function deleteLabel(id: string): boolean {
 }
 
 export function attachLabelToTask(taskId: string, labelId: string) {
-  getDatabase().prepare('INSERT OR IGNORE INTO task_labels (task_id, label_id) VALUES (?, ?)').run(
-    taskId,
-    labelId
-  );
+  getDatabase()
+    .prepare('INSERT OR IGNORE INTO task_labels (task_id, label_id) VALUES (?, ?)')
+    .run(taskId, labelId);
 }
 
 export function detachLabelFromTask(taskId: string, labelId: string) {
-  getDatabase().prepare('DELETE FROM task_labels WHERE task_id = ? AND label_id = ?').run(taskId, labelId);
+  getDatabase()
+    .prepare('DELETE FROM task_labels WHERE task_id = ? AND label_id = ?')
+    .run(taskId, labelId);
 }
 
 // ==================== SUBTASKS ====================
@@ -830,11 +878,13 @@ export function createSubtask(data: {
 }): SubtaskRow {
   const id = generateId();
   const order = data.order ?? getSubtasksByTaskId(data.task_id).length + 1;
-  getDatabase().prepare(
-    `
+  getDatabase()
+    .prepare(
+      `
     INSERT INTO subtasks (id, task_id, title, order_index) VALUES (?, ?, ?, ?)
   `
-  ).run(id, data.task_id, data.title, order);
+    )
+    .run(id, data.task_id, data.title, order);
   return getDatabase().prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as SubtaskRow;
 }
 
@@ -865,7 +915,9 @@ export function updateSubtask(
   if (updates.length === 0) return null;
 
   values.push(id);
-  getDatabase().prepare(`UPDATE subtasks SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+  getDatabase()
+    .prepare(`UPDATE subtasks SET ${updates.join(', ')} WHERE id = ?`)
+    .run(...values);
   return getDatabase().prepare('SELECT * FROM subtasks WHERE id = ?').get(id) as SubtaskRow;
 }
 
@@ -887,7 +939,9 @@ export interface AttachmentRow {
 }
 
 export function getAttachmentsByTaskId(taskId: string): AttachmentRow[] {
-  return getDatabase().prepare('SELECT * FROM attachments WHERE task_id = ?').all(taskId) as AttachmentRow[];
+  return getDatabase()
+    .prepare('SELECT * FROM attachments WHERE task_id = ?')
+    .all(taskId) as AttachmentRow[];
 }
 
 export function createAttachment(data: {
@@ -898,12 +952,14 @@ export function createAttachment(data: {
   size: number;
 }): AttachmentRow {
   const id = generateId();
-  getDatabase().prepare(
-    `
+  getDatabase()
+    .prepare(
+      `
     INSERT INTO attachments (id, task_id, name, url, type, size)
     VALUES (?, ?, ?, ?, ?, ?)
   `
-  ).run(id, data.task_id, data.name, data.url, data.type, data.size);
+    )
+    .run(id, data.task_id, data.name, data.url, data.type, data.size);
   return getDatabase().prepare('SELECT * FROM attachments WHERE id = ?').get(id) as AttachmentRow;
 }
 
@@ -923,7 +979,9 @@ export interface ReminderRow {
 }
 
 export function getRemindersByTaskId(taskId: string): ReminderRow[] {
-  return getDatabase().prepare('SELECT * FROM reminders WHERE task_id = ?').all(taskId) as ReminderRow[];
+  return getDatabase()
+    .prepare('SELECT * FROM reminders WHERE task_id = ?')
+    .all(taskId) as ReminderRow[];
 }
 
 export function getPendingReminders(): ReminderRow[] {
@@ -935,11 +993,13 @@ export function getPendingReminders(): ReminderRow[] {
 
 export function createReminder(data: { task_id: string; remind_at: Date }): ReminderRow {
   const id = generateId();
-  getDatabase().prepare(
-    `
+  getDatabase()
+    .prepare(
+      `
     INSERT INTO reminders (id, task_id, remind_at) VALUES (?, ?, ?)
   `
-  ).run(id, data.task_id, data.remind_at.toISOString());
+    )
+    .run(id, data.task_id, data.remind_at.toISOString());
   return getDatabase().prepare('SELECT * FROM reminders WHERE id = ?').get(id) as ReminderRow;
 }
 
@@ -978,4 +1038,3 @@ export function seedDefaultData() {
     createList({ name: 'Someday', color: '#6b7280', icon: '☁️', order: 3 });
   }
 }
-

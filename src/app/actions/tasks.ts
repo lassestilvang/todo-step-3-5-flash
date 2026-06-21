@@ -49,7 +49,10 @@ export async function createTaskAction(data: CreateTaskData) {
   }
 }
 
-export async function updateTaskAction(id: string, data: Partial<CreateTaskData> & { status?: string }) {
+export async function updateTaskAction(
+  id: string,
+  data: Partial<CreateTaskData> & { status?: string }
+) {
   try {
     const parsed = updateTaskSchema.parse(data);
     type UpdateKey =
@@ -109,7 +112,9 @@ export async function deleteTaskAction(id: string) {
 
 export async function toggleTaskCompleteAction(id: string) {
   try {
-    const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as EnrichedTaskRow | undefined;
+    const existing = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id) as
+      | EnrichedTaskRow
+      | undefined;
     if (!existing) {
       throw new AppError('Task not found', 'NOT_FOUND');
     }
@@ -184,6 +189,23 @@ export async function deleteSubtaskAction(subtaskId: string) {
   } catch (error) {
     if (error instanceof Error && !(error instanceof AppError)) {
       throw handleDbError(error, 'deleteSubtask');
+    }
+    throw error;
+  }
+}
+
+export async function reorderTasksAction(orderedIds: string[]): Promise<void> {
+  try {
+    const updateStmt = db.prepare('UPDATE tasks SET order_index = ? WHERE id = ?');
+    const transaction = db.transaction((ids: string[]) => {
+      for (let i = 0; i < ids.length; i++) {
+        updateStmt.run(i, ids[i]);
+      }
+    });
+    transaction(orderedIds);
+  } catch (error) {
+    if (error instanceof Error && !(error instanceof AppError)) {
+      throw handleDbError(error, 'reorderTasks');
     }
     throw error;
   }

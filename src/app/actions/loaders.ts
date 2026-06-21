@@ -68,6 +68,7 @@ function mapTaskRowToTask(row: EnrichedTaskRow, listMap: Map<string, TaskList>):
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     completedAt: row.completed_at,
+    order: row.order_index ?? 0,
     labels: row.labels.map((l) => ({
       id: l.id,
       name: l.name,

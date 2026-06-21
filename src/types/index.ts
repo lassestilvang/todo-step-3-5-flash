@@ -119,6 +119,7 @@ export interface CreateTaskData {
   title: string;
   description?: string;
   listId: string;
+  order?: number;
   dueDate?: Date;
   deadline?: Date;
   estimateMinutes?: number;

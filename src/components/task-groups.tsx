@@ -1,8 +1,20 @@
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { format, isToday, isTomorrow, isThisWeek, isThisYear } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { DATE_FORMATS, STRINGS } from '@/constants';
+import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 import type { Task } from '@/types';
 
@@ -18,10 +30,58 @@ function getDateLabel(due: Date | string | undefined): string {
   return format(date, DATE_FORMATS.FULL_DATE);
 }
 
+function SortableTaskItem({ task, isNew }: { task: Task; isNew: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: task.id,
+    data: { task },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  };
+
+  return (
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      layout
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+      transition={{ duration: 0.2, delay: isNew ? 0.3 : 0 }}
+      className={cn(isDragging && 'relative z-50')}
+      {...attributes}
+      {...listeners}
+    >
+      <motion.div
+        initial={isNew ? { boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.4)' } : undefined}
+        animate={
+          isNew
+            ? {
+                boxShadow: [
+                  '0 0 0 0px rgba(59, 130, 246, 0.4)',
+                  '0 0 0 4px rgba(59, 130, 246, 0)',
+                  '0 0 0 0px rgba(59, 130, 246, 0)',
+                ],
+              }
+            : undefined
+        }
+        transition={isNew ? { duration: 1.5, repeat: Infinity } : undefined}
+      >
+        <TaskCard task={task} />
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export function TaskGroups({ tasks }: { tasks: Task[] }) {
   const setSelectedTask = useStore((s) => s.setSelectedTask);
   const lastAddedTask = useStore((s) => s.lastAddedTask);
   const clearLastAddedTask = useStore((s) => s.clearLastAddedTask);
+  const reorderTasks = useStore((s) => s.reorderTasks);
 
   const taskIds = useMemo(() => tasks.map((t) => t.id), [tasks]);
 
@@ -52,26 +112,29 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
   }, [taskIds, setSelectedTask]);
 
   /* eslint-disable-next-line complexity */
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    const tag = document.activeElement?.tagName;
-    const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || e.target instanceof HTMLInputElement;
-    if (isInput) return;
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      const tag = document.activeElement?.tagName;
+      const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || e.target instanceof HTMLInputElement;
+      if (isInput) return;
 
-    const isModifier = e.metaKey || e.ctrlKey;
-    const current = useStore.getState().selectedTaskId;
+      const isModifier = e.metaKey || e.ctrlKey;
+      const current = useStore.getState().selectedTaskId;
 
-    if (e.key === 'j' && isModifier) {
-      e.preventDefault();
-      handleNext();
-    } else if (e.key === 'k' && isModifier) {
-      e.preventDefault();
-      handlePrev();
-    } else if (e.key === 'x' && !isModifier && current) {
-      e.preventDefault();
-      void useStore.getState().deleteTask(current);
-      useStore.getState().setSelectedTask(null);
-    }
-  }, [handleNext, handlePrev]);
+      if (e.key === 'j' && isModifier) {
+        e.preventDefault();
+        handleNext();
+      } else if (e.key === 'k' && isModifier) {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.key === 'x' && !isModifier && current) {
+        e.preventDefault();
+        void useStore.getState().deleteTask(current);
+        useStore.getState().setSelectedTask(null);
+      }
+    },
+    [handleNext, handlePrev]
+  );
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -88,41 +151,58 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
     return map;
   }, [tasks]);
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor)
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+
+      const activeIdx = taskIds.indexOf(active.id as string);
+      const overIdx = taskIds.indexOf(over.id as string);
+      if (activeIdx === -1 || overIdx === -1) return;
+
+      const reordered = [...taskIds];
+      reordered.splice(activeIdx, 1);
+      reordered.splice(overIdx, 0, active.id as string);
+
+      void reorderTasks(reordered);
+    },
+    [taskIds, reorderTasks]
+  );
+
   return (
-    <div className="space-y-8" style={{ contentVisibility: 'auto', containIntrinsicHeight: '800px' }}>
-      {Object.entries(grouped).map(([dateLabel, grp]) => (
-        <div key={dateLabel} className="space-y-2">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-background py-2">
-            {dateLabel}
-            <span className="ml-2 text-xs font-normal opacity-60 tabular-nums">({grp.length})</span>
-          </h3>
-          <div className="space-y-2" style={{ contentVisibility: 'auto', containIntrinsicHeight: '200px' }}>
-            <AnimatePresence mode="popLayout">
-              {grp.map((task) => {
-                const isNew = task.id === lastAddedTask;
-                return (
-                  <motion.div
-                    key={task.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    transition={{ duration: 0.2, delay: isNew ? 0.3 : 0 }}
-                  >
-                    <motion.div
-                      initial={isNew ? { boxShadow: '0 0 0 0 rgba(59, 130, 246, 0.4)' } : undefined}
-                      animate={isNew ? { boxShadow: ['0 0 0 0px rgba(59, 130, 246, 0.4)', '0 0 0 4px rgba(59, 130, 246, 0)', '0 0 0 0px rgba(59, 130, 246, 0)'] } : undefined}
-                      transition={isNew ? { duration: 1.5, repeat: Infinity } : undefined}
-                    >
-                      <TaskCard task={task} />
-                    </motion.div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <div
+        className="space-y-8"
+        style={{ contentVisibility: 'auto', containIntrinsicHeight: '800px' }}
+      >
+        {Object.entries(grouped).map(([dateLabel, grp]) => (
+          <div key={dateLabel} className="space-y-2">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-background py-2">
+              {dateLabel}
+              <span className="ml-2 text-xs font-normal opacity-60 tabular-nums">
+                ({grp.length})
+              </span>
+            </h3>
+            <div
+              className="space-y-2"
+              style={{ contentVisibility: 'auto', containIntrinsicHeight: '200px' }}
+            >
+              <AnimatePresence mode="popLayout">
+                {grp.map((task) => (
+                  <SortableTaskItem key={task.id} task={task} isNew={task.id === lastAddedTask} />
+                ))}
+              </AnimatePresence>
+            </div>
           </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </DndContext>
   );
 }

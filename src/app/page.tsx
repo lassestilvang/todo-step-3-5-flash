@@ -40,19 +40,10 @@ export default function HomePage() {
 
   useEffect(() => {
     useStore.getState().loadData();
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'n' && !(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement)) {
-        e.preventDefault();
-        useStore.getState().openCreateTask();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
   const productivityStats = useMemo(() => {
-    const completed = tasks.filter(t => t.status === 'completed').length;
+    const completed = tasks.filter((t) => t.status === 'completed').length;
     const total = tasks.length;
     const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
     return { completed, total, percent };
@@ -61,8 +52,14 @@ export default function HomePage() {
   return (
     <div className="flex h-screen bg-[#fafafa] dark:bg-[#050505] relative overflow-hidden">
       {/* Animated background elements */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDuration: '20s' }} />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl -z-10 animate-pulse" style={{ animationDuration: '25s' }} />
+      <div
+        className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 animate-pulse"
+        style={{ animationDuration: '20s' }}
+      />
+      <div
+        className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl -z-10 animate-pulse"
+        style={{ animationDuration: '25s' }}
+      />
       {/* Mobile Sidebar Sheet */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="w-80 p-0 border-r-0 shadow-2xl">
@@ -92,13 +89,15 @@ export default function HomePage() {
         <div className="p-6 border-b border-border/50">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2 group cursor-default">
-              <motion.div 
+              <motion.div
                 whileHover={{ rotate: 12, scale: 1.1 }}
                 className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20 transition-transform"
               >
                 <CheckCircle2 className="w-5 h-5 text-primary-foreground" />
               </motion.div>
-              <h1 className="text-xl font-black tracking-tighter group-hover:text-primary transition-colors">TaskPlanner</h1>
+              <h1 className="text-xl font-black tracking-tighter group-hover:text-primary transition-colors">
+                TaskPlanner
+              </h1>
             </div>
             <ThemeToggle />
           </div>
@@ -115,7 +114,7 @@ export default function HomePage() {
               <span>{productivityStats.percent}%</span>
             </div>
             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-              <motion.div 
+              <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${productivityStats.percent}%` }}
                 className="h-full bg-primary"
@@ -132,14 +131,14 @@ export default function HomePage() {
       <main id="main-content" role="main" className="flex-1 flex flex-col overflow-hidden relative">
         {/* Background gradient for main content */}
         <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-        
+
         {/* Header */}
         <header className="flex-shrink-0 z-10 p-4 md:p-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="outline" 
-                size="icon" 
+              <Button
+                variant="outline"
+                size="icon"
                 className="lg:hidden h-10 w-10 rounded-xl"
                 onClick={() => setSidebarOpen(true)}
               >
@@ -147,13 +146,15 @@ export default function HomePage() {
               </Button>
 
               <div>
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   className="flex items-center gap-2 mb-1"
                 >
                   <Sparkles className="h-4 w-4 text-amber-500" />
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Personal Workspace</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                    Personal Workspace
+                  </span>
                 </motion.div>
                 <div className="flex items-center gap-3">
                   <h2 className="text-3xl md:text-5xl font-black tracking-tight">
@@ -169,7 +170,10 @@ export default function HomePage() {
                     {productivityStats.total} tasks active
                   </p>
                   {overdueCount > 0 && (
-                    <Badge variant="destructive" className="rounded-full px-2 py-0 h-5 text-[10px] font-bold">
+                    <Badge
+                      variant="destructive"
+                      className="rounded-full px-2 py-0 h-5 text-[10px] font-bold"
+                    >
                       {overdueCount} OVERDUE
                     </Badge>
                   )}
@@ -188,8 +192,8 @@ export default function HomePage() {
                 <Sparkles className="h-4 w-4" />
               </Button>
               <ViewToggle />
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 onClick={() => openCreateTask()}
                 className="rounded-2xl h-12 px-6 font-bold shadow-xl shadow-primary/20 transition-all hover:scale-105 active:scale-95"
               >
@@ -208,32 +212,43 @@ export default function HomePage() {
                 <Trophy className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Productivity Score</div>
-                <div className="text-lg font-black tracking-tight">{productivityStats.percent} <span className="text-sm font-medium text-muted-foreground">/ 100</span></div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Productivity Score
+                </div>
+                <div className="text-lg font-black tracking-tight">
+                  {productivityStats.percent}{' '}
+                  <span className="text-sm font-medium text-muted-foreground">/ 100</span>
+                </div>
               </div>
             </div>
-            
+
             <div className="hidden md:flex gap-8">
               <div className="text-center">
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Completed</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Completed
+                </div>
                 <div className="text-lg font-black">{productivityStats.completed}</div>
               </div>
               <div className="text-center">
-                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Outstanding</div>
-                <div className="text-lg font-black">{productivityStats.total - productivityStats.completed}</div>
+                <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Outstanding
+                </div>
+                <div className="text-lg font-black">
+                  {productivityStats.total - productivityStats.completed}
+                </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-               <span className="text-xs font-medium text-muted-foreground">Show Completed</span>
-               <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={toggleShowCompleted}
-                  className={cn('rounded-lg', showCompleted ? 'text-primary bg-primary/10' : '')}
-                >
-                  {showCompleted ? '✓' : '○'}
-                </Button>
+              <span className="text-xs font-medium text-muted-foreground">Show Completed</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleShowCompleted}
+                className={cn('rounded-lg', showCompleted ? 'text-primary bg-primary/10' : '')}
+              >
+                {showCompleted ? '✓' : '○'}
+              </Button>
             </div>
           </div>
         </div>

@@ -31,6 +31,8 @@ export const useStore = create<AppState>()(
       lastAddedTask: null,
       theme: 'system',
       brandColor: 'oklch(0.55 0.25 260)',
+      soundEnabled: true,
+      notificationsEnabled: false,
       focusTimer: {
         timeLeft: 25 * 60,
         isActive: false,
@@ -142,15 +144,23 @@ export const useStore = create<AppState>()(
 
       tickFocusTimer: () => {
         const state = get();
-        const { timeLeft, mode, isActive, autoStartNext, workDuration, breakDuration } = state.focusTimer;
+        const { timeLeft, mode, isActive, autoStartNext, workDuration, breakDuration } =
+          state.focusTimer;
         if (!isActive) return;
 
         if (timeLeft <= 0) {
-          playSound('timer_end');
+          if (get().soundEnabled) playSound('timer_end');
           try {
             navigator.vibrate([100, 50, 100]);
           } catch {
             // Vibration not supported
+          }
+          if (get().notificationsEnabled) {
+            import('@/lib/notifications').then(({ sendNotification }) => {
+              sendNotification(mode === 'work' ? 'Focus session complete!' : 'Break time over!', {
+                body: mode === 'work' ? 'Time to take a break.' : 'Time to get back to work.',
+              });
+            });
           }
           const nextMode = mode === 'work' ? 'break' : 'work';
           const nextDuration = nextMode === 'work' ? workDuration : breakDuration;
@@ -238,6 +248,20 @@ export const useStore = create<AppState>()(
         set({ lastAddedTask: null });
       },
 
+      setSoundEnabled: (enabled) => {
+        set({ soundEnabled: enabled });
+      },
+
+      setNotificationsEnabled: async (enabled) => {
+        if (enabled) {
+          const { requestNotificationPermission } = await import('@/lib/notifications');
+          const granted = await requestNotificationPermission();
+          set({ notificationsEnabled: granted });
+        } else {
+          set({ notificationsEnabled: false });
+        }
+      },
+
       ...createTaskActions(set as StoreSetter, get as StoreGetter),
       ...createListActions(set as StoreSetter, get as StoreGetter),
       ...createLabelActions(set as StoreSetter),
@@ -247,6 +271,8 @@ export const useStore = create<AppState>()(
       partialize: (state) => ({
         theme: state.theme,
         brandColor: state.brandColor,
+        soundEnabled: state.soundEnabled,
+        notificationsEnabled: state.notificationsEnabled,
       }),
     }
   )
@@ -275,7 +301,15 @@ export const useFilteredTasks = () => {
   const searchQuery = useStore(selectSearchQuery);
 
   return useMemo(
-    () => getFilteredTasks(tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery),
+    () =>
+      getFilteredTasks(
+        tasks,
+        currentView,
+        selectedListId,
+        statusFilter,
+        showCompleted,
+        searchQuery
+      ),
     [tasks, currentView, selectedListId, statusFilter, showCompleted, searchQuery]
   );
 };

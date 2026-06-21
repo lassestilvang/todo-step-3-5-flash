@@ -31,6 +31,8 @@ export interface AppState {
   lastAddedTask: string | null;
   theme: string;
   brandColor: string;
+  soundEnabled: boolean;
+  notificationsEnabled: boolean;
   focusTimer: FocusTimerState;
   loading: boolean;
   error: string | null;
@@ -56,7 +58,10 @@ export interface AppState {
   closeTaskModal: () => void;
   clearError: () => void;
   addTask: (data: CreateTaskData) => Promise<Task | null>;
-  updateTask: (id: string, data: Partial<CreateTaskData> & { status?: Task['status'] }) => Promise<void>;
+  updateTask: (
+    id: string,
+    data: Partial<CreateTaskData> & { status?: Task['status'] }
+  ) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   undoDeleteTask: (id: string) => void;
   toggleTaskComplete: (id: string, status?: Task['status']) => Promise<void>;
@@ -73,6 +78,8 @@ export interface AppState {
   deleteLabel: (id: string) => Promise<void>;
   getTaskById: (id: string) => Task | undefined;
   clearLastAddedTask: () => void;
+  setSoundEnabled: (enabled: boolean) => void;
+  setNotificationsEnabled: (enabled: boolean) => void;
 }
 
 export type StoreSetter = (

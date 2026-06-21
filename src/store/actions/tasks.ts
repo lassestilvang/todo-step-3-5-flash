@@ -21,7 +21,10 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
       return newTask;
     },
 
-    updateTask: async (id: string, data: Partial<CreateTaskData> & { status?: Task['status'] }): Promise<void> => {
+    updateTask: async (
+      id: string,
+      data: Partial<CreateTaskData> & { status?: Task['status'] }
+    ): Promise<void> => {
       const updated = await actions.updateTaskAction(id, data);
       if (updated) {
         set((state: AppState) => {
@@ -38,7 +41,10 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
       await actions.deleteTaskAction(id);
       set((state: AppState) => {
         const tasks = state.tasks.filter((t: Task) => t.id !== id);
-        const deletedTasks = [...(state.deletedTasks || []), { task: taskToDelete, timestamp: Date.now() }];
+        const deletedTasks = [
+          ...(state.deletedTasks || []),
+          { task: taskToDelete, timestamp: Date.now() },
+        ];
         return { tasks, overdueCount: computeOverdue(tasks), deletedTasks };
       });
     },
@@ -60,9 +66,16 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
         const updated = await actions.updateTaskAction(id, { status: newStatus });
         if (updated) {
           if (updated.status === 'completed') {
-            playSound('complete');
+            if (get().soundEnabled) playSound('complete');
             if (typeof navigator !== 'undefined' && navigator.vibrate) {
               navigator.vibrate(100);
+            }
+            if (get().notificationsEnabled) {
+              import('@/lib/notifications').then(({ sendNotification }) => {
+                sendNotification('Task completed!', {
+                  body: `"${updated.title}" is done. Great work!`,
+                });
+              });
             }
             void confetti({
               particleCount: 150,
@@ -133,19 +146,19 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
 
     magicSortTasks: () => {
       const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2, none: 3 };
-      
+
       set((state: AppState) => {
         const sortedTasks = [...state.tasks].sort((a, b) => {
           // 1. Status (incomplete first)
           if (a.status !== b.status) {
             return a.status === 'completed' ? 1 : -1;
           }
-          
+
           // 2. Priority
           if (a.priority !== b.priority) {
             return priorityOrder[a.priority]! - priorityOrder[b.priority]!;
           }
-          
+
           // 3. Due Date
           const dateA = a.dueDate || a.deadline;
           const dateB = b.dueDate || b.deadline;
@@ -154,14 +167,15 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
           }
           if (dateA) return -1;
           if (dateB) return 1;
-          
+
           // 4. Creation Date (newest first)
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         });
-        
+
         return { tasks: sortedTasks };
       });
-      
+
+      if (get().soundEnabled) playSound('complete');
       void confetti({
         particleCount: 100,
         spread: 100,

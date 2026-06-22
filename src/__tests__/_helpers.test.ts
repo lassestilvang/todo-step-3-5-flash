@@ -16,6 +16,7 @@ describe('_helpers', () => {
         deadline: new Date('2024-06-20'),
         estimate_minutes: 60,
         actual_minutes: 30,
+        order_index: 0,
         status: 'pending',
         priority: 'high',
         recurrence: null,
@@ -50,6 +51,7 @@ describe('_helpers', () => {
         deadline: undefined,
         estimate_minutes: 0,
         actual_minutes: 0,
+        order_index: 0,
         status: 'pending',
         priority: 'none',
         recurrence: null,
@@ -61,7 +63,14 @@ describe('_helpers', () => {
           { id: 'label-1', name: 'Work', color: '#ff0000', icon: '💼', created_at: new Date() },
         ],
         subtasks: [
-          { id: 'sub-1', taskId: 'task-1', title: 'Subtask', completed: true, order: 0, createdAt: new Date() },
+          {
+            id: 'sub-1',
+            taskId: 'task-1',
+            title: 'Subtask',
+            completed: true,
+            order: 0,
+            createdAt: new Date(),
+          },
         ],
       };
 
@@ -84,6 +93,7 @@ describe('_helpers', () => {
         deadline: undefined,
         estimate_minutes: 0,
         actual_minutes: 0,
+        order_index: 0,
         status: 'pending',
         priority: 'none',
         recurrence: null,

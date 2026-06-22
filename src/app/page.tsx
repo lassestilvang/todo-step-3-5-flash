@@ -51,14 +51,26 @@ export default function HomePage() {
 
   return (
     <div className="flex h-screen bg-[#fafafa] dark:bg-[#050505] relative overflow-hidden">
-      {/* Animated background elements */}
-      <div
-        className="absolute top-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -z-10 animate-pulse"
-        style={{ animationDuration: '20s' }}
+      {/* Animated background elements bound to active brand accent color */}
+      <motion.div
+        className="absolute top-0 left-0 w-96 h-96 rounded-full blur-3xl -z-10 opacity-20"
+        animate={{
+          scale: [1, 1.2, 1],
+          x: [0, 20, 0],
+          y: [0, -20, 0],
+        }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        style={{ backgroundColor: 'var(--primary, oklch(0.55 0.25 260))' }}
       />
-      <div
-        className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl -z-10 animate-pulse"
-        style={{ animationDuration: '25s' }}
+      <motion.div
+        className="absolute bottom-0 right-0 w-96 h-96 rounded-full blur-3xl -z-10 opacity-20"
+        animate={{
+          scale: [1, 1.3, 1],
+          x: [0, -30, 0],
+          y: [0, 30, 0],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+        style={{ backgroundColor: 'var(--primary, oklch(0.55 0.25 260))' }}
       />
       {/* Mobile Sidebar Sheet */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>

@@ -1,8 +1,11 @@
 'use client';
 
+/* eslint-disable max-lines */
+
 import { motion } from 'framer-motion';
 import { useMemo } from 'react';
 
+import { cn } from '@/lib/utils';
 import { useStore } from '@/store';
 
 interface StatCardProps {
@@ -108,6 +111,44 @@ export function TaskStatistics() {
     return streakCount;
   }, [tasks]);
 
+  const completionHistory = useMemo(() => {
+    const days = [];
+    const now = new Date();
+    const completedByDay = new Map<string, number>();
+
+    tasks.forEach(t => {
+      if (t.status === 'completed' && t.completedAt) {
+        const dateStr = new Date(t.completedAt).toDateString();
+        completedByDay.set(dateStr, (completedByDay.get(dateStr) || 0) + 1);
+      }
+    });
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const dateStr = d.toDateString();
+      const count = completedByDay.get(dateStr) || 0;
+      days.push({
+        label: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        dateStr,
+        count
+      });
+    }
+    return days;
+  }, [tasks]);
+
+  const tagsDistribution = useMemo(() => {
+    const map = new Map<string, { count: number; color: string }>();
+    tasks.forEach((t) => {
+      t.labels?.forEach((l) => {
+        const entry = map.get(l.name) || { count: 0, color: l.color };
+        map.set(l.name, { count: entry.count + 1, color: l.color });
+      });
+    });
+    return Array.from(map.entries())
+      .map(([name, { count, color }]) => ({ name, count, color }))
+      .sort((a, b) => b.count - a.count);
+  }, [tasks]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -167,6 +208,75 @@ export function TaskStatistics() {
           icon={<span className="text-red-500">⚠</span>}
           color="text-red-500"
         />
+      </div>
+
+      {/* Interactive Charts Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Weekly Productivity SVG Chart */}
+        <div className="bg-card border border-border/50 rounded-3xl p-6 shadow-sm">
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
+            <span>📊</span> Tasks Completed (Past 7 Days)
+          </h3>
+          <div className="h-48 flex items-end justify-between gap-2 pt-4 px-2">
+            {completionHistory.map((day) => {
+              const maxCount = Math.max(...completionHistory.map(d => d.count), 1);
+              const percent = (day.count / maxCount) * 100;
+              return (
+                <div key={day.dateStr} className="flex-1 flex flex-col items-center gap-2 group h-full justify-end">
+                  <div className="relative w-full flex justify-center items-end h-[80%]">
+                    {/* Tooltip */}
+                    <div className="absolute bottom-full mb-2 bg-popover text-popover-foreground text-[10px] font-bold px-2 py-1 rounded-lg border shadow opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 whitespace-nowrap">
+                      {day.count} completed
+                    </div>
+                    {/* Bar */}
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: `${percent}%` }}
+                      transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                      className="w-full sm:w-8 bg-primary/20 hover:bg-primary border-t-2 border-primary rounded-t-lg transition-colors cursor-default relative overflow-hidden"
+                      style={{ height: `${percent}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] font-bold text-muted-foreground">{day.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tags Distribution Bar Chart */}
+        <div className="bg-card border border-border/50 rounded-3xl p-6 shadow-sm">
+          <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6 flex items-center gap-2">
+            <span>🏷️</span> Tags & Labels Distribution
+          </h3>
+          {tagsDistribution.length === 0 ? (
+            <div className="h-48 flex items-center justify-center text-xs text-muted-foreground italic">
+              No tasks have tags assigned yet.
+            </div>
+          ) : (
+            <div className="space-y-4 max-h-48 overflow-y-auto pr-2">
+              {tagsDistribution.map((item) => (
+                <div key={item.name} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                      {item.name}
+                    </span>
+                    <span>{item.count} tasks</span>
+                  </div>
+                  <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(item.count / stats.total) * 100}%` }}
+                      className="h-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Gamified Streak Milestones section */}

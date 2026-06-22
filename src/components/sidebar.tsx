@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable max-lines */
+
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, CheckCircle2, Sparkles, Circle, Volume2, Bell, Download } from 'lucide-react';
 import { useMemo } from 'react';

@@ -97,7 +97,6 @@ describe('sounds', () => {
     let mockLoop = false;
     let mockVolume = 1;
     const mockAmbientAudioInstance = {
-      volume: 1,
       play: vi.fn().mockResolvedValue(undefined),
       pause: vi.fn(),
       set loop(v: boolean) { mockLoop = v; },

@@ -1,9 +1,11 @@
+/* eslint-disable complexity */
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coffee, Brain, Minimize2, Play, Pause, RotateCcw, X } from 'lucide-react';
 import React, { useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { QUOTES } from '@/constants/quotes';
+import { startAmbientSound, stopAmbientSound, getActiveAmbientSound } from '@/lib/sounds';
 import { cn } from '@/lib/utils';
 import type { FocusTimerState } from '@/store/types';
 import type { Task } from '@/types';
@@ -148,7 +150,6 @@ const Controls = React.memo(function Controls({
             variant="ghost"
             size="xs"
             onClick={() => {
-              const { startAmbientSound, stopAmbientSound, getActiveAmbientSound } = require('@/lib/sounds');
               if (getActiveAmbientSound() === 'rain') {
                 stopAmbientSound();
               } else {
@@ -158,7 +159,7 @@ const Controls = React.memo(function Controls({
               window.dispatchEvent(new Event('ambient-change'));
             }}
             className={cn('text-[10px] rounded-lg px-2 py-0.5 h-6 font-bold', 
-              typeof window !== 'undefined' && require('@/lib/sounds').getActiveAmbientSound() === 'rain' ? 'bg-primary/20 text-primary' : 'text-muted-foreground'
+              typeof window !== 'undefined' && getActiveAmbientSound() === 'rain' ? 'bg-primary/20 text-primary' : 'text-muted-foreground'
             )}
           >
             🌧️ Rain
@@ -167,7 +168,6 @@ const Controls = React.memo(function Controls({
             variant="ghost"
             size="xs"
             onClick={() => {
-              const { startAmbientSound, stopAmbientSound, getActiveAmbientSound } = require('@/lib/sounds');
               if (getActiveAmbientSound() === 'lofi') {
                 stopAmbientSound();
               } else {
@@ -176,7 +176,7 @@ const Controls = React.memo(function Controls({
               window.dispatchEvent(new Event('ambient-change'));
             }}
             className={cn('text-[10px] rounded-lg px-2 py-0.5 h-6 font-bold', 
-              typeof window !== 'undefined' && require('@/lib/sounds').getActiveAmbientSound() === 'lofi' ? 'bg-primary/20 text-primary' : 'text-muted-foreground'
+              typeof window !== 'undefined' && getActiveAmbientSound() === 'lofi' ? 'bg-primary/20 text-primary' : 'text-muted-foreground'
             )}
           >
             🎵 Lofi

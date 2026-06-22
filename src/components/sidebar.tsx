@@ -15,6 +15,7 @@ import type { TaskStatus } from '@/types';
 
 import { CreateListDialog } from './create-list-dialog';
 import { SidebarSmartViews } from './sidebar-smart-views';
+import { useToast } from '@/components/toast-provider';
 
 export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const lists = useStore((s) => s.lists);
@@ -397,9 +398,51 @@ function ExportButton() {
   const handleExport = () => {
     window.open('/api/export', '_blank');
   };
+  const tasks = useStore((s) => s.tasks);
+  const updateTask = useStore((s) => s.updateTask);
+  const { showToast } = useToast();
+
+  const handleOptimize = async () => {
+    const overdue = tasks.filter(t => t.status !== 'completed' && ((t.deadline && new Date(t.deadline) < new Date()) || (t.dueDate && new Date(t.dueDate) < new Date())));
+    if (overdue.length === 0) {
+      showToast('info', 'No overdue tasks to optimize schedule for!');
+      return;
+    }
+    // Optimizing schedule: set due date to today for overdue tasks, sorting by priority (high priority first)
+    const sorted = [...overdue].sort((a, b) => {
+      const priorityWeight = { high: 3, medium: 2, low: 1, none: 0 };
+      return priorityWeight[b.priority] - priorityWeight[a.priority];
+    });
+
+    const today = new Date();
+    today.setHours(9, 0, 0, 0); // start scheduling at 9 AM today
+
+    let minutesOffset = 0;
+    for (const task of sorted) {
+      const scheduledTime = new Date(today.getTime() + minutesOffset * 60 * 1000);
+      await updateTask(task.id, {
+        due_date: scheduledTime,
+      });
+      // Increment offset by estimate time or default 30 mins
+      minutesOffset += task.estimateMinutes || 30;
+    }
+
+    showToast('success', `Optimized schedule for ${sorted.length} overdue task(s)!`);
+  };
 
   return (
-    <div className="px-3 py-2">
+    <div className="px-3 py-2 space-y-2">
+      <Button
+        variant="ghost"
+        onClick={handleOptimize}
+        className="w-full justify-start text-xs text-muted-foreground hover:text-amber-500 hover:bg-amber-500/5 group px-3 h-10 rounded-xl"
+      >
+        <div className="p-1.5 rounded-lg bg-muted group-hover:bg-amber-500/10 transition-colors mr-3">
+          <Sparkles className="h-3.5 w-3.5" />
+        </div>
+        Auto-Schedule Overdue
+      </Button>
+
       <Button
         variant="ghost"
         onClick={handleExport}

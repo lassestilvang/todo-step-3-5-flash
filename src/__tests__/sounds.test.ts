@@ -1,10 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 describe('sounds', () => {
-  let mockAudioInstance: { volume: number; play: ReturnType<typeof vi.fn>; pause: ReturnType<typeof vi.fn> };
+  let mockAudioInstance: {
+    volume: number;
+    play: ReturnType<typeof vi.fn>;
+    pause: ReturnType<typeof vi.fn>;
+  };
   let originalAudio: typeof Audio;
 
   beforeEach(() => {
+    originalAudio = global.Audio;
     mockAudioInstance = {
       volume: 1,
       play: vi.fn().mockResolvedValue(undefined),
@@ -18,7 +25,9 @@ describe('sounds', () => {
   });
 
   it('should play complete sound', async () => {
-    const MockAudio = function() { return mockAudioInstance; };
+    const MockAudio = function () {
+      return mockAudioInstance;
+    };
     global.Audio = MockAudio as any;
 
     const { playSound } = await import('@/lib/sounds');
@@ -30,7 +39,9 @@ describe('sounds', () => {
   });
 
   it('should play timer_end sound', async () => {
-    const MockAudio = function() { return mockAudioInstance; };
+    const MockAudio = function () {
+      return mockAudioInstance;
+    };
     global.Audio = MockAudio as any;
 
     const { playSound } = await import('@/lib/sounds');
@@ -41,7 +52,9 @@ describe('sounds', () => {
   });
 
   it('should play click sound', async () => {
-    const MockAudio = function() { return mockAudioInstance; };
+    const MockAudio = function () {
+      return mockAudioInstance;
+    };
     global.Audio = MockAudio as any;
 
     const { playSound } = await import('@/lib/sounds');
@@ -52,7 +65,9 @@ describe('sounds', () => {
   });
 
   it('should handle autoplay errors silently', async () => {
-    const MockAudio = function() { return mockAudioInstance; };
+    const MockAudio = function () {
+      return mockAudioInstance;
+    };
     global.Audio = MockAudio as any;
     mockAudioInstance.play.mockRejectedValue(new Error('Autoplay prevented'));
 

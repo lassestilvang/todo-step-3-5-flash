@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, CheckCircle2, Sparkles, Circle, Volume2, Bell, Download } from 'lucide-react';
 import { useMemo } from 'react';
 
+import { useToast } from '@/components/toast-provider';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { INBOX_LIST_ID } from '@/constants';
@@ -15,7 +16,6 @@ import type { TaskStatus } from '@/types';
 
 import { CreateListDialog } from './create-list-dialog';
 import { SidebarSmartViews } from './sidebar-smart-views';
-import { useToast } from '@/components/toast-provider';
 
 export function Sidebar({ onItemClick }: { onItemClick?: () => void } = {}) {
   const lists = useStore((s) => s.lists);
@@ -421,7 +421,7 @@ function ExportButton() {
     for (const task of sorted) {
       const scheduledTime = new Date(today.getTime() + minutesOffset * 60 * 1000);
       await updateTask(task.id, {
-        due_date: scheduledTime,
+        dueDate: scheduledTime,
       });
       // Increment offset by estimate time or default 30 mins
       minutesOffset += task.estimateMinutes || 30;
@@ -434,7 +434,9 @@ function ExportButton() {
     <div className="px-3 py-2 space-y-2">
       <Button
         variant="ghost"
-        onClick={handleOptimize}
+        onClick={() => {
+          void handleOptimize();
+        }}
         className="w-full justify-start text-xs text-muted-foreground hover:text-amber-500 hover:bg-amber-500/5 group px-3 h-10 rounded-xl"
       >
         <div className="p-1.5 rounded-lg bg-muted group-hover:bg-amber-500/10 transition-colors mr-3">

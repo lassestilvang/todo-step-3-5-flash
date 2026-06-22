@@ -1,4 +1,4 @@
-import { LayoutList, Calendar, CalendarDays, Sparkles, LayoutGrid, PlayCircle, BarChart3, CheckCircle2 } from 'lucide-react';
+import { LayoutList, Calendar, CalendarDays, Sparkles, LayoutGrid, PlayCircle, BarChart3, CheckCircle2, Settings } from 'lucide-react';
 
 // Default list identifiers
 export const INBOX_LIST_ID = 'inbox';
@@ -12,6 +12,7 @@ export const VIEWS = [
   { id: 'in_progress', label: 'In Progress', icon: PlayCircle, color: 'text-amber-500' },
   { id: 'completed', label: 'Completed', icon: CheckCircle2, color: 'text-green-500' },
   { id: 'statistics', label: 'Statistics', icon: BarChart3, color: 'text-emerald-500' },
+  { id: 'settings', label: 'Settings', icon: Settings, color: 'text-slate-500' },
 ] as const;
 
 // UI timing
@@ -96,6 +97,7 @@ export const VIEW_LABELS: Record<string, string> = {
   in_progress: 'In Progress',
   completed: 'Completed',
   statistics: 'Statistics',
+  settings: 'Settings',
 };
 
 // Time constants (ms)

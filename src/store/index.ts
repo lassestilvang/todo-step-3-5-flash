@@ -258,11 +258,13 @@ export const useStore = create<AppState>()(
         set({ soundEnabled: enabled });
       },
 
-      setNotificationsEnabled: async (enabled) => {
+      setNotificationsEnabled: (enabled) => {
         if (enabled) {
-          const { requestNotificationPermission } = await import('@/lib/notifications');
-          const granted = await requestNotificationPermission();
-          set({ notificationsEnabled: granted });
+          import('@/lib/notifications').then(({ requestNotificationPermission }) => {
+            requestNotificationPermission().then((granted) => {
+              set({ notificationsEnabled: granted });
+            });
+          });
         } else {
           set({ notificationsEnabled: false });
         }

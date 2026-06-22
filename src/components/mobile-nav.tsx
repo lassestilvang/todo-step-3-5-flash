@@ -19,6 +19,7 @@ export function MobileNav() {
       { id: 'today', label: 'Today', icon: '📅' },
       { id: 'in_progress', label: 'Active', icon: '⚡' },
       { id: 'statistics', label: 'Stats', icon: '📊' },
+      { id: 'settings', label: 'Settings', icon: '⚙️' },
     ],
     []
   );

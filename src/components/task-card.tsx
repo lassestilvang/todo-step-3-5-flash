@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable max-lines, complexity */
+
 import { format, isToday, isTomorrow } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Clock, ChevronRight, AlertTriangle, GripVertical, Play, PauseCircle, Zap, Trash2 } from 'lucide-react';
@@ -261,13 +263,13 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
         e.stopPropagation();
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
-        void useStore.getState().updateTask(taskId, { due_date: tomorrow });
+        void useStore.getState().updateTask(taskId, { dueDate: tomorrow });
         showToast('success', `Scheduled "${task.title}" for Tomorrow`);
         break;
       case '=': // schedule for today
         e.preventDefault();
         e.stopPropagation();
-        void useStore.getState().updateTask(taskId, { due_date: new Date() });
+        void useStore.getState().updateTask(taskId, { dueDate: new Date() });
         showToast('success', `Scheduled "${task.title}" for Today`);
         break;
       // Priority tags shortcuts

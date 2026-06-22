@@ -176,6 +176,16 @@ function DeleteButton({ task, onDelete }: { task: Task; onDelete: (id: string) =
   );
 }
 
+function getNextStatus(status: Task['status']): Task['status'] {
+  if (status === 'pending') return 'in_progress';
+  if (status === 'in_progress') return 'completed';
+  return 'pending';
+}
+
+function isInputField(target: EventTarget): boolean {
+  return target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement;
+}
+
 function computeIsOverdue(dueDate: string | Date | undefined, status: Task['status']): boolean {
   if (!dueDate || status === 'completed') return false;
   return new Date(dueDate) < new Date();
@@ -215,8 +225,7 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
   }, [deleteTask, undoDeleteTask, showToast]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    const isInput = e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
-    if (isInput) return;
+    if (isInputField(e.target)) return;
 
     const taskId = task.id;
     switch (e.key) {
@@ -240,8 +249,14 @@ export const TaskCard = React.memo(function TaskCard({ task }: TaskCardProps) {
         e.stopPropagation();
         startFocusTimer(taskId);
         break;
+      case 's':
+      case 'S':
+        e.preventDefault();
+        e.stopPropagation();
+        void toggleTaskComplete(taskId, getNextStatus(task.status));
+        break;
     }
-  }, [task.id, setSelectedTask, handleDelete, openEditTask, startFocusTimer]);
+  }, [task.id, task.status, setSelectedTask, handleDelete, openEditTask, startFocusTimer, toggleTaskComplete]);
 
   return (
     <motion.div

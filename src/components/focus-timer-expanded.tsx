@@ -122,7 +122,7 @@ const Controls = React.memo(function Controls({
         />
       </div>
       <div className="flex items-center justify-center gap-3">
-        <Button variant="outline" size="icon" onClick={onReset} className="rounded-xl h-10 w-10">
+        <Button variant="outline" size="icon" onClick={onReset} className="rounded-xl h-10 w-10" title="Reset timer">
           <RotateCcw className="w-4 h-4" />
         </Button>
         <Button
@@ -135,10 +135,54 @@ const Controls = React.memo(function Controls({
         >
           {isActive ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 fill-current" />}
         </Button>
-        <Button variant="outline" size="icon" onClick={onToggleMode} className="rounded-xl h-10 w-10">
+        <Button variant="outline" size="icon" onClick={onToggleMode} className="rounded-xl h-10 w-10" title={isWorkMode ? 'Switch to break mode' : 'Switch to work mode'}>
           {isWorkMode ? <Coffee className="w-4 h-4" /> : <Brain className="w-4 h-4" />}
         </Button>
       </div>
+      
+      {/* Ambient Soundscape selector */}
+      {isWorkMode && isActive && (
+        <div className="flex items-center justify-center gap-2 pt-2 border-t border-border/30">
+          <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mr-1">Ambient:</span>
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => {
+              const { startAmbientSound, stopAmbientSound, getActiveAmbientSound } = require('@/lib/sounds');
+              if (getActiveAmbientSound() === 'rain') {
+                stopAmbientSound();
+              } else {
+                startAmbientSound('rain');
+              }
+              // Force re-render of this specific element by dispatching window event or similar
+              window.dispatchEvent(new Event('ambient-change'));
+            }}
+            className={cn('text-[10px] rounded-lg px-2 py-0.5 h-6 font-bold', 
+              typeof window !== 'undefined' && require('@/lib/sounds').getActiveAmbientSound() === 'rain' ? 'bg-primary/20 text-primary' : 'text-muted-foreground'
+            )}
+          >
+            🌧️ Rain
+          </Button>
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={() => {
+              const { startAmbientSound, stopAmbientSound, getActiveAmbientSound } = require('@/lib/sounds');
+              if (getActiveAmbientSound() === 'lofi') {
+                stopAmbientSound();
+              } else {
+                startAmbientSound('lofi');
+              }
+              window.dispatchEvent(new Event('ambient-change'));
+            }}
+            className={cn('text-[10px] rounded-lg px-2 py-0.5 h-6 font-bold', 
+              typeof window !== 'undefined' && require('@/lib/sounds').getActiveAmbientSound() === 'lofi' ? 'bg-primary/20 text-primary' : 'text-muted-foreground'
+            )}
+          >
+            🎵 Lofi
+          </Button>
+        </div>
+      )}
     </div>
   );
 });

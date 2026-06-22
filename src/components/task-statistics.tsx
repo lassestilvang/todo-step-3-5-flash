@@ -84,10 +84,23 @@ export function TaskStatistics() {
       }
     });
 
-    // Count consecutive days from today backwards
+    const todayStr = today.toISOString().split('T')[0]!;
+    const yesterday = new Date(today.getTime() - 86400000);
+    const yesterdayStr = yesterday.toISOString().split('T')[0]!;
+
+    let startDate = today;
+    if (!completedByDay.has(todayStr)) {
+      if (completedByDay.has(yesterdayStr)) {
+        startDate = yesterday;
+      } else {
+        return 0;
+      }
+    }
+
+    // Count consecutive days from start date backwards
     let streakCount = 0;
     for (let daysAgo = 0; ; daysAgo++) {
-      const checkDate = new Date(today.getTime() - daysAgo * 86400000);
+      const checkDate = new Date(startDate.getTime() - daysAgo * 86400000);
       if (!completedByDay.has(checkDate.toISOString().split('T')[0]!)) break;
       streakCount++;
     }

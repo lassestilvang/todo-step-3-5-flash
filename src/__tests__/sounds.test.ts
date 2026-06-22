@@ -92,4 +92,36 @@ describe('sounds', () => {
 
     global.Audio = originalAudio;
   });
+
+  it('should handle start, stop and get of ambient sounds', async () => {
+    let mockLoop = false;
+    let mockVolume = 1;
+    const mockAmbientAudioInstance = {
+      volume: 1,
+      play: vi.fn().mockResolvedValue(undefined),
+      pause: vi.fn(),
+      set loop(v: boolean) { mockLoop = v; },
+      get loop() { return mockLoop; },
+      set volume(v: number) { mockVolume = v; },
+      get volume() { return mockVolume; }
+    };
+    
+    const MockAudio = function () {
+      return mockAmbientAudioInstance;
+    };
+    global.Audio = MockAudio as any;
+
+    vi.resetModules();
+    const { startAmbientSound, stopAmbientSound, getActiveAmbientSound } = await import('@/lib/sounds');
+
+    startAmbientSound('rain');
+    expect(getActiveAmbientSound()).toBe('rain');
+    expect(mockAmbientAudioInstance.play).toHaveBeenCalled();
+    expect(mockLoop).toBe(true);
+    expect(mockVolume).toBe(0.2);
+
+    stopAmbientSound();
+    expect(getActiveAmbientSound()).toBeNull();
+    expect(mockAmbientAudioInstance.pause).toHaveBeenCalled();
+  });
 });

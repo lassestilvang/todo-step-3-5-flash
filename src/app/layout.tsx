@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 
 import './globals.css';
 import { BrandThemeProvider } from '@/components/brand-theme-provider';
+import { CommandMenu } from '@/components/command-menu';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { RegisterServiceWorker } from '@/components/register-sw';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -80,6 +81,7 @@ export default function RootLayout({
                   {/* Screen reader announcements */}
                   <div aria-live="polite" aria-atomic="true" className="sr-only" />
                   {children}
+                  <CommandMenu />
                   <RegisterServiceWorker />
                 </ToastProvider>
               </TooltipProvider>

@@ -112,6 +112,7 @@ function filterBySearch(tasks: Task[], query: string): Task[] {
 
 function sortTasks(tasks: Task[]): Task[] {
   const priorityOrder: Record<Task['priority'], number> = { high: 0, medium: 1, low: 2, none: 3 };
+  // eslint-disable-next-line complexity
   return [...tasks].sort((a, b) => {
     const aCompleted = Number(a.status === 'completed');
     const bCompleted = Number(b.status === 'completed');

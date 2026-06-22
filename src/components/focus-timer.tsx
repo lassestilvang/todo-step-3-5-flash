@@ -109,8 +109,23 @@ export function FocusTimer() {
     setFocusMode(focusTimer.mode === 'work' ? 'break' : 'work');
   }, [focusTimer.mode, setFocusMode]);
 
-  if (!focusTimer.isActive && isMinimized && !focusTimer.taskId) {
-    return <FocusTimerMinimized onStart={handleStart} />;
+  useEffect(() => {
+    if (focusTimer.isActive) {
+      const timer = setTimeout(() => setIsMinimized(false), 0);
+      return () => clearTimeout(timer);
+    }
+  }, [focusTimer.isActive]);
+
+  if (isMinimized) {
+    return (
+      <FocusTimerMinimized
+        focusTimer={focusTimer}
+        activeTask={activeTask}
+        formatTime={formatTime}
+        onMaximize={handleStart}
+        onToggle={handleToggle}
+      />
+    );
   }
 
   return (

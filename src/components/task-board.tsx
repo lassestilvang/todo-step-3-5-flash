@@ -151,8 +151,9 @@ export function TaskBoard({ tasks }: { tasks: Task[] }) {
     if (!activeTask) return;
 
     let newStatus: TaskStatus;
-    if (Object.values(COLUMN_IDS).includes(overId as TaskStatus)) {
-      newStatus = overId as TaskStatus;
+    if (Object.values(COLUMN_IDS).includes(overId)) {
+      const statusKey = Object.entries(COLUMN_IDS).find(([_, val]) => val === overId)?.[0] as TaskStatus | undefined;
+      newStatus = statusKey ?? activeTask.status;
     } else {
       const overTask = tasks.find((t) => t.id === overId);
       newStatus = overTask?.status ?? activeTask.status;

@@ -177,17 +177,21 @@ export function KeyboardShortcuts() {
     }, 100);
   }, []);
 
+  const shortcutsHelperEnabled = useStore((s) => s.shortcutsHelperEnabled);
+
   return (
     <>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 bg-background/80 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl h-12 w-12 hover:scale-110 active:scale-95 transition-all hidden md:flex"
-        aria-label="Keyboard shortcuts"
-      >
-        <Keyboard className="h-5 w-5" />
-      </Button>
+      {shortcutsHelperEnabled && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-6 right-6 z-40 bg-background/80 backdrop-blur-xl border border-border/50 rounded-2xl shadow-2xl h-12 w-12 hover:scale-110 active:scale-95 transition-all hidden md:flex"
+          aria-label="Keyboard shortcuts"
+        >
+          <Keyboard className="h-5 w-5" />
+        </Button>
+      )}
 
       <AnimatePresence>
         {isOpen && (

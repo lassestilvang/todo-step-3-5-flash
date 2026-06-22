@@ -33,6 +33,7 @@ export const useStore = create<AppState>()(
       brandColor: 'oklch(0.55 0.25 260)',
       soundEnabled: true,
       notificationsEnabled: false,
+      shortcutsHelperEnabled: true,
       focusTimer: {
         timeLeft: 25 * 60,
         isActive: false,
@@ -270,6 +271,10 @@ export const useStore = create<AppState>()(
         }
       },
 
+      setShortcutsHelperEnabled: (enabled) => {
+        set({ shortcutsHelperEnabled: enabled });
+      },
+
       ...createTaskActions(set as StoreSetter, get as StoreGetter),
       ...createListActions(set as StoreSetter, get as StoreGetter),
       ...createLabelActions(set as StoreSetter),
@@ -281,6 +286,7 @@ export const useStore = create<AppState>()(
         brandColor: state.brandColor,
         soundEnabled: state.soundEnabled,
         notificationsEnabled: state.notificationsEnabled,
+        shortcutsHelperEnabled: state.shortcutsHelperEnabled,
       }),
     }
   )

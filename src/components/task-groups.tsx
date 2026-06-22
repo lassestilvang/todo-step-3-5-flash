@@ -111,23 +111,26 @@ export function TaskGroups({ tasks }: { tasks: Task[] }) {
     setSelectedTask(taskIds[nextIdx]!);
   }, [taskIds, setSelectedTask]);
 
-  /* eslint-disable-next-line complexity */
   const handleKeyDown = useCallback(
+    // eslint-disable-next-line complexity
     (e: KeyboardEvent) => {
       const tag = document.activeElement?.tagName;
-      const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || e.target instanceof HTMLInputElement;
-      if (isInput) return;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target instanceof HTMLInputElement) return;
 
-      const isModifier = e.metaKey || e.ctrlKey;
+      const mod = e.metaKey || e.ctrlKey;
       const current = useStore.getState().selectedTaskId;
 
-      if (e.key === 'j' && isModifier) {
+      if (e.key === 'j' && mod) {
         e.preventDefault();
         handleNext();
-      } else if (e.key === 'k' && isModifier) {
+        return;
+      }
+      if (e.key === 'k' && mod) {
         e.preventDefault();
         handlePrev();
-      } else if (e.key === 'x' && !isModifier && current) {
+        return;
+      }
+      if (e.key === 'x' && !mod && current) {
         e.preventDefault();
         void useStore.getState().deleteTask(current);
         useStore.getState().setSelectedTask(null);

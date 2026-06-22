@@ -109,6 +109,17 @@ export function FocusTimer() {
     setFocusMode(focusTimer.mode === 'work' ? 'break' : 'work');
   }, [focusTimer.mode, setFocusMode]);
 
+  const [, setAmbientTick] = useState(0);
+  useEffect(() => {
+    const handleAmbientChange = () => {
+      setAmbientTick((t) => t + 1);
+    };
+    window.addEventListener('ambient-change', handleAmbientChange);
+    return () => {
+      window.removeEventListener('ambient-change', handleAmbientChange);
+    };
+  }, []);
+
   useEffect(() => {
     if (focusTimer.isActive) {
       const timer = setTimeout(() => setIsMinimized(false), 0);

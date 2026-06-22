@@ -30,7 +30,7 @@ const mockDeleteTask = vi.fn();
 const mockUndoDeleteTask = vi.fn();
 const mockStartFocusTimer = vi.fn();
 
-const mockStore = {
+const mockStore: Record<string, unknown> = {
   toggleTaskComplete: mockToggleTaskComplete,
   openEditTask: mockOpenEditTask,
   setSelectedTask: mockSetSelectedTask,

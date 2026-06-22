@@ -74,6 +74,7 @@ const handleShortcut = (
     onClose: () => void;
     onCreateTask: () => void;
     onFocusSearch: () => void;
+    onFocusQuickAdd: () => void;
     onToggleCompleted: () => void;
     onMagicSort: () => void;
     onFilterView: (view: string) => void;
@@ -84,6 +85,7 @@ const handleShortcut = (
     onClose,
     onCreateTask,
     onFocusSearch,
+    onFocusQuickAdd,
     onToggleCompleted,
     onMagicSort,
     onFilterView,
@@ -92,6 +94,7 @@ const handleShortcut = (
   const handlers = [
     { condition: () => e.key === '?' && !isInput, action: () => { e.preventDefault(); onToggleShortcuts(); } },
     { condition: () => e.key === 'Escape' && !isInput, action: () => onClose() },
+    { condition: () => isModdedEvent(e) && e.key === 'n', action: () => { e.preventDefault(); onFocusQuickAdd(); } },
     { condition: () => e.key === 'n' && !isInput && !isModdedEvent(e), action: () => { e.preventDefault(); onCreateTask(); } },
     { condition: () => e.key === 'k' && !isInput && !isModdedEvent(e), action: () => { e.preventDefault(); onFocusSearch(); } },
     { condition: () => e.key === 't' && !isInput && !isModdedEvent(e), action: () => { e.preventDefault(); onToggleCompleted(); } },
@@ -128,6 +131,10 @@ export function KeyboardShortcuts() {
         onCreateTask: openCreateTask,
         onFocusSearch: () => {
           const el = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement | null;
+          el?.focus();
+        },
+        onFocusQuickAdd: () => {
+          const el = document.querySelector('input[placeholder*="Quick add"]') as HTMLInputElement | null;
           el?.focus();
         },
         onToggleCompleted: toggleShowCompleted,

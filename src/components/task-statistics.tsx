@@ -169,6 +169,51 @@ export function TaskStatistics() {
         />
       </div>
 
+      {/* Gamified Streak Milestones section */}
+      <div className="bg-muted/30 rounded-3xl p-6 border border-border/50">
+        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
+          <span>🏆</span> Streak Milestone Badges
+        </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <motion.div 
+            whileHover={{ scale: 1.05, y: -4 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            className={cn("p-4 rounded-2xl border transition-all flex flex-col items-center text-center cursor-default", streak >= 1 ? "bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400 font-bold shadow-md shadow-green-500/5" : "bg-muted/10 border-border/20 text-muted-foreground opacity-50")}
+          >
+            <span className="text-3xl mb-1">🌱</span>
+            <span className="text-xs">Day 1</span>
+            <span className="text-[10px] opacity-80 font-normal">Initiated</span>
+          </motion.div>
+          <motion.div 
+            whileHover={{ scale: 1.05, y: -4 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            className={cn("p-4 rounded-2xl border transition-all flex flex-col items-center text-center cursor-default", streak >= 3 ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400 font-bold shadow-md shadow-amber-500/5 animate-pulse" : "bg-muted/10 border-border/20 text-muted-foreground opacity-50")}
+          >
+            <span className="text-3xl mb-1">🔥</span>
+            <span className="text-xs">Day 3</span>
+            <span className="text-[10px] opacity-80 font-normal">Consistent</span>
+          </motion.div>
+          <motion.div 
+            whileHover={{ scale: 1.05, y: -4 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            className={cn("p-4 rounded-2xl border transition-all flex flex-col items-center text-center cursor-default", streak >= 7 ? "bg-purple-500/10 border-purple-500/30 text-purple-700 dark:text-purple-400 font-bold shadow-md shadow-purple-500/5" : "bg-muted/10 border-border/20 text-muted-foreground opacity-50")}
+          >
+            <span className="text-3xl mb-1">⚡</span>
+            <span className="text-xs">Day 7</span>
+            <span className="text-[10px] opacity-80 font-normal">Unstoppable</span>
+          </motion.div>
+          <motion.div 
+            whileHover={{ scale: 1.05, y: -4 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            className={cn("p-4 rounded-2xl border transition-all flex flex-col items-center text-center cursor-default", streak >= 30 ? "bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-400 font-bold shadow-md shadow-rose-500/5" : "bg-muted/10 border-border/20 text-muted-foreground opacity-50")}
+          >
+            <span className="text-3xl mb-1">👑</span>
+            <span className="text-xs">Day 30</span>
+            <span className="text-[10px] opacity-80 font-normal">Legendary</span>
+          </motion.div>
+        </div>
+      </div>
+
       {stats.completed > 0 && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -176,10 +221,12 @@ export function TaskStatistics() {
           className="bg-gradient-to-r from-primary/10 via-purple-500/10 to-pink-500/10 rounded-2xl p-6 text-center"
         >
           <div className="text-3xl font-black mb-2">
-            Great job! You have completed {stats.completed} tasks.
+            {streak >= 3 ? "🔥 You are on fire!" : "Great job!"} You have completed {stats.completed} tasks.
           </div>
           <p className="text-sm text-muted-foreground">
-            Keep up the momentum and continue building your productive habits.
+            {streak >= 3 
+              ? `You've kept a consecutive streak alive for ${streak} days! Keep the flame burning!`
+              : "Keep up the momentum and continue building your productive habits."}
           </p>
         </motion.div>
       )}

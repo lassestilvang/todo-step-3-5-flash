@@ -64,6 +64,7 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
       }, 10000);
     },
 
+    // eslint-disable-next-line complexity
     toggleTaskComplete: async (id: string, status?: Task['status']): Promise<void> => {
       const prevTask = get().tasks.find((t: Task) => t.id === id);
       if (!prevTask) return;
@@ -214,12 +215,12 @@ export function createTaskActions(set: StoreSetter, get: StoreGetter) {
       set((state: AppStateType) => {
         const taskMap = new Map(state.tasks.map((t: Task) => [t.id, t]));
         const reordered: Task[] = [];
-        for (let i = 0; i < orderedIds.length; i++) {
-          const task = taskMap.get(orderedIds[i]);
+        orderedIds.forEach((id: string, i: number) => {
+          const task = taskMap.get(id);
           if (task) {
             reordered.push({ ...task, order: i });
           }
-        }
+        });
         const remainingIds = new Set(orderedIds);
         const remaining = state.tasks.filter((t: Task) => !remainingIds.has(t.id));
         return { tasks: [...reordered, ...remaining] };

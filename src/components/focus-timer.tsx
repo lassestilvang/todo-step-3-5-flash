@@ -64,6 +64,20 @@ export function FocusTimer() {
     };
   }, [focusTimer.isActive, focusTimer.timeLeft, tickFocusTimer]);
 
+  useEffect(() => {
+    if (focusTimer.isActive) {
+      const timeStr = formatTime(focusTimer.timeLeft);
+      const modeLabel = focusTimer.mode === 'work' ? 'Focus' : 'Break';
+      const taskLabel = activeTask ? ` - ${activeTask.title}` : '';
+      document.title = `(${timeStr}) ${modeLabel}${taskLabel} | TaskPlanner`;
+    } else {
+      document.title = 'TaskPlanner - Daily Task Manager';
+    }
+    return () => {
+      document.title = 'TaskPlanner - Daily Task Manager';
+    };
+  }, [focusTimer.isActive, focusTimer.timeLeft, focusTimer.mode, activeTask, formatTime]);
+
   const handleStart = useCallback(() => {
     setIsMinimized(false);
     if (!focusTimer.isActive) {

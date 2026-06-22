@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 // Mock zustand persist middleware
@@ -70,6 +71,9 @@ const initialState = {
     isActive: false,
     mode: 'work' as const,
     taskId: null,
+    workDuration: 25 * 60,
+    breakDuration: 5 * 60,
+    autoStartNext: false,
   },
   loading: false,
   error: null,

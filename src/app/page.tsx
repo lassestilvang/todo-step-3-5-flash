@@ -11,6 +11,7 @@ import { KeyboardShortcuts } from '@/components/keyboard-shortcuts';
 import { MobileNav } from '@/components/mobile-nav';
 import { QuickAddTask } from '@/components/quick-add-task';
 import { SearchBar } from '@/components/search-bar';
+import { SettingsView } from '@/components/settings-view';
 import { Sidebar } from '@/components/sidebar';
 import { TaskDetailSheet } from '@/components/task-detail-sheet';
 import { TaskList } from '@/components/task-list';
@@ -272,10 +273,16 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Task List or Statistics */}
+        {/* Task List, Statistics, or Settings */}
         <ScrollArea className="flex-1 px-4 md:px-8">
           <div className="max-w-5xl mx-auto pb-24">
-            {currentView === 'statistics' ? <TaskStatistics /> : <TaskList />}
+            {currentView === 'statistics' ? (
+              <TaskStatistics />
+            ) : currentView === 'settings' ? (
+              <SettingsView />
+            ) : (
+              <TaskList />
+            )}
           </div>
           <ScrollBar />
         </ScrollArea>

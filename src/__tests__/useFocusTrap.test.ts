@@ -1,3 +1,4 @@
+/* eslint-disable import/order, @typescript-eslint/no-unused-vars */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useFocusTrap } from '@/hooks/use-focus-trap';

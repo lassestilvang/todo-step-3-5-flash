@@ -33,6 +33,7 @@ export interface AppState {
   brandColor: string;
   soundEnabled: boolean;
   notificationsEnabled: boolean;
+  shortcutsHelperEnabled: boolean;
   focusTimer: FocusTimerState;
   loading: boolean;
   error: string | null;
@@ -81,6 +82,7 @@ export interface AppState {
   reorderTasks: (taskIds: string[]) => Promise<void>;
   setSoundEnabled: (enabled: boolean) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
+  setShortcutsHelperEnabled: (enabled: boolean) => void;
 }
 
 export type StoreSetter = (

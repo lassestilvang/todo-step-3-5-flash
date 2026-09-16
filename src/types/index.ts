@@ -9,7 +9,8 @@ export type ViewType =
   | 'board'
   | 'in_progress'
   | 'completed'
-  | 'statistics';
+  | 'statistics'
+  | 'settings';
 
 export interface Label {
   id: string;
